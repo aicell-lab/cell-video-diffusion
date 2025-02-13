@@ -1,0 +1,24 @@
+name: cell-video-diffusion
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - python=3.10
+  - ipykernel
+  - pytorch-cuda
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit
+  - diffusers
+  - transformers
+  - numpy
+  - pandas
+  - matplotlib
+  - wandb
+  - pip:
+      - tifffile
+      - einops
+      - accelerate

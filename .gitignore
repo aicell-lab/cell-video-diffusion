@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.ruff_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+# *.ipynb
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ML specific
+/datasets/
+/models/
+*.h5
+*.pkl
+*.pth
+*.onnx
+*.mlmodel
+wandb/
+runs/
+logs/
+checkpoints/
+
+# Temp files
+*.log
+*.tmp
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Large media files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.tif
+*.tiff
+*.mp4
+*.mov
+*.avi
+
+# Secrets
+*.env
+.env.*
+credentials.json
+config.json
+
+
+# personal
+notes
+/data/

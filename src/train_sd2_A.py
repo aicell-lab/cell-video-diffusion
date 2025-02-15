@@ -1,6 +1,8 @@
 import math
 import os
 import argparse
+from PIL import Image
+
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -29,8 +31,31 @@ def parse_args():
     parser.add_argument("--wandb_project", type=str, default="sd2_cell_finetune")
     parser.add_argument("--wandb_run_name", type=str, default="approachA_fullfinetune")
     parser.add_argument("--log_frequency", type=int, default=100, help="Log every X steps.")
-    parser.add_argument("--sample_prompts", type=str, nargs="+", default=["a microscopy image of a cell"])
+    parser.add_argument("--sample_prompts", type=str, nargs="+",
+                        default=["a microscopy image of a cell"])  # multiple prompts
     return parser.parse_args()
+
+
+def merge_images_side_by_side(images):
+    """
+    Takes a list of PIL Images and merges them horizontally (side-by-side)
+    into a single PIL Image.
+    """
+    widths, heights = zip(*(img.size for img in images))
+    
+    total_width = sum(widths)
+    max_height = max(heights)
+    
+    # Create a new blank image (white background)
+    merged = Image.new("RGB", (total_width, max_height), color=(255, 255, 255))
+    
+    x_offset = 0
+    for img in images:
+        merged.paste(img, (x_offset, 0))
+        x_offset += img.width
+    
+    return merged
+
 
 def collate_fn(examples):
     """
@@ -87,7 +112,7 @@ def main():
 
     train_dataset = MCAFrameDataset(
         image_dir=args.train_data_dir,
-        prompt="a microscopy image of a cell",
+        base_prompt="a microscopy image of a cell",
         transform=train_transform
     )
     info = train_dataset.get_dataset_info()
@@ -124,9 +149,11 @@ def main():
         unet, vae, text_encoder, optimizer, train_dataloader, lr_scheduler
     )
 
-    # A small utility to generate sample images & log them to wandb
     def log_generated_images(step):
-        # Create a temporary pipeline with updated weights
+        """
+        Generates images for each prompt in args.sample_prompts,
+        merges them side-by-side, and logs as one single image to W&B.
+        """
         unet_tmp = accelerator.unwrap_model(unet)
         text_encoder_tmp = accelerator.unwrap_model(text_encoder)
         vae_tmp = accelerator.unwrap_model(vae)
@@ -141,29 +168,32 @@ def main():
             feature_extractor=pipe.feature_extractor
         ).to(accelerator.device)
 
-        images = []
-        captions = []
-
+        # Generate images for each prompt
+        gen_images = []
         for prompt in args.sample_prompts:
             with torch.autocast("cuda"):
                 out = pipe_tmp(prompt, num_inference_steps=25, guidance_scale=7.5)
-            generated_img = out.images[0]
-            images.append(generated_img)
-            captions.append(prompt)
+            gen_images.append(out.images[0])
 
-        # Log to wandb
+        # Merge them into a single row
+        row_image = merge_images_side_by_side(gen_images)
+
+        # Caption can list all prompts for reference
+        caption_text = " | ".join(args.sample_prompts)
+
+        # Log to W&B: single image with multiple sub-images side-by-side
         wandb.log({
-            "generated_samples": [
-                wandb.Image(img, caption=cap)
-                for img, cap in zip(images, captions)
-            ],
-            "global_step": step
+            "global_step": step,
+            "merged_samples": wandb.Image(row_image, caption=caption_text)
         })
+
 
     # 5) Training Loop
     global_step = 0
     for epoch in range(args.num_train_epochs):
-        unet.train(); text_encoder.train()
+        unet.train()
+        text_encoder.train()
+
         for step, batch in enumerate(train_dataloader):
             with accelerator.accumulate(unet):
                 # 5.1) Encode text
@@ -178,7 +208,6 @@ def main():
                 text_embeddings = text_encoder(**text_inputs).last_hidden_state
 
                 # 5.2) Encode images to latents
-                # pixel_values = batch["pixel_values"].to(accelerator.device, dtype=torch.float16)
                 pixel_values = batch["pixel_values"].to(accelerator.device, dtype=torch.float32)
                 latents = vae.encode(pixel_values).latent_dist.sample()
                 latents = latents * 0.18215  # SD scaling
@@ -190,20 +219,16 @@ def main():
                     (latents.shape[0],),
                     device=latents.device
                 ).long()
-
                 noise = torch.randn_like(latents)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
 
                 # 5.4) U-Net forward
-                model_pred = unet(
-                    noisy_latents, timesteps, encoder_hidden_states=text_embeddings
-                ).sample
+                model_pred = unet(noisy_latents, timesteps, encoder_hidden_states=text_embeddings).sample
 
-                # 5.5) The target is the noise (ε)
-                target = noise
+                # 5.5) The target is the noise
+                loss = torch.nn.functional.mse_loss(model_pred, noise)
 
-                # 5.6) Compute loss & backprop
-                loss = torch.nn.functional.mse_loss(model_pred, target)
+                # 5.6) Backprop & update
                 accelerator.backward(loss)
                 optimizer.step()
                 lr_scheduler.step()
@@ -214,13 +239,13 @@ def main():
                 if step % args.log_frequency == 0:
                     print(f"Epoch {epoch} Step {step} Loss: {loss.item():.4f}")
                     wandb.log({"train/loss": loss.item(), "step": global_step})
+                
+                if global_step % 100 == 0:
+                    log_generated_images(global_step)
 
             global_step += 1
 
-        if accelerator.is_main_process:
-            # log generated images every epoch
-            log_generated_images(global_step)
-
+    # After training, save final model
     if accelerator.is_main_process:
         final_dir = os.path.join(args.output_dir, "final")
         os.makedirs(final_dir, exist_ok=True)
@@ -233,9 +258,7 @@ def main():
             text_encoder=text_encoder_to_save,
             vae=vae_to_save
         )
-
-    print("Fine-tuning complete!")
-    if accelerator.is_main_process:
+        print("Fine-tuning complete! Model saved at:", final_dir)
         wandb.finish()
 
 if __name__ == "__main__":

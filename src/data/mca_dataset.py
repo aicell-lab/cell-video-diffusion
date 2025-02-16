@@ -1,22 +1,32 @@
 import os
 import glob
 import re
-import torch
 from torch.utils.data import Dataset
 from PIL import Image
+import torch
+
+def collate_fn(examples):
+    pixel_values = torch.stack([ex["pixel_values"] for ex in examples])  # (B,3,H,W)
+    frame_idxs = torch.tensor([ex["frame_idx"] for ex in examples], dtype=torch.long)
+    return {
+        "pixel_values": pixel_values,  # (B,3,H,W)
+        "frame_idx": frame_idxs        # (B,)
+    }
 
 class MCAFrameDataset(Dataset):
-    def __init__(self, image_dir, base_prompt="a microscopy image of a cell", transform=None):
+    def __init__(self, image_dir, transform=None):
+        """
+        image_dir: directory with images named something like ..._f19.png
+        transform: torchvision transforms
+        """
         self.image_paths = sorted(glob.glob(os.path.join(image_dir, "*.png")))
-        self.base_prompt = base_prompt
         self.transform = transform
 
     def get_dataset_info(self):
         return {
             "size": len(self.image_paths),
             "directory": os.path.dirname(self.image_paths[0]) if self.image_paths else None,
-            "prompt_format": self.base_prompt
-        }        
+        }
 
     def __len__(self):
         return len(self.image_paths)
@@ -25,21 +35,19 @@ class MCAFrameDataset(Dataset):
         path = self.image_paths[idx]
         filename = os.path.basename(path)
 
-        # 1) Parse frame index from filename; fail if no match
+        # Parse frame index from filename, e.g. ..._f19.png
         match = re.search(r"_f(\d+)", filename)
-        assert match, f"Filename '{filename}' does not contain '_f<number>'."
+        assert match, f"Filename '{filename}' must contain '_f<number>'."
         frame_idx = int(match.group(1))
 
-        image = Image.open(path).convert("L")
-
-        image = image.convert("RGB")
+        # Load and transform the image
+        image = Image.open(path).convert("L")  # grayscale
+        image = image.convert("RGB")          # expand to 3 channels
 
         if self.transform:
             image = self.transform(image)
 
-        prompt = f"{self.base_prompt} at frame {frame_idx}"
-
         return {
-            "pixel_values": image,
-            "text": prompt
+            "pixel_values": image,     # (3,H,W) after transforms
+            "frame_idx": frame_idx     # integer
         }

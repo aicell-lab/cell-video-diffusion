@@ -82,6 +82,4 @@ config.json
 notes
 /data/
 visualizations/
-
-sd2-mca-finetuned/
-sd2-mca-finetuned-B/
+/models/

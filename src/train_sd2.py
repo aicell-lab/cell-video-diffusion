@@ -1,3 +1,6 @@
+"""
+This script is used to train the SD2 model on the MCA dataset. Each sample is a frame from a microscopy video.
+"""
 import math
 import os
 import argparse
@@ -7,7 +10,6 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion import StableDiffusionPipeline
-from diffusers.schedulers.scheduling_dpmsolver_multistep import DPMSolverMultistepScheduler
 from diffusers.optimization import get_scheduler
 from accelerate import Accelerator
 import wandb
@@ -76,11 +78,9 @@ def main():
     args = parse_args()
     accelerator = Accelerator()
 
-    # Initialize wandb (only in the main process)
     if accelerator.is_main_process:
         wandb.init(project=args.wandb_project, name=args.wandb_run_name)
 
-    # 1) Load Pretrained Model
     pipe = StableDiffusionPipeline.from_pretrained(
         args.pretrained_model_name_or_path,
     )
@@ -89,22 +89,16 @@ def main():
         subfolder="scheduler"
     )
 
-    # Extract model components
     unet = pipe.unet
     vae = pipe.vae
     text_encoder = pipe.text_encoder
     tokenizer = pipe.tokenizer
 
-    # 2) Freeze the VAE by default (common approach)
-    # Usually, the VAE is either kept frozen or trained lightly. 
-    # Freezing saves memory and reduces overfitting risk on small data.
+    # Freeze the VAE and encoder by default, but not the U-Net
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
-
-    # But we do want to train the U-Net
     unet.requires_grad_(True)
 
-    # 3) Create Dataset & Dataloaders
     train_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize([0.5], [0.5])  # SD expects images in [-1,1]
@@ -127,12 +121,7 @@ def main():
         collate_fn=collate_fn
     )
 
-    # 4) Optimizer & Scheduler
     params_to_optimize = list(unet.parameters()) + list(text_encoder.parameters())
-    # If you do want to train VAE as well, uncomment:
-    # vae.requires_grad_(True)
-    # params_to_optimize += list(vae.parameters())
-
     optimizer = torch.optim.AdamW(params_to_optimize, lr=args.learning_rate)
 
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
@@ -144,7 +133,6 @@ def main():
         num_training_steps=max_train_steps
     )
 
-    # Prepare with accelerator
     unet, vae, text_encoder, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
         unet, vae, text_encoder, optimizer, train_dataloader, lr_scheduler
     )
@@ -188,7 +176,6 @@ def main():
         })
 
 
-    # 5) Training Loop
     global_step = 0
     for epoch in range(args.num_train_epochs):
         unet.train()
@@ -234,7 +221,6 @@ def main():
                 lr_scheduler.step()
                 optimizer.zero_grad()
 
-            # 5.7) Logging
             if accelerator.is_main_process:
                 if step % args.log_frequency == 0:
                     print(f"Epoch {epoch} Step {step} Loss: {loss.item():.4f}")
@@ -245,7 +231,6 @@ def main():
 
             global_step += 1
 
-    # After training, save final model
     if accelerator.is_main_process:
         final_dir = os.path.join(args.output_dir, "final")
         os.makedirs(final_dir, exist_ok=True)

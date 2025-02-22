@@ -73,7 +73,6 @@ Paper: https://pmc.ncbi.nlm.nih.gov/articles/PMC3108885/
 Data: https://idr.openmicroscopy.org/webclient/?show=screen-1101
 Description: Showing how knockdown of each gene affects cell division over two days.
 The dataset looks very large.
-WARNING: This dataset seems to be very annoying to work with. Avoid.
 One sample 2D + time: (t, c, h, w) = (93, 1, 1344, 1024)
 
 

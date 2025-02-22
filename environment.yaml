@@ -18,6 +18,7 @@ dependencies:
   - pandas
   - matplotlib
   - wandb
+  - imageio-ffmpeg
   - pip:
       - tifffile
       - einops

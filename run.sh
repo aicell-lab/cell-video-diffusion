@@ -27,3 +27,6 @@ accelerate launch src/train_sd2.py \
   --log_frequency=20 \
   --max_frame_idx=40 \
   --sample_frames 0 9 19 29 39
+
+
+rsync -avP /proj/aicell/users/x_aleho/video-diffusion/data/raw/idr0013 root@139.59.155.245:/mnt/volume_fra1_01/

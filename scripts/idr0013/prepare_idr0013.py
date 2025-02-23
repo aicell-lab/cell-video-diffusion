@@ -1,20 +1,16 @@
-#!/usr/bin/env python3
-
 """
 prepare_idr0013.py
 
-Usage:
+Example usage:
   python prepare_idr0013.py \
     --csv /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/idr0013-screenA-annotation.csv \
     --data_root /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013 \
-    --output_dir ./IDR0013-VidGene-50
+    --output_dir ../../CogVideo/finetune/IDR0013-VidGene-BIG
 
-This will produce:
+Outputs:
   ./IDR0013-VidGene/prompts.txt
   ./IDR0013-VidGene/videos.txt
-
-Both files have the same number of lines. The i-th line in prompts.txt
-matches the i-th line in videos.txt.
+Each line i in 'prompts.txt' corresponds to line i in 'videos.txt'.
 """
 
 import csv
@@ -24,105 +20,98 @@ import re
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", type=str, required=True, help="Path to idr0013-screenA-annotation.csv")
-    parser.add_argument("--data_root", type=str, required=True, help="Root directory containing plate folders (e.g. LT0001_02, LT0001_09, ...)")
-    parser.add_argument("--output_dir", type=str, default="./IDR0013-VidGene", help="Where to write prompts.txt/videos.txt")
+    parser.add_argument("--csv", type=str, required=True,
+                        help="Path to idr0013-screenA-annotation.csv")
+    parser.add_argument("--data_root", type=str, required=True,
+                        help="Root directory containing plate folders (e.g. LT0001_02, LT0001_09, ...)")
+    parser.add_argument("--output_dir", type=str, default="./IDR0013-VidGene",
+                        help="Where to write prompts.txt/videos.txt")
+    parser.add_argument("--max_samples", type=int, default=-1,
+                        help="Limit the total number of samples (for debugging). Use -1 for no limit.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Read CSV into a dict:
-    # Key = Plate_Well (e.g. "LT0001_02_A1")
-    # Value = (GeneSymbol, HasPhenotype, Possibly other info)
+    # We'll create two lookups:
+    # 1) annotation_dict: Key = Plate_Well (like "LT0001_02_A1"),
+    #                     storing numeric scores for migration/proliferation, etc.
+    # 2) plateWell_map:   Key = (plate, well_number) -> Plate_Well
+    #                     so we can match .mp4 filenames to annotation.
+
     annotation_dict = {}
+    plateWell_map = {}
+
     with open(args.csv, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            plate_well = row["Plate_Well"]  # e.g. "LT0001_02_A1"
-            gene_symbol = row.get("Gene Symbol", "unknown").strip()
-            has_phenotype = row.get("Has Phenotype", "").strip().lower()
-            # Build a short text to mention domain context
-            # We can store a prompt template here:
+            plate_well = row["Plate_Well"]   # e.g. "LT0001_02_A1"
+            plate      = row["Plate"]        # e.g. "LT0001_02"
+            well_num   = row["Well Number"]  # e.g. "1" or "384"
+
+            # read numeric scores (3 columns), default to 0.0 on errors/blank
+            def safe_float(x):
+                try:
+                    return float(x)
+                except:
+                    return 0.0
+
+            mig_speed = safe_float(row.get("Score - migration (speed) (automatic)", "0"))
+            mig_dist  = safe_float(row.get("Score - migration (distance) (automatic)", "0"))
+            prolif    = safe_float(row.get("Score - increased proliferation (automatic)", "0"))
+
             annotation_dict[plate_well] = {
-                "plate": row["Plate"],              # e.g. "LT0001_02"
-                "well": row["Well"],               # e.g. "A1"
-                "gene_symbol": gene_symbol,
-                "has_phenotype": has_phenotype if has_phenotype else "no",
+                "plate": plate,
+                "well_num": well_num,
+                "mig_speed": mig_speed,
+                "mig_dist":  mig_dist,
+                "prolif":    prolif
             }
 
-    # Next, we'll search each plate folder (like LT0001_02) for .mp4 files.
-    # We'll try to match them to a Plate_Well by scanning the filename for well info.
-    # But many times, well is something like "A1" => how does that appear in the mp4?
-    #
-    # Hypothesis: The user mentioned "00384_01.mp4" as an example. Possibly "001_01.mp4" = well #1?
-    # If so, we can parse out the well number from the filename and combine with the plate to form "LT0001_02_A1".
-    # We also have a column "Well Number" => row["Well Number"].
-
-    # Let's load the CSV again but keep row["Well Number"] so we can attempt numeric matching.
-    # Or we can do it in a single pass, but let's keep it simpler:
-
-    # We'll build a dictionary from (Plate, wellNum) -> Plate_Well
-    # Then for each .mp4 that we find in plate folder "Plate", parse the wellNum from the filename and match.
-    plateWell_map = {}  # (plate, well_number) -> Plate_Well
-    # We'll store the entire row so we can build a prompt
     with open(args.csv, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            plate = row["Plate"]  # e.g. "LT0001_02"
-            well_num = row["Well Number"]  # e.g. "1" => int
-            plate_well = row["Plate_Well"] # e.g. "LT0001_02_A1"
+            plate      = row["Plate"]
+            well_num   = row["Well Number"]
+            plate_well = row["Plate_Well"]
             plateWell_map[(plate, well_num)] = plate_well
 
     prompts = []
     videopaths = []
 
-    # Now let's walk each plate folder
+    # Walk each plate folder under data_root
     for plate_folder in os.listdir(args.data_root):
         plate_path = os.path.join(args.data_root, plate_folder)
         if not os.path.isdir(plate_path):
             continue
-        # e.g. "LT0001_02"
-        # We'll search for .mp4 in that folder
-        # For each .mp4, we attempt to parse a well_num from the filename, e.g. "00384_01.mp4" => well_num=384
-        # We'll do a simple regex that looks for something like ^0*(\d+)_\d+.mp4
+
         mp4s = [f for f in os.listdir(plate_path) if f.endswith(".mp4")]
         for mp4file in mp4s:
             # e.g. "00384_01.mp4"
             match = re.match(r"^0*(\d+)_\d+\.mp4$", mp4file)
             if not match:
-                # If it doesn't match, skip or handle differently
+                # skip any non-matching files
                 continue
-            well_num_str = match.group(1)   # e.g. "384"
-            # We'll see if (plate_folder, well_num_str) is in plateWell_map
-            plate_key = plate_folder
-            well_key = well_num_str
 
-            # The CSV might store well as "384", so we must match. 
-            # But note that row["Well Number"] might be "384" or "384.0" if it's read as float, etc. 
-            # We'll just compare strings for now:
-            # We'll do well_key_str = well_num_str => "384"
-            # so we check plateWell_map.get((plate_folder, "384"))
-            plate_well = plateWell_map.get((plate_key, well_key))
+            well_num_str = match.group(1)   # "384"
+            # Attempt to find plate_well
+            plate_well = plateWell_map.get((plate_folder, well_num_str))
             if not plate_well:
-                # No direct match in dictionary
                 continue
 
-            # Ok we found a match => we can build the prompt
             data = annotation_dict.get(plate_well, None)
             if not data:
                 continue
 
-            # Construct a domain prompt
-            # Example:
-            # "Time-lapse microscopy video of HeLa cells in LT0001_02_A1, with siRNA knockdown of INCENP, 
-            #  showing noticeable cell division abnormalities."
-            gene_symbol = data["gene_symbol"]
-            has_phenotype = data["has_phenotype"]
-            well_label = plate_well
-            # Simple text:
+            # Extract numeric scores
+            mig_speed = data["mig_speed"]
+            mig_dist  = data["mig_dist"]
+            prolif    = data["prolif"]
+
+            # Build a simple prompt
+            # E.g.: "Time-lapse microscopy video. Migration speed=0.123, distance=4.567, proliferation=-0.003."
             prompt_text = (
-                f"Time-lapse microscopy video of HeLa cells in {well_label}, with siRNA knockdown of {gene_symbol}. "
-                f"Fluorescently labeled chromosomes are observed. Phenotype: {has_phenotype}."
+                f"Time-lapse microscopy video of dividing cells. "
+                f"Migration speed={mig_speed:.3f}, distance={mig_dist:.3f}, proliferation={prolif:.3f}."
             )
 
             abs_video_path = os.path.join(plate_path, mp4file)
@@ -133,11 +122,12 @@ def main():
 
     print(f"Found {len(prompts)} matched videos in total.")
 
-    # Take only the first 50 samples
-    prompts = prompts[:50]
-    videopaths = videopaths[:50]
+    # Optionally limit
+    if args.max_samples > 0:
+        prompts = prompts[:args.max_samples]
+        videopaths = videopaths[:args.max_samples]
 
-    # Write out prompts.txt and videos.txt
+    # Write out
     out_prompts = os.path.join(args.output_dir, "prompts.txt")
     out_videos  = os.path.join(args.output_dir, "videos.txt")
     with open(out_prompts, "w", encoding="utf-8") as f_p, open(out_videos, "w", encoding="utf-8") as f_v:
@@ -148,6 +138,7 @@ def main():
     print(f"Wrote {len(prompts)} lines to:")
     print(f"  {out_prompts}")
     print(f"  {out_videos}")
+
 
 if __name__ == "__main__":
     main()

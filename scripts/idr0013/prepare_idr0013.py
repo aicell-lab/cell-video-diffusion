@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 prepare_idr0013.py
 
@@ -5,12 +7,20 @@ Example usage:
   python prepare_idr0013.py \
     --csv /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/idr0013-screenA-annotation.csv \
     --data_root /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013 \
-    --output_dir ../../CogVideo/finetune/IDR0013-VidGene-BIG
+    --output_dir ./IDR0013-VidGene
 
-Outputs:
-  ./IDR0013-VidGene/prompts.txt
-  ./IDR0013-VidGene/videos.txt
-Each line i in 'prompts.txt' corresponds to line i in 'videos.txt'.
+What it does:
+  1) Collect matching video–prompt pairs from your dataset.
+  2) Keep only up to `max_samples`.
+  3) Reserve the last `val_samples` lines for validation.
+  4) Writes:
+       ./IDR0013-VidGene/prompts.txt
+       ./IDR0013-VidGene/videos.txt
+     for training
+  5) Also writes:
+       ./IDR0013-VidGene-Val/prompts.txt
+       ./IDR0013-VidGene-Val/videos.txt
+     for validation.
 """
 
 import csv
@@ -25,19 +35,30 @@ def main():
     parser.add_argument("--data_root", type=str, required=True,
                         help="Root directory containing plate folders (e.g. LT0001_02, LT0001_09, ...)")
     parser.add_argument("--output_dir", type=str, default="./IDR0013-VidGene",
-                        help="Where to write prompts.txt/videos.txt")
+                        help="Base output directory name (we also create `...-Val` for validation).")
     parser.add_argument("--max_samples", type=int, default=-1,
-                        help="Limit the total number of samples (for debugging). Use -1 for no limit.")
+                        help="Limit total matched samples. -1 means no limit.")
+    parser.add_argument("--val_samples", type=int, default=1,
+                        help="How many samples to reserve for validation. Default=1.")
     args = parser.parse_args()
 
-    os.makedirs(args.output_dir, exist_ok=True)
+    # We'll produce 2 sets of files:
+    #   {output_dir}/prompts.txt + videos.txt      <-- training set
+    #   {output_dir}-Val/prompts.txt + videos.txt  <-- validation set
+    #
+    # The script is the same as before, but at the end we split the matched data.
+
+    # For convenience, define final output paths:
+    train_dir = args.output_dir
+    val_dir   = f"{args.output_dir}-Val"
+
+    # Make sure the train directory exists, and the val directory as well.
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(val_dir, exist_ok=True)
 
     # We'll create two lookups:
-    # 1) annotation_dict: Key = Plate_Well (like "LT0001_02_A1"),
-    #                     storing numeric scores for migration/proliferation, etc.
+    # 1) annotation_dict: Key = Plate_Well, storing numeric scores
     # 2) plateWell_map:   Key = (plate, well_number) -> Plate_Well
-    #                     so we can match .mp4 filenames to annotation.
-
     annotation_dict = {}
     plateWell_map = {}
 
@@ -48,7 +69,7 @@ def main():
             plate      = row["Plate"]        # e.g. "LT0001_02"
             well_num   = row["Well Number"]  # e.g. "1" or "384"
 
-            # read numeric scores (3 columns), default to 0.0 on errors/blank
+            # read numeric scores (3 columns)
             def safe_float(x):
                 try:
                     return float(x)
@@ -67,6 +88,7 @@ def main():
                 "prolif":    prolif
             }
 
+    # Build the plateWell_map in a second pass (or same pass) for convenience
     with open(args.csv, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -78,7 +100,7 @@ def main():
     prompts = []
     videopaths = []
 
-    # Walk each plate folder under data_root
+    # Walk each plate folder
     for plate_folder in os.listdir(args.data_root):
         plate_path = os.path.join(args.data_root, plate_folder)
         if not os.path.isdir(plate_path):
@@ -86,14 +108,11 @@ def main():
 
         mp4s = [f for f in os.listdir(plate_path) if f.endswith(".mp4")]
         for mp4file in mp4s:
-            # e.g. "00384_01.mp4"
             match = re.match(r"^0*(\d+)_\d+\.mp4$", mp4file)
             if not match:
-                # skip any non-matching files
                 continue
 
-            well_num_str = match.group(1)   # "384"
-            # Attempt to find plate_well
+            well_num_str = match.group(1)
             plate_well = plateWell_map.get((plate_folder, well_num_str))
             if not plate_well:
                 continue
@@ -102,43 +121,59 @@ def main():
             if not data:
                 continue
 
-            # Extract numeric scores
             mig_speed = data["mig_speed"]
             mig_dist  = data["mig_dist"]
             prolif    = data["prolif"]
 
-            # Build a simple prompt
-            # E.g.: "Time-lapse microscopy video. Migration speed=0.123, distance=4.567, proliferation=-0.003."
+            # Very simple prompt using raw numeric values
             prompt_text = (
-                f"Time-lapse microscopy video of dividing cells. "
+                f"Time-lapse microscopy video. "
                 f"Migration speed={mig_speed:.3f}, distance={mig_dist:.3f}, proliferation={prolif:.3f}."
             )
 
-            abs_video_path = os.path.join(plate_path, mp4file)
-            abs_video_path = os.path.abspath(abs_video_path)
+            abs_video_path = os.path.abspath(os.path.join(plate_path, mp4file))
 
             prompts.append(prompt_text)
             videopaths.append(abs_video_path)
 
-    print(f"Found {len(prompts)} matched videos in total.")
+    total_found = len(prompts)
+    print(f"Found {total_found} matched videos in total.")
 
-    # Optionally limit
-    if args.max_samples > 0:
-        prompts = prompts[:args.max_samples]
+    # 1) Limit with max_samples if >0
+    if args.max_samples > 0 and args.max_samples < total_found:
+        prompts   = prompts[:args.max_samples]
         videopaths = videopaths[:args.max_samples]
+        total_found = len(prompts)
 
-    # Write out
-    out_prompts = os.path.join(args.output_dir, "prompts.txt")
-    out_videos  = os.path.join(args.output_dir, "videos.txt")
-    with open(out_prompts, "w", encoding="utf-8") as f_p, open(out_videos, "w", encoding="utf-8") as f_v:
-        for p, v in zip(prompts, videopaths):
+    # 2) Separate the last `val_samples` for validation
+    valN = min(args.val_samples, total_found)
+    trainN = total_found - valN
+
+    train_prompts = prompts[:trainN]
+    train_videos  = videopaths[:trainN]
+    val_prompts   = prompts[trainN:]
+    val_videos    = videopaths[trainN:]
+
+    print(f"Training samples: {len(train_prompts)}  Validation samples: {len(val_prompts)}")
+
+    # Write training set
+    out_prompts_train = os.path.join(train_dir, "prompts.txt")
+    out_videos_train  = os.path.join(train_dir, "videos.txt")
+    with open(out_prompts_train, "w", encoding="utf-8") as f_p, open(out_videos_train, "w", encoding="utf-8") as f_v:
+        for p, v in zip(train_prompts, train_videos):
             f_p.write(p + "\n")
             f_v.write(v + "\n")
 
-    print(f"Wrote {len(prompts)} lines to:")
-    print(f"  {out_prompts}")
-    print(f"  {out_videos}")
+    # Write validation set
+    out_prompts_val = os.path.join(val_dir, "prompts.txt")
+    out_videos_val  = os.path.join(val_dir, "videos.txt")
+    with open(out_prompts_val, "w", encoding="utf-8") as f_p, open(out_videos_val, "w", encoding="utf-8") as f_v:
+        for p, v in zip(val_prompts, val_videos):
+            f_p.write(p + "\n")
+            f_v.write(v + "\n")
 
+    print(f"Wrote training set => {trainN} lines:\n  {out_prompts_train}\n  {out_videos_train}")
+    print(f"Wrote validation set => {valN} lines:\n  {out_prompts_val}\n  {out_videos_val}")
 
 if __name__ == "__main__":
     main()

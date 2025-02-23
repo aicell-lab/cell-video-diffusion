@@ -572,7 +572,6 @@ class Trainer:
             pipe = pipe.to(dtype=self.state.weight_dtype)
 
         #################################
-
         all_processes_artifacts = []
         for i in range(num_validation_samples):
             if self.state.using_deepspeed and self.accelerator.deepspeed_plugin.zero_stage != 3:
@@ -621,8 +620,8 @@ class Trainer:
                 "image": {"type": "image", "value": image},
                 "video": {"type": "video", "value": video},
             }
-            for i, (artifact_type, artifact_value) in enumerate(validation_artifacts):
-                artifacts.update({f"artifact_{i}": {"type": artifact_type, "value": artifact_value}})
+            for k, (artifact_type, artifact_value) in enumerate(validation_artifacts):
+                artifacts.update({f"artifact_{k}": {"type": artifact_type, "value": artifact_value}})
             logger.debug(
                 f"Validation artifacts on process {accelerator.process_index}: {list(artifacts.keys())}",
                 main_process_only=False,
@@ -649,16 +648,32 @@ class Trainer:
                     export_to_video(artifact_value, filename, fps=self.args.gen_fps)
                     artifact_value = wandb.Video(filename, caption=prompt)
 
-                    # 4. NEW: Count first vs. last nuclei
-                    #    (We read the just-saved video and compute a ratio.)
-                    count_first, count_last, ratio = count_first_last_nuclei(filename)
-                    if count_first is not None and count_last is not None:
-                        logger.info(
-                            f"[Val@step={step}] Prompt: {prompt}, "
-                            f"count_first={count_first}, count_last={count_last}, ratio={ratio:.2f}"
-                        )
-                        self.accelerator.log({"val_nuclei_ratio": ratio}, step=step)
+                    # Keep track of real and generated video paths
+                    if key == "video":  # This is the input/real video
+                        real_video_path = filename
+                        real_counts = count_first_last_nuclei(filename)
+                    elif key.startswith("artifact_"):  # This is the generated video
+                        gen_video_path = filename
+                        gen_counts = count_first_last_nuclei(filename)
+                        
+                        # Only log comparison when we have both videos
+                        if real_counts[2] is not None and gen_counts[2] is not None:
+                            count_first_real, count_last_real, ratio_real = real_counts
+                            count_first_gen, count_last_gen, ratio_gen = gen_counts
+                            
+                            logger.info(
+                                f"[Val@step={step}] Prompt: {prompt}\n"
+                                f"  Real video:  count_first={count_first_real}, count_last={count_last_real}, ratio={ratio_real:.2f}\n"
+                                f"  Synth video: count_first={count_first_gen}, count_last={count_last_gen}, ratio={ratio_gen:.2f}"
+                            )
+                            
+                            self.accelerator.log({"val_real_ratio": ratio_real}, step=step)
+                            self.accelerator.log({"val_gen_ratio": ratio_gen}, step=step)
 
+                            if ratio_real > 0:
+                                ratio_of_ratios = ratio_gen / ratio_real
+                                logger.info(f"  ratio_of_ratios = {ratio_of_ratios:.2f}")
+                                self.accelerator.log({"val_ratio_of_ratios": ratio_of_ratios}, step=step)
 
                 all_processes_artifacts.append(artifact_value)
 

@@ -4,7 +4,7 @@
 #SBATCH -t 1-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J cogvideo_i2v_train_big         # Job name
+#SBATCH -J cogvideo_i2v_train         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -26,14 +26,13 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v-big"
+    --output_dir "../models/loras/idr0013-i2v-overfit"
     --report_to "wandb"
 )
-export WANDB_PROJECT="idr0013"
 
 # Data Configuration
 DATA_ARGS=(
-    --data_root "./IDR0013-VidGene"
+    --data_root "./IDR0013-VidGene-1"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
     # --image_column "images.txt"  # comment this line will use first frame of video as image conditioning
@@ -42,9 +41,9 @@ DATA_ARGS=(
 
 # Training Configuration
 TRAIN_ARGS=(
-    --train_epochs 15 # number of training epochs
+    --train_epochs 10 # number of training epochs
     --seed 42 # random seed
-    --batch_size 2
+    --batch_size 1
     --gradient_accumulation_steps 1
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
     # --rank 256
@@ -60,7 +59,7 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 25 # save checkpoint every x steps
+    --checkpointing_steps 1 # save checkpoint every x steps
     --checkpointing_limit 2 # maximum number of checkpoints to keep, after which the oldest one is deleted
     # --resume_from_checkpoint "../models/loras/idr0013-i2v-50/checkpoint-250"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
@@ -68,11 +67,11 @@ CHECKPOINT_ARGS=(
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "./IDR0013-VidGene-Val"
-    --validation_steps 50  # should be multiple of checkpointing_steps
+    --validation_dir "./IDR0013-VidGene-Val-1"
+    --validation_steps 1  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"
-    --validation_videos "videos.txt"
+    --validation_videos "videos.txt" # is this handled correctly?
     # --gen_fps 16
 )
 

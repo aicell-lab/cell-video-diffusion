@@ -35,12 +35,19 @@ def load_images(image_path: Path) -> List[Path]:
 
 
 def load_images_from_videos(videos_path: List[Path]) -> List[Path]:
+    """
+    OBS: I just updated this function to include the plate name prefix (e.g., "LT0001_02-00001_01.png")
+    to prevent naming conflicts when extracting frames from videos with identical names across different plates.
+    """
     first_frames_dir = videos_path[0].parent.parent / "first_frames"
     first_frames_dir.mkdir(exist_ok=True)
 
     first_frame_paths = []
     for video_path in videos_path:
-        frame_path = first_frames_dir / f"{video_path.stem}.png"
+        # Get plate name from parent directory
+        plate_name = video_path.parent.name
+        # Create filename with plate prefix: "LT0001_02-00001_01.png"
+        frame_path = first_frames_dir / f"{plate_name}-{video_path.stem}.png"
         if frame_path.exists():
             first_frame_paths.append(frame_path)
             continue
@@ -53,7 +60,7 @@ def load_images_from_videos(videos_path: List[Path]) -> List[Path]:
         if not ret:
             raise RuntimeError(f"Failed to read video: {video_path}")
 
-        # Save frame as PNG with same name as video
+        # Save frame as PNG with plate prefix
         cv2.imwrite(str(frame_path), frame)
         logging.info(f"Saved first frame to {frame_path}")
 

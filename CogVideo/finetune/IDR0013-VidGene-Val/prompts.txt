@@ -1,0 +1,2 @@
+Time-lapse microscopy video of HeLa cells in LT0001_02_L1, with siRNA knockdown of PPM1F. Fluorescently labeled chromosomes are observed. Phenotype: no.
+Time-lapse microscopy video of HeLa cells in LT0001_02_L3, with siRNA knockdown of CYP1A2. Fluorescently labeled chromosomes are observed. Phenotype: no.

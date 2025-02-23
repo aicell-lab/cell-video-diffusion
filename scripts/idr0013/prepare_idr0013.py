@@ -7,7 +7,7 @@ Usage:
   python prepare_idr0013.py \
     --csv /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/idr0013-screenA-annotation.csv \
     --data_root /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013 \
-    --output_dir ./IDR0013-VidGene
+    --output_dir ./IDR0013-VidGene-50
 
 This will produce:
   ./IDR0013-VidGene/prompts.txt
@@ -50,7 +50,7 @@ def main():
                 "has_phenotype": has_phenotype if has_phenotype else "no",
             }
 
-    # Next, we’ll search each plate folder (like LT0001_02) for .mp4 files.
+    # Next, we'll search each plate folder (like LT0001_02) for .mp4 files.
     # We'll try to match them to a Plate_Well by scanning the filename for well info.
     # But many times, well is something like "A1" => how does that appear in the mp4?
     #
@@ -132,6 +132,10 @@ def main():
             videopaths.append(abs_video_path)
 
     print(f"Found {len(prompts)} matched videos in total.")
+
+    # Take only the first 50 samples
+    prompts = prompts[:50]
+    videopaths = videopaths[:50]
 
     # Write out prompts.txt and videos.txt
     out_prompts = os.path.join(args.output_dir, "prompts.txt")

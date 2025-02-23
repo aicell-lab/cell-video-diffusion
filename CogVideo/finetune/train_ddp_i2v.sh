@@ -26,13 +26,14 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v"
-    --report_to "tensorboard"
+    --output_dir "../models/loras/idr0013-i2v-50"
+    --report_to "wandb"
 )
+export WANDB_PROJECT="idr0013"
 
 # Data Configuration
 DATA_ARGS=(
-    --data_root "./IDR0013-VidGene"
+    --data_root "./IDR0013-VidGene-50"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
     # --image_column "images.txt"  # comment this line will use first frame of video as image conditioning
@@ -41,7 +42,7 @@ DATA_ARGS=(
 
 # Training Configuration
 TRAIN_ARGS=(
-    --train_epochs 5 # number of training epochs
+    --train_epochs 10 # number of training epochs
     --seed 42 # random seed
     --batch_size 2
     --gradient_accumulation_steps 1
@@ -59,18 +60,18 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 10 # save checkpoint every x steps
+    --checkpointing_steps 25 # save checkpoint every x steps
     --checkpointing_limit 2 # maximum number of checkpoints to keep, after which the oldest one is deleted
     # --resume_from_checkpoint "/absolute/path/to/checkpoint_dir"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration
 VALIDATION_ARGS=(
-    --do_validation false  # ["true", "false"]
-    # --validation_dir "/absolute/path/to/your/validation_set"
-    # --validation_steps 20  # should be multiple of checkpointing_steps
-    # --validation_prompts "prompts.txt"
-    # --validation_images "images.txt"
+    --do_validation true  # ["true", "false"]
+    --validation_dir "./IDR0013-VidGene-Val"
+    --validation_steps 50  # should be multiple of checkpointing_steps
+    --validation_prompts "prompts.txt"
+    --validation_images "images.txt"
     # --gen_fps 16
 )
 

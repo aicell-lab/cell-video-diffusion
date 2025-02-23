@@ -49,6 +49,62 @@ from finetune.utils import (
     unwrap_model,
 )
 
+import cv2
+import numpy as np
+
+def count_nuclei_basic_threshold(frame_bgr, threshold=50, min_area=5):
+    """
+    Simple nucleus count via threshold + connected components.
+    frame_bgr: (H, W, 3) BGR image
+    threshold: brightness threshold for binarization
+    min_area : to ignore small noise
+    returns: integer count of distinct 'nuclei'
+    """
+    gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+    _, bin_img = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    
+    num_labels, labels = cv2.connectedComponents(bin_img)
+
+    # Exclude small or background
+    count = 0
+    for label_id in range(1, num_labels):
+        area = np.sum(labels == label_id)
+        if area >= min_area:
+            count += 1
+    return count
+
+def count_first_last_nuclei(video_path, threshold=50, min_area=5):
+    """
+    Reads the first and last frame of 'video_path', 
+    returns (#nuclei_first, #nuclei_last, ratio).
+    """
+    cap = cv2.VideoCapture(str(video_path))  # ensure string
+    frames_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    if frames_count < 2:
+        cap.release()
+        return None, None, None
+
+    # First frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    ret, first_frame = cap.read()
+    if not ret:
+        cap.release()
+        return None, None, None
+    count_first = count_nuclei_basic_threshold(first_frame, threshold=threshold, min_area=min_area)
+
+    # Last frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, frames_count - 1)
+    ret, last_frame = cap.read()
+    if not ret:
+        cap.release()
+        return count_first, None, None
+    count_last = count_nuclei_basic_threshold(last_frame, threshold=threshold, min_area=min_area)
+    cap.release()
+
+    ratio = 0 if count_first == 0 else count_last / count_first
+    return count_first, count_last, ratio
+
+
 
 logger = get_logger(LOG_NAME, LOG_LEVEL)
 
@@ -592,6 +648,17 @@ class Trainer:
                     logger.debug(f"Saving video to {filename}")
                     export_to_video(artifact_value, filename, fps=self.args.gen_fps)
                     artifact_value = wandb.Video(filename, caption=prompt)
+
+                    # 4. NEW: Count first vs. last nuclei
+                    #    (We read the just-saved video and compute a ratio.)
+                    count_first, count_last, ratio = count_first_last_nuclei(filename)
+                    if count_first is not None and count_last is not None:
+                        logger.info(
+                            f"[Val@step={step}] Prompt: {prompt}, "
+                            f"count_first={count_first}, count_last={count_last}, ratio={ratio:.2f}"
+                        )
+                        self.accelerator.log({"val_nuclei_ratio": ratio}, step=step)
+
 
                 all_processes_artifacts.append(artifact_value)
 

@@ -7,7 +7,7 @@ Example usage:
   python prepare_idr0013.py \
     --csv /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/idr0013-screenA-annotation.csv \
     --data_root /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013 \
-    --output_dir ./IDR0013-VidGene
+    --output_dir ../../data/ready/IDR0013-VidGene
 
 What it does:
   1) Collect matching video–prompt pairs from your dataset.

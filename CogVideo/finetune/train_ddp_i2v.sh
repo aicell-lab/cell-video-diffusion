@@ -26,14 +26,13 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v-big"
+    --output_dir "../models/loras/idr0013-i2v-5plates-r128"
     --report_to "wandb"
 )
-export WANDB_PROJECT="idr0013"
 
 # Data Configuration
 DATA_ARGS=(
-    --data_root "./IDR0013-VidGene"
+    --data_root "../../data/ready/IDR0013-VidGene"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
     # --image_column "images.txt"  # comment this line will use first frame of video as image conditioning
@@ -42,7 +41,7 @@ DATA_ARGS=(
 
 # Training Configuration
 TRAIN_ARGS=(
-    --train_epochs 15 # number of training epochs
+    --train_epochs 5 # number of training epochs
     --seed 42 # random seed
     --batch_size 2
     --gradient_accumulation_steps 1
@@ -60,7 +59,7 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 25 # save checkpoint every x steps
+    --checkpointing_steps 50 # save checkpoint every x steps
     --checkpointing_limit 2 # maximum number of checkpoints to keep, after which the oldest one is deleted
     # --resume_from_checkpoint "../models/loras/idr0013-i2v-50/checkpoint-250"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
@@ -68,7 +67,7 @@ CHECKPOINT_ARGS=(
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "./IDR0013-VidGene-Val"
+    --validation_dir "../../data/ready/IDR0013-VidGene-Val"
     --validation_steps 50  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"

@@ -11,6 +11,7 @@ dependencies:
   - torchvision>=0.20.0
   - cuda-toolkit
   - pip
+  - trackpy
   - pip:
     - accelerate>=1.1.1
     - transformers>=4.46.2

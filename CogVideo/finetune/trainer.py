@@ -214,7 +214,7 @@ class Trainer:
 
     def prepare_dataset(self) -> None:
         logger.info("Initializing dataset and dataloader")
-
+        
         if self.args.model_type == "i2v":
             self.dataset = I2VDatasetWithResize(
                 **(self.args.model_dump()),

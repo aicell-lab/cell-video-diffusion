@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=1 -C "fat"        # Number of GPUs needed
-#SBATCH -t 1-00:00:00            # Time limit (e.g. 1 day)
+#SBATCH --gpus=2 -C "thin"        # Number of GPUs needed
+#SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J cogvideo_i2v_train_big         # Job name
+#SBATCH -J cogvideo_i2v_train_r256         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -26,13 +26,13 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v-5plates-r128"
+    --output_dir "../models/loras/idr0013-i2v-10plates-r256"
     --report_to "wandb"
 )
 
 # Data Configuration
 DATA_ARGS=(
-    --data_root "../../data/ready/IDR0013-VidGene"
+    --data_root "../../data/ready/IDR0013-10plates"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
     # --image_column "images.txt"  # comment this line will use first frame of video as image conditioning
@@ -43,11 +43,11 @@ DATA_ARGS=(
 TRAIN_ARGS=(
     --train_epochs 5 # number of training epochs
     --seed 42 # random seed
-    --batch_size 2
+    --batch_size 1
     --gradient_accumulation_steps 1
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
-    # --rank 256
-    # --lora_alpha 256
+    --rank 256
+    --lora_alpha 128
 )
 
 # System Configuration
@@ -61,13 +61,13 @@ SYSTEM_ARGS=(
 CHECKPOINT_ARGS=(
     --checkpointing_steps 50 # save checkpoint every x steps
     --checkpointing_limit 2 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    # --resume_from_checkpoint "../models/loras/idr0013-i2v-50/checkpoint-250"  # if you want to resume from a checkpoint, otherwise, comment this line
+    # --resume_from_checkpoint "./models/loras/idr0013-i2v-5plates-r128/checkpoint-850"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "../../data/ready/IDR0013-VidGene-Val"
+    --validation_dir "../../data/ready/IDR0013-10plates-Val"
     --validation_steps 50  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"

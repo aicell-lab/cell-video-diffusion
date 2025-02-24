@@ -26,13 +26,13 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v-overfit"
+    --output_dir "../models/loras/idr0013-i2v-r128-overfit"
     --report_to "wandb"
 )
 
 # Data Configuration
 DATA_ARGS=(
-    --data_root "./IDR0013-VidGene-1"
+    --data_root "../../data/ready/IDR0013-VidGene-Overfit"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
     # --image_column "images.txt"  # comment this line will use first frame of video as image conditioning
@@ -67,12 +67,12 @@ CHECKPOINT_ARGS=(
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "./IDR0013-VidGene-Val-1"
+    --validation_dir "../../data/ready/IDR0013-VidGene-Val"
     --validation_steps 1  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"
     --validation_videos "videos.txt" # is this handled correctly?
-    # --gen_fps 16
+    # --gen_fps 16 # this is probably defaulted to 16
 )
 
 # Combine all arguments and launch training

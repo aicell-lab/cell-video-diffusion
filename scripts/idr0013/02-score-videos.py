@@ -96,22 +96,43 @@ def main():
         print(f"Error: data_root={data_root} is not a directory.")
         return
 
-    plate_folders = [p for p in data_root.iterdir() if p.is_dir()]
+    # ------------------------------------------------------
+    # 1) Check if output CSV exists and load existing rows.
+    # ------------------------------------------------------
+    outpath = Path(args.output_csv)
+    existing_entries = set()
+    file_exists = outpath.is_file()
 
+    if file_exists:
+        with outpath.open("r", newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # Mark existing Plate & Well as known
+                existing_entries.add((row["Plate"], row["Well Number"]))
+
+    plate_folders = [p for p in data_root.iterdir() if p.is_dir()]
     output_rows = []
+
+    # ------------------------------------------------------
+    # 2) Only compute if (Plate, WellNum) missing from CSV.
+    # ------------------------------------------------------
     for plate_dir in plate_folders:
         plate_name = plate_dir.name  # e.g. "LT0001_02"
         mp4_files = list(plate_dir.glob("*.mp4"))
 
         for mp4path in mp4_files:
-            # parse the well number from e.g. "00005_01.mp4" => well_num=5
             match = re.match(r"^0*(\d+)_\d+\.mp4$", mp4path.name)
             if not match:
                 continue
             well_num_str = match.group(1)  # e.g. "5"
 
-            # compute proliferation only
-            prolifer = compute_proliferation_ratio(mp4path, threshold=args.threshold, min_area=args.min_area)
+            # If already in CSV, skip
+            if (plate_name, well_num_str) in existing_entries:
+                continue
+
+            prolifer = compute_proliferation_ratio(mp4path,
+                                                   threshold=args.threshold,
+                                                   min_area=args.min_area)
 
             output_rows.append({
                 "Plate": plate_name,
@@ -120,16 +141,23 @@ def main():
                 "Video Path": str(mp4path)
             })
 
-    # Write CSV
-    outpath = Path(args.output_csv)
-    with outpath.open("w", newline="", encoding="utf-8") as f:
+    # ------------------------------------------------------
+    # 3) Append (or write) new rows to CSV
+    # ------------------------------------------------------
+    # If the file doesn't exist, write header. Otherwise append.
+    write_header = not file_exists
+
+    with outpath.open("a" if file_exists else "w", newline="", encoding="utf-8") as f:
         fieldnames = ["Plate", "Well Number", "Proliferation Score", "Video Path"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
+
+        if write_header:
+            writer.writeheader()
+
         for row in output_rows:
             writer.writerow(row)
 
-    print(f"Wrote {len(output_rows)} rows to {outpath}")
+    print(f"Skipped existing entries. Wrote {len(output_rows)} new rows to {outpath}")
 
 if __name__ == "__main__":
     main()

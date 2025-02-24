@@ -18,9 +18,10 @@ Then:
 Usage example:
   python 03-prepare-idr0013.py \
     --scores_csv ./idr0013_scores.csv \
-    --output_dir ./IDR0013 \
+    --output_dir ../../data/ready/IDR0013-10plates \
     --percentiles 33,66 \
-    --val_samples 1
+    --val_samples 1 \
+    --val_path /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/LT0001_02/00223_01.mp4
 """
 
 import argparse
@@ -36,11 +37,14 @@ def main():
     parser.add_argument("--output_dir", type=str, default="./IDR0013-Prolif-Binned",
                         help="Base output dir for train/validation subdirs.")
     parser.add_argument("--percentiles", type=str, default="33,66",
-                        help="Comma-separated percentile boundaries for binning (e.g. '33,66').")
+                        help="Comma-separated percentile boundaries for binning.")
     parser.add_argument("--val_samples", type=int, default=1,
                         help="Number of videos to move into validation set. Default=1.")
     parser.add_argument("--max_samples", type=int, default=-1,
                         help="If >0, limit total number of samples.")
+    # New param for optional single validation path
+    parser.add_argument("--val_path", type=str, default=None,
+                        help="If set and val_samples=1, force this video path into validation set.")
     args = parser.parse_args()
 
     train_dir = args.output_dir
@@ -131,16 +135,40 @@ def main():
         prompts.append(prompt_text)
         videos.append(row["video_path"])
 
-    # 5) Create train/val split
+    # 5) Train/val split with optional forced val_path
+    #    By default, we reserve the last val_samples entries for validation.
+    #    But if val_samples=1 and val_path is specified, we force that video into validation.
     valN = min(args.val_samples, total_found)
     trainN = total_found - valN
 
+    # If they provided --val_path but val_samples != 1, ignore it with a warning:
+    if args.val_path and args.val_samples != 1:
+        print("Warning: --val_path was set, but val_samples != 1. Ignoring val_path.")
+
+    # Initialize with default approach:
     train_prompts = prompts[:trainN]
     train_videos  = videos[:trainN]
     val_prompts   = prompts[trainN:]
     val_videos    = videos[trainN:]
 
-    print(f"Training samples: {trainN}, Validation samples: {valN}")
+    # If we are indeed dealing with val_samples=1 and a val_path is provided:
+    if valN == 1 and args.val_path:
+        if args.val_path in videos:
+            # Find the index of the provided path
+            idx = videos.index(args.val_path)
+
+            # Force that single sample to the validation set
+            val_prompts = [prompts[idx]]
+            val_videos  = [videos[idx]]
+
+            # Rebuild the training set (all except that one sample)
+            train_prompts = prompts[:idx] + prompts[idx+1:]
+            train_videos  = videos[:idx]  + videos[idx+1:]
+            print(f"Forcing {args.val_path} into validation set.")
+        else:
+            print(f"Warning: --val_path {args.val_path} not found in data. Using default last-item val.")
+
+    print(f"Training samples: {len(train_prompts)}, Validation samples: {len(val_prompts)}")
 
     # 6) Write them out
     out_prompts_train = os.path.join(train_dir, "prompts.txt")
@@ -157,8 +185,8 @@ def main():
             f_p.write(p + "\n")
             f_v.write(v + "\n")
 
-    print(f"Wrote training set => {trainN} lines:\n  {out_prompts_train}\n  {out_videos_train}")
-    print(f"Wrote validation set => {valN} lines:\n  {out_prompts_val}\n  {out_videos_val}")
+    print(f"Wrote training set => {len(train_prompts)} lines:\n  {out_prompts_train}\n  {out_videos_train}")
+    print(f"Wrote validation set => {len(val_prompts)} lines:\n  {out_prompts_val}\n  {out_videos_val}")
 
 if __name__ == "__main__":
     main()

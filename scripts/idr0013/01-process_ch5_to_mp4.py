@@ -4,6 +4,7 @@ import glob
 import h5py
 import numpy as np
 import imageio
+
 def find_ch5_image_datasets(h5file):
     """
     Search an open HDF5 file (CellH5) for datasets likely to contain raw images,
@@ -68,7 +69,7 @@ def make_mp4(timeseries, out_path, fps=10):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python process_ch5_to_mp4.py /path/to/hdf5_folder [fps=10]")
+        print("Usage: python 01-process_ch5_to_mp4.py /path/to/hdf5_folder [fps=10]")
         sys.exit(1)
     
     hdf5_folder = sys.argv[1]

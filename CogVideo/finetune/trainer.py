@@ -602,7 +602,10 @@ class Trainer:
                 f"Validating sample {i + 1}/{num_validation_samples} on process {accelerator.process_index}. Prompt: {prompt}",
                 main_process_only=False,
             )
-            validation_artifacts = self.validation_step({"prompt": prompt, "image": image, "video": video}, pipe)
+            if self.accelerator.is_main_process:
+                validation_artifacts = self.validation_step({"prompt": prompt, "image": image, "video": video}, pipe)
+            else:
+                validation_artifacts = []
 
             if (
                 self.state.using_deepspeed
@@ -751,7 +754,7 @@ class Trainer:
     def compute_loss(self, batch) -> torch.Tensor:
         raise NotImplementedError
 
-    def validation_step(self) -> List[Tuple[str, Image.Image | List[Image.Image]]]:
+    def validation_step(self, batch, pipe) -> List[Tuple[str, Image.Image | List[Image.Image]]]:
         raise NotImplementedError
 
     def __get_training_dtype(self) -> torch.dtype:

@@ -32,7 +32,7 @@ FPS=10
 # --------------------------------------
 # OUTPUT DIRECTORY
 # --------------------------------------
-OUTDIR="./test_generations/i2v_synonym_spam"
+OUTDIR="./test_generations/i2v_synonym_spam_low"
 mkdir -p "$OUTDIR"
 
 # --------------------------------------
@@ -45,12 +45,12 @@ BASENAME=$(basename "$IMAGE_PATH" .png)
 # PROMPT SYNONYMS
 # --------------------------------------
 SYNONYMS=(
-"extremely high"
-"massively high"
-"super high"
-"unbelievably high"
-"wildly high"
-"insanely high"
+"extremely low"
+"practically zero"
+"microscopic"
+"barely any"
+"vanishingly small"
+"infinitesimal"
 )
 
 # We'll keep “medium migration speed” & “high migration distance” the same,

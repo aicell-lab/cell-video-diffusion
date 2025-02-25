@@ -36,3 +36,4 @@ dependencies:
     - pandas
     - ipykernel
     - h5py
+    - pytorch-fid

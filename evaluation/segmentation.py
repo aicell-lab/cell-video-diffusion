@@ -90,7 +90,7 @@ if __name__ == "__main__":
         "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/test_generations/i2v_eval1_night/LT0001_02-00223_01_noLORA_lowPROF.mp4",
         "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/test_generations/i2v_eval2_night/LT0001_02-00223_01_S50_G8_F97_FPS16.mp4",
     )
-    video_path = samples[0]
+    video_path = samples[1]
 
     sample_name = os.path.splitext(os.path.basename(video_path))[0]
     preview_dir = os.path.join(os.path.dirname(__file__), "preview")

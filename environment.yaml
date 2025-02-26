@@ -36,3 +36,5 @@ dependencies:
     - pandas
     - ipykernel
     - h5py
+    - cellpose
+    - scikit-image

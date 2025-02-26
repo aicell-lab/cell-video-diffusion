@@ -51,6 +51,9 @@ from finetune.utils import (
 
 import cv2
 import numpy as np
+from skimage.metrics import structural_similarity as ssim
+import torchvision.transforms as T
+from torchvision.transforms.functional import to_tensor
 
 def count_nuclei_basic_threshold(frame_bgr, threshold=50, min_area=5):
     """
@@ -539,7 +542,7 @@ class Trainer:
         accelerator.end_training()
 
     def validate(self, step: int) -> None:
-        logger.info("Starting validation")
+        logger.info(f"Starting validation on process {self.accelerator.process_index}")
 
         accelerator = self.accelerator
         num_validation_samples = len(self.state.validation_prompts)
@@ -578,18 +581,41 @@ class Trainer:
                 # Skip current validation on all processes but one
                 if i % accelerator.num_processes != accelerator.process_index:
                     continue
+            
+            # Always distribute samples across processes, regardless of whether using DeepSpeed
+            if i % accelerator.num_processes != accelerator.process_index:
+                continue
 
             prompt = self.state.validation_prompts[i]
+            logger.info(f"Process {accelerator.process_index}, i: {i}, Prompt: {prompt}", main_process_only=False)
             image = self.state.validation_images[i]
+            logger.info(f"Process {accelerator.process_index}, i: {i}, Image: {image}", main_process_only=False)
             video = self.state.validation_videos[i]
+            logger.info(f"Process {accelerator.process_index}, i: {i}, Video: {video}", main_process_only=False)
 
+            # Process input image if it exists
             if image is not None:
                 image = preprocess_image_with_resize(image, self.state.train_height, self.state.train_width)
                 # Convert image tensor (C, H, W) to PIL images
                 image = image.to(torch.uint8)
                 image = image.permute(1, 2, 0).cpu().numpy()
                 image = Image.fromarray(image)
+                
+                # Save and log conditioning image
+                prompt_filename = string_to_filename(prompt)[:25]
+                hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
+                image_filename = f"validation-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.png"
+                validation_path = self.args.output_dir / "validation_res"
+                validation_path.mkdir(parents=True, exist_ok=True)
+                image_path = str(validation_path / image_filename)
+                
+                logger.info(f"Process {accelerator.process_index}, i: {i}, Saving conditioning image to {image_path}", main_process_only=False)
+                image.save(image_path)
+                image_wandb = wandb.Image(image_path, caption=f"Sample {i} - Conditioning frame - {prompt}")
+                all_processes_artifacts.append(image_wandb)
 
+            # Process input video if it exists
+            real_counts = None
             if video is not None:
                 video = preprocess_video_with_resize(
                     video, self.state.train_frames, self.state.train_height, self.state.train_width
@@ -597,16 +623,32 @@ class Trainer:
                 # Convert video tensor (F, C, H, W) to list of PIL images
                 video = video.round().clamp(0, 255).to(torch.uint8)
                 video = [Image.fromarray(frame.permute(1, 2, 0).cpu().numpy()) for frame in video]
+                
+                # Save real video (but don't log to wandb)
+                prompt_filename = string_to_filename(prompt)[:25]
+                hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
+                video_filename = f"validation-real-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.mp4"
+                validation_path = self.args.output_dir / "validation_res"
+                video_path = str(validation_path / video_filename)
+                
+                logger.info(f"Process {accelerator.process_index}, i: {i}, Saving real video to {video_path}", main_process_only=False)
+                export_to_video(video, video_path, fps=self.args.gen_fps)
+                real_counts = count_first_last_nuclei(video_path)
 
-            logger.debug(
+            # Run the validation step and handle generated artifacts
+            logger.info(
                 f"Validating sample {i + 1}/{num_validation_samples} on process {accelerator.process_index}. Prompt: {prompt}",
                 main_process_only=False,
             )
-            if self.accelerator.is_main_process:
-                validation_artifacts = self.validation_step({"prompt": prompt, "image": image, "video": video}, pipe)
-            else:
-                validation_artifacts = []
+            
+            validation_artifacts = self.validation_step({"prompt": prompt, "image": image, "video": video}, pipe)
+            # # Only main process runs the validation step
+            # if self.accelerator.is_main_process:
+            #     validation_artifacts = self.validation_step({"prompt": prompt, "image": image, "video": video}, pipe)
+            # else:
+            #     validation_artifacts = []
 
+            # Skip processing of validation_artifacts for non-main process in zero_stage == 3
             if (
                 self.state.using_deepspeed
                 and self.accelerator.deepspeed_plugin.zero_stage == 3
@@ -614,83 +656,117 @@ class Trainer:
             ):
                 continue
 
-            prompt_filename = string_to_filename(prompt)[:25]
-            # Calculate hash of reversed prompt as a unique identifier
-            reversed_prompt = prompt[::-1]
-            hash_suffix = hashlib.md5(reversed_prompt.encode()).hexdigest()[:5]
-
-            artifacts = {
-                "image": {"type": "image", "value": image},
-                "video": {"type": "video", "value": video},
-            }
+            # Now process all generated artifacts from validation_step
             for k, (artifact_type, artifact_value) in enumerate(validation_artifacts):
-                artifacts.update({f"artifact_{k}": {"type": artifact_type, "value": artifact_value}})
-            logger.debug(
-                f"Validation artifacts on process {accelerator.process_index}: {list(artifacts.keys())}",
-                main_process_only=False,
-            )
-
-            for key, value in list(artifacts.items()):
-                artifact_type = value["type"]
-                artifact_value = value["value"]
-                if artifact_type not in ["image", "video"] or artifact_value is None:
+                if artifact_type not in ["video"] or artifact_value is None:
                     continue
-
-                extension = "png" if artifact_type == "image" else "mp4"
-                filename = f"validation-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.{extension}"
+                    
+                # Generate a unique filename for the artifact
+                prompt_filename = string_to_filename(prompt)[:25]
+                hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
+                extension = "mp4"
+                gen_filename = f"validation-gen-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.{extension}"
                 validation_path = self.args.output_dir / "validation_res"
-                validation_path.mkdir(parents=True, exist_ok=True)
-                filename = str(validation_path / filename)
-
-                if artifact_type == "image":
-                    logger.debug(f"Saving image to {filename}")
-                    artifact_value.save(filename)
-                    artifact_value = wandb.Image(filename)
-                elif artifact_type == "video":
-                    logger.debug(f"Saving video to {filename}")
-                    export_to_video(artifact_value, filename, fps=self.args.gen_fps)
-                    artifact_value = wandb.Video(filename, caption=prompt)
-
-                    # Keep track of real and generated video paths
-                    if key == "video":  # This is the input/real video
-                        real_video_path = filename
-                        real_counts = count_first_last_nuclei(filename)
-                    elif key.startswith("artifact_"):  # This is the generated video
-                        gen_video_path = filename
-                        gen_counts = count_first_last_nuclei(filename)
+                gen_path = str(validation_path / gen_filename)
+                
+ 
+                logger.info(f"Process {accelerator.process_index}, i: {i}, Saving generated video to {gen_path}", main_process_only=False)
+                export_to_video(artifact_value, gen_path, fps=self.args.gen_fps)
+                
+                # Extract and save first frame
+                if len(artifact_value) > 0:
+                    first_frame = artifact_value[0]
+                    first_frame_filename = gen_path.replace(".mp4", "_first_frame.png")
+                    first_frame.save(first_frame_filename)
+                    first_frame_wandb = wandb.Image(
+                        first_frame_filename, 
+                        caption=f"Sample {i} - First frame - {prompt}"
+                    )
+                    all_processes_artifacts.append(first_frame_wandb)
+                    
+                    # Calculate similarity metrics if we have a conditioning image
+                    if image is not None:
+                        img1 = np.array(image)
+                        img2 = np.array(first_frame)
                         
-                        # Only log comparison when we have both videos
-                        if real_counts[2] is not None and gen_counts[2] is not None:
-                            count_first_real, count_last_real, ratio_real = real_counts
-                            count_first_gen, count_last_gen, ratio_gen = gen_counts
+                        if img1.shape == img2.shape:
+                            # Calculate MSE
+                            mse_value = np.mean((img1 - img2) ** 2)
+                            logger.info(f"Process {accelerator.process_index}, i: {i},  MSE between conditioning image and first frame: {mse_value:.4f}", main_process_only=False)
+                            # Add to artifacts instead of direct logging
+                            all_processes_artifacts.append({
+                                "type": "metric",
+                                "name": f"val_image_similarity/mse_sample{i}",
+                                "value": mse_value
+                            })
                             
-                            logger.info(
-                                f"[Val@step={step}] Prompt: {prompt}\n"
-                                f"  Real video:  count_first={count_first_real}, count_last={count_last_real}, ratio={ratio_real:.2f}\n"
-                                f"  Synth video: count_first={count_first_gen}, count_last={count_last_gen}, ratio={ratio_gen:.2f}"
-                            )
-                            
-                            self.accelerator.log({"val_real_ratio": ratio_real}, step=step)
-                            self.accelerator.log({"val_gen_ratio": ratio_gen}, step=step)
+                            # Calculate SSIM
+                            img1_gray = np.array(image.convert("L"))
+                            img2_gray = np.array(first_frame.convert("L"))
+                            ssim_value = ssim(img1_gray, img2_gray)
+                            logger.info(f"Process {accelerator.process_index}, i: {i},  SSIM between conditioning image and first frame: {ssim_value:.4f}", main_process_only=False)
+                            # Add to artifacts instead of direct logging
+                            all_processes_artifacts.append({
+                                "type": "metric",
+                                "name": f"val_image_similarity/ssim_sample{i}",
+                                "value": ssim_value
+                            })
+                    
+                    # Log the video to wandb
+                    video_wandb = wandb.Video(gen_path, caption=f"Sample {i} - {prompt}")
+                    all_processes_artifacts.append(video_wandb)
+                    
+                    # Calculate nuclei counts
+                    gen_counts = count_first_last_nuclei(gen_path)
+                    
+                    # Log comparison between real and generated videos
+                    if real_counts is not None and real_counts[2] is not None and gen_counts[2] is not None:
+                        count_first_real, count_last_real, ratio_real = real_counts
+                        count_first_gen, count_last_gen, ratio_gen = gen_counts
+                        
+                        logger.info(
+                            f"Process {accelerator.process_index}, i: {i}, [Val@step={step}] Prompt: {prompt}\n"
+                            f"  Real video:  count_first={count_first_real}, count_last={count_last_real}, ratio={ratio_real:.2f}\n"
+                            f"  Synth video: count_first={count_first_gen}, count_last={count_last_gen}, ratio={ratio_gen:.2f}",
+                            main_process_only=False
+                        )
 
-                            if ratio_real > 0:
-                                ratio_of_ratios = ratio_gen / ratio_real
-                                logger.info(f"  ratio_of_ratios = {ratio_of_ratios:.2f}")
-                                self.accelerator.log({"val_ratio_of_ratios": ratio_of_ratios}, step=step)
+                        # For ratio_of_ratios
+                        if ratio_real > 0:
+                            ratio_of_ratios = ratio_gen / ratio_real
+                            logger.info(f"Process {accelerator.process_index}, i: {i},  ratio_of_ratios = {ratio_of_ratios:.2f}", main_process_only=False)
+                            # Add to artifacts instead of direct logging
+                            all_processes_artifacts.append({
+                                "type": "metric",
+                                "name": f"val_ratio_of_ratios_sample{i}",
+                                "value": ratio_of_ratios
+                            })
 
-                all_processes_artifacts.append(artifact_value)
 
         all_artifacts = gather_object(all_processes_artifacts)
 
         if accelerator.is_main_process:
             tracker_key = "validation"
+            
+            # Extract metrics from all_artifacts
+            metrics_dict = {}
+            image_artifacts = []
+            video_artifacts = []
+            
+            for artifact in all_artifacts:
+                if isinstance(artifact, dict) and artifact.get("type") == "metric":
+                    metrics_dict[artifact["name"]] = artifact["value"]
+                elif isinstance(artifact, wandb.Image):
+                    image_artifacts.append(artifact)
+                elif isinstance(artifact, wandb.Video):
+                    video_artifacts.append(artifact)
+            
             for tracker in accelerator.trackers:
                 if tracker.name == "wandb":
-                    image_artifacts = [artifact for artifact in all_artifacts if isinstance(artifact, wandb.Image)]
-                    video_artifacts = [artifact for artifact in all_artifacts if isinstance(artifact, wandb.Video)]
                     tracker.log(
                         {
                             tracker_key: {"images": image_artifacts, "videos": video_artifacts},
+                            **metrics_dict
                         },
                         step=step,
                     )

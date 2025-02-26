@@ -4,7 +4,7 @@
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J cogvideo_i2v_train_r256         # Job name
+#SBATCH -J cogvideo_i2v_train_r512         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -26,7 +26,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v-10plates-r256"
+    --output_dir "../models/loras/idr0013-i2v-10plates-r512"
     --report_to "wandb"
 )
 
@@ -46,8 +46,8 @@ TRAIN_ARGS=(
     --batch_size 2
     --gradient_accumulation_steps 1
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
-    --rank 256
-    --lora_alpha 128
+    --rank 512
+    --lora_alpha 256
 )
 
 # System Configuration
@@ -61,7 +61,7 @@ SYSTEM_ARGS=(
 CHECKPOINT_ARGS=(
     --checkpointing_steps 50 # save checkpoint every x steps
     --checkpointing_limit 10 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    --resume_from_checkpoint "../models/loras/idr0013-i2v-10plates-r256/checkpoint-150"  # if you want to resume from a checkpoint, otherwise, comment this line
+    # --resume_from_checkpoint "../models/loras/idr0013-i2v-10plates-r512/checkpoint-150"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration

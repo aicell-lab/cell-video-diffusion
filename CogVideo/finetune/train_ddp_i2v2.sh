@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=2 -C "fat"        # Number of GPUs needed
+#SBATCH --gpus=1 -C "fat"        # Number of GPUs needed
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J i2v_r64_a32         # Job name
+#SBATCH -J i2v_r128_a64         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -13,8 +13,8 @@ module load Mambaforge/23.3.1-1-hpc1-bdist
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
 # LoRA Configuration - Set these values
-LORA_RANK=64
-LORA_ALPHA=32
+LORA_RANK=128
+LORA_ALPHA=64
 DATASET_NAME="IDR0013-10plates"
 
 # Prevent tokenizer parallelism issues
@@ -46,10 +46,10 @@ DATA_ARGS=(
 
 # Training Configuration
 TRAIN_ARGS=(
-    --train_epochs 1 # number of training epochs
+    --train_epochs 5 # number of training epochs
     --seed 42 # random seed
     --batch_size 2
-    --gradient_accumulation_steps 2
+    --gradient_accumulation_steps 4
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
     --rank ${LORA_RANK}
     --lora_alpha ${LORA_ALPHA}

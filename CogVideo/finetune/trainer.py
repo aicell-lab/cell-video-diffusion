@@ -107,8 +107,6 @@ def count_first_last_nuclei(video_path, threshold=50, min_area=5):
     ratio = 0 if count_first == 0 else count_last / count_first
     return count_first, count_last, ratio
 
-
-
 logger = get_logger(LOG_NAME, LOG_LEVEL)
 
 _DTYPE_MAP = {
@@ -604,7 +602,7 @@ class Trainer:
                 # Save and log conditioning image
                 prompt_filename = string_to_filename(prompt)[:25]
                 hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
-                image_filename = f"validation-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.png"
+                image_filename = f"validation-{step}-{i}-{prompt_filename}-{hash_suffix}.png"
                 validation_path = self.args.output_dir / "validation_res"
                 validation_path.mkdir(parents=True, exist_ok=True)
                 image_path = str(validation_path / image_filename)
@@ -627,7 +625,7 @@ class Trainer:
                 # Save real video (but don't log to wandb)
                 prompt_filename = string_to_filename(prompt)[:25]
                 hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
-                video_filename = f"validation-real-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.mp4"
+                video_filename = f"validation-real-{step}-{i}-{prompt_filename}-{hash_suffix}.mp4"
                 validation_path = self.args.output_dir / "validation_res"
                 video_path = str(validation_path / video_filename)
                 
@@ -665,7 +663,7 @@ class Trainer:
                 prompt_filename = string_to_filename(prompt)[:25]
                 hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
                 extension = "mp4"
-                gen_filename = f"validation-gen-{step}-{accelerator.process_index}-{prompt_filename}-{hash_suffix}.{extension}"
+                gen_filename = f"validation-gen-{step}-{i}-{prompt_filename}-{hash_suffix}.{extension}"
                 validation_path = self.args.output_dir / "validation_res"
                 gen_path = str(validation_path / gen_filename)
                 
@@ -748,6 +746,9 @@ class Trainer:
         if accelerator.is_main_process:
             tracker_key = "validation"
             
+            # Add debug logging
+            logger.info(f"Main process preparing to log artifacts. all_artifacts length: {len(all_artifacts)}")
+            
             # Extract metrics from all_artifacts
             metrics_dict = {}
             image_artifacts = []
@@ -761,8 +762,11 @@ class Trainer:
                 elif isinstance(artifact, wandb.Video):
                     video_artifacts.append(artifact)
             
+            logger.info(f"Extracted {len(metrics_dict)} metrics, {len(image_artifacts)} images, {len(video_artifacts)} videos")
+            
             for tracker in accelerator.trackers:
                 if tracker.name == "wandb":
+                    logger.info(f"Logging to wandb: {len(video_artifacts)} videos, {len(image_artifacts)} images")
                     tracker.log(
                         {
                             tracker_key: {"images": image_artifacts, "videos": video_artifacts},
@@ -785,7 +789,7 @@ class Trainer:
 
             # Change trainable weights back to fp32 to keep with dtype after prepare the model
             cast_training_params([self.components.transformer], dtype=torch.float32)
-
+            
         free_memory()
         accelerator.wait_for_everyone()
         ################################

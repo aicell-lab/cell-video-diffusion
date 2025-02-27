@@ -46,6 +46,8 @@ RESOLUTION_MAP = {
     "cogvideox-5b-i2v": (480, 720),
     "cogvideox-5b": (480, 720),
     "cogvideox-2b": (480, 720),
+    # For SFT models converted to fp32
+    "fp32_model": (768, 1360),
 }
 
 

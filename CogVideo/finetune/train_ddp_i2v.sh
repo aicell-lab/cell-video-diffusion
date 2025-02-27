@@ -4,7 +4,7 @@
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J i2v_r64_a32         # Job name
+#SBATCH -J i2v_r256_a128         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -13,8 +13,8 @@ module load Mambaforge/23.3.1-1-hpc1-bdist
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
 # LoRA Configuration - Set these values
-LORA_RANK=64
-LORA_ALPHA=32
+LORA_RANK=256
+LORA_ALPHA=128
 DATASET_NAME="IDR0013-10plates"
 
 # Prevent tokenizer parallelism issues
@@ -49,7 +49,7 @@ TRAIN_ARGS=(
     --train_epochs 1 # number of training epochs
     --seed 42 # random seed
     --batch_size 2
-    --gradient_accumulation_steps 2
+    --gradient_accumulation_steps 1
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
     --rank ${LORA_RANK}
     --lora_alpha ${LORA_ALPHA}
@@ -64,7 +64,7 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 50 # save checkpoint every x steps
+    --checkpointing_steps 25 # save checkpoint every x steps
     --checkpointing_limit 10 # maximum number of checkpoints to keep, after which the oldest one is deleted
     # --resume_from_checkpoint "../models/loras/${DATASET_NAME}-i2v-r${LORA_RANK}-a${LORA_ALPHA}/checkpoint-150"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
@@ -73,7 +73,7 @@ CHECKPOINT_ARGS=(
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
     --validation_dir "../../data/ready/${DATASET_NAME}-Val"
-    --validation_steps 50  # should be multiple of checkpointing_steps
+    --validation_steps 25  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"
     --validation_videos "videos.txt"

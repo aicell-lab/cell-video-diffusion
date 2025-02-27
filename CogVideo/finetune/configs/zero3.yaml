@@ -35,7 +35,7 @@
         "stage3_param_persistence_threshold": 1e5
     },
     "gradient_accumulation_steps": 1,
-    "train_micro_batch_size_per_gpu": 1,
+    "train_micro_batch_size_per_gpu": 2,
     "train_batch_size": "auto",
     "gradient_clipping": "auto",
     "steps_per_print": 2000,

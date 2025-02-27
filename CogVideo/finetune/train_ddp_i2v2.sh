@@ -1,10 +1,8 @@
 #!/bin/bash
-#SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=1 -C "thin"        # Number of GPUs needed
+#SBATCH -A berzelius-2025-23     # Your project/account
+#SBATCH --gpus=1                 # Number of GPUs needed
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
-#SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
-#SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J i2v_joke        # Job name
+#SBATCH -J i2v_r256_a128         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -15,7 +13,7 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 # LoRA Configuration - Set these values
 LORA_RANK=256
 LORA_ALPHA=128
-DATASET_NAME="IDR0013-10plates-bigval"
+DATASET_NAME="IDR0013-10plates"
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -30,7 +28,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/joke"
+    --output_dir "../models/loras/${DATASET_NAME}-i2v-r${LORA_RANK}-a${LORA_ALPHA}"
     --report_to "wandb"
 )
 

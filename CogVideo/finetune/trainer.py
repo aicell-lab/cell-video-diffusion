@@ -255,6 +255,7 @@ class Trainer:
             pin_memory=self.args.pin_memory,
         )
         tmp_data_loader = self.accelerator.prepare_data_loader(tmp_data_loader)
+        import ipdb; ipdb.set_trace()
         for _ in tmp_data_loader:
             ...
         self.accelerator.wait_for_everyone()

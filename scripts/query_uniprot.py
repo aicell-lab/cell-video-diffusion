@@ -9,7 +9,7 @@ def get_gene_info(gene_name: str) -> Dict[str, str]:
     This function queries the UniProt API for reviewed entries matching the given gene symbol and extracts:
       - description: Derived from the 'proteinDescription' field (using recommendedName or submissionNames).
       - function: A text found in the FUNCTION comment section.
-      - biological_process: GO annotations for Biological Processes.
+      - biological_processes: GO annotations for Biological Processes.
     
     GO Annotation Details:
       The UniProt cross-references under "uniProtKBCrossReferences" provide GO terms in the format "X:Term"

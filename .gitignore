@@ -83,3 +83,4 @@ config.json
 visualizations/
 /models/    
 evaluation/preview/*
+evaluation/results/*

@@ -81,4 +81,5 @@ config.json
 # personal
 /data/
 visualizations/
-/models/
+/models/    
+evaluation/preview/*

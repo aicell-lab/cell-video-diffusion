@@ -36,5 +36,7 @@ dependencies:
     - pandas
     - ipykernel
     - h5py
+    - cellpose
+    - scikit-image
     - pytorch-fid
     - torch-fidelity

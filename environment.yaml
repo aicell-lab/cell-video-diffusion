@@ -38,3 +38,5 @@ dependencies:
     - h5py
     - cellpose
     - scikit-image
+    - pytorch-fid
+    - torch-fidelity

@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=1 -C "fat"        # Number of GPUs needed
+#SBATCH --gpus=4 -C "fat"        # Number of GPUs needed
 #SBATCH -t 1-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J cogvideo_i2v_train         # Job name
+#SBATCH -J cogvideo_i2v_overfit         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -67,7 +67,7 @@ CHECKPOINT_ARGS=(
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "../../data/ready/IDR0013-VidGene-Val"
+    --validation_dir "../../data/ready/IDR0013-VidGene-Overfit-Val"
     --validation_steps 1  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"
@@ -76,7 +76,7 @@ VALIDATION_ARGS=(
 )
 
 # Combine all arguments and launch training
-accelerate launch train.py \
+accelerate launch --main_process_port=29501 train.py \
     "${MODEL_ARGS[@]}" \
     "${OUTPUT_ARGS[@]}" \
     "${DATA_ARGS[@]}" \

@@ -13,15 +13,15 @@ Then:
      - videos.txt 
      for training and validation subsets.
   3) Prompts look like:
-       "Time-lapse microscopy video with LOW proliferation."
+       "<ALEXANDER> Time-lapse microscopy video with LOW proliferation."
 
 Usage example:
   python 03-prepare-idr0013.py \
-    --scores_csv ./idr0013_scores.csv \
-    --output_dir ../../data/ready/IDR0013-10plates \
+    --scores_csv ./idr0013_scores_val.csv \
+    --output_dir ../../data/ready/IDR0013-10plates-bigval \
     --percentiles 33,66 \
     --val_samples 1 \
-    --val_path /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/LT0001_02/00223_01.mp4
+    --prompt_prefix "<ALEXANDER>"
 """
 
 import argparse
@@ -45,6 +45,9 @@ def main():
     # New param for optional single validation path
     parser.add_argument("--val_path", type=str, default=None,
                         help="If set and val_samples=1, force this video path into validation set.")
+    # Add new parameter for the prompt prefix
+    parser.add_argument("--prompt_prefix", type=str, default="<ALEXANDER>",
+                        help="Prefix to add to the beginning of each prompt. Default=<ALEXANDER>")
     args = parser.parse_args()
 
     train_dir = args.output_dir
@@ -130,8 +133,8 @@ def main():
     for row in data_rows:
         pval = row["prolif_val"]
         binned_p = bin_value(pval, edges_prolif, bin_labels)
-        # e.g. "Time-lapse microscopy video with low proliferation."
-        prompt_text = f"Time-lapse microscopy video with {binned_p} proliferation."
+        # Modified to include the prefix
+        prompt_text = f"{args.prompt_prefix} Time-lapse microscopy video with {binned_p} proliferation."
         prompts.append(prompt_text)
         videos.append(row["video_path"])
 

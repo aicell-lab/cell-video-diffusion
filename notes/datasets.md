@@ -10,8 +10,8 @@ Amount of data:
 11G     data/raw/idr0113-bottes-opcclones
 23G     data/raw/dkwh7_data
 43G     data/raw/idr0115
-113G    data/raw/20180215
-284G    data/raw/idr0067-king-yeastmeiosis
+113G    data/raw/20180215 - REMOVED
+284G    data/raw/idr0067-king-yeastmeiosis - REMOVED
 302G    data/raw/idr0040-aymoz-singlecell
 326G    data/raw/S-BIAD725
 462G    data/raw/mitotic_cell_atlas_v1.0.1_fulldata

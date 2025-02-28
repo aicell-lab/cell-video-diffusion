@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=4 -C "fat"        # Number of GPUs needed
+#SBATCH --gpus=2 -C "fat"        # Number of GPUs needed
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH --cpus-per-gpu=16        # CPU cores per GPU (adjust as needed)
 #SBATCH --mem=128G               # Total memory (adjust as needed)
-#SBATCH -J cogvideo_i2v_train_r256         # Job name
+#SBATCH -J i2v_r256_a128         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -12,6 +12,10 @@ module load Mambaforge/23.3.1-1-hpc1-bdist
 
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
+# LoRA Configuration - Set these values
+LORA_RANK=256
+LORA_ALPHA=128
+DATASET_NAME="IDR0013-10plates"
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -26,28 +30,29 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/idr0013-i2v-10plates-r256"
+    --output_dir "../models/loras/${DATASET_NAME}-i2v-r${LORA_RANK}-a${LORA_ALPHA}"
     --report_to "wandb"
 )
 
 # Data Configuration
 DATA_ARGS=(
-    --data_root "../../data/ready/IDR0013-10plates"
+    --data_root "../../data/ready/${DATASET_NAME}"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
+    # --id_token "<ALEXANDER>" # add in preprocessing instead
     # --image_column "images.txt"  # comment this line will use first frame of video as image conditioning
     --train_resolution "81x768x1360"  # (frames x height x width), frames should be 8N+1
 )
 
 # Training Configuration
 TRAIN_ARGS=(
-    --train_epochs 5 # number of training epochs
+    --train_epochs 1 # number of training epochs
     --seed 42 # random seed
     --batch_size 2
     --gradient_accumulation_steps 1
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
-    --rank 256
-    --lora_alpha 128
+    --rank ${LORA_RANK}
+    --lora_alpha ${LORA_ALPHA}
 )
 
 # System Configuration
@@ -59,16 +64,16 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 50 # save checkpoint every x steps
+    --checkpointing_steps 25 # save checkpoint every x steps
     --checkpointing_limit 10 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    --resume_from_checkpoint "../models/loras/idr0013-i2v-10plates-r256/checkpoint-100"  # if you want to resume from a checkpoint, otherwise, comment this line
+    # --resume_from_checkpoint "../models/loras/${DATASET_NAME}-i2v-r${LORA_RANK}-a${LORA_ALPHA}/checkpoint-150"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "../../data/ready/IDR0013-10plates-Val"
-    --validation_steps 50  # should be multiple of checkpointing_steps
+    --validation_dir "../../data/ready/${DATASET_NAME}-Val"
+    --validation_steps 25  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"
     --validation_videos "videos.txt"

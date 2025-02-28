@@ -12,8 +12,8 @@ for each .mp4 file:
 
 Usage Example:
   python 02-score-videos.py \
-    --data_root /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013 \
-    --output_csv ./idr0013_scores.csv
+    --data_root /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val \
+    --output_csv ./idr0013_scores_val.csv
 """
 
 import argparse

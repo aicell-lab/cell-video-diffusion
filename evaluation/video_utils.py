@@ -7,6 +7,7 @@ This module provides functions for:
 - Creating overlays with segmentation masks
 """
 
+#%%
 import os
 from datetime import datetime
 from typing import Tuple
@@ -16,7 +17,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def load_video(video_path: str) -> np.ndarray:
+def load_video(video_path: str, preview_path: str = None) -> np.ndarray:
     """Load video file and convert frames to grayscale.
 
     Parameters
@@ -34,8 +35,7 @@ def load_video(video_path: str) -> np.ndarray:
     frames = []
 
     # Load frames with progress bar
-    saved = False
-    for _ in tqdm(range(total_frames), desc="Loading frames"):
+    for i in tqdm(range(total_frames), desc="Loading frames"):
         ret, frame = cap.read()
         if not ret:
             break
@@ -43,59 +43,38 @@ def load_video(video_path: str) -> np.ndarray:
         if len(frame.shape) == 3:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         frames.append(frame)
-        if not saved:
+        if preview_path is not None and i == 0:
             # Save the first frame for preview
-            cv2.imwrite("preview.png", frame)
-            saved = True
-
+            cv2.imwrite(preview_path, frame)
+            file_name = os.path.basename(preview_path)
+            print(f"\nPreview saved to {file_name}")
+        
     cap.release()
     frames = np.stack(frames)
     print(f"Loaded {len(frames)} frames with shape {frames.shape}")
 
     return frames
 
-
-def fourier_high_pass(image: np.ndarray, ksize: int = 3, cutoff: int = 3) -> np.ndarray:
-    """Apply high-pass filter in Fourier domain.
-
-    Removes low-frequency background noise while preserving high-frequency details.
+def remove_background(frames: np.ndarray) -> np.ndarray:
+    """
+    Remove background from fluorescence microscopy frames.
 
     Parameters
     ----------
-    image : np.ndarray
-        Input grayscale image, shape (H, W), dtype uint8
-    ksize : int, optional
-        Kernel size for Gaussian blur, by default 3
-    cutoff : int, optional
-        Radius for low-frequency suppression, by default 5
+    frames : np.ndarray
+        Array of grayscale frames with shape (T, H, W)
 
     Returns
     -------
     np.ndarray
-        Filtered image, shape (H, W), dtype uint8
+        Background-subtracted frames
     """
-    # Smoothing to prevent artifacts
-    blurred = cv2.GaussianBlur(image, (ksize, ksize), 0)
+    background = np.min(frames, axis=0)
 
-    # Convert to float and Fourier transform
-    f = np.fft.fft2(blurred)
-    fshift = np.fft.fftshift(f)
+    corrected_frames = frames - background  # Subtraction method
+    corrected_frames = np.clip(corrected_frames, 0, None)  # Ensure non-negative values
 
-    # Create a high-pass mask (inverse Gaussian)
-    rows, cols = image.shape
-    crow, ccol = rows // 2, cols // 2
-    mask = np.ones((rows, cols), np.float32)
-    y, x = np.ogrid[:rows, :cols]
-    mask_area = (x - ccol) ** 2 + (y - crow) ** 2 <= cutoff**2
-    mask[mask_area] = 0  # Remove low-frequency components
-
-    # Apply mask and inverse transform
-    fshift = fshift * mask
-    f_ishift = np.fft.ifftshift(fshift)
-    img_back = np.fft.ifft2(f_ishift)
-    img_back = np.abs(img_back)
-
-    return cv2.normalize(img_back, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    return corrected_frames
 
 
 def apply_clahe(
@@ -124,8 +103,8 @@ def apply_clahe(
     return image_clahe
 
 
-def percentile_normalization(
-    image: np.ndarray, percentile: Tuple[float, float] = (0.5, 99.5)
+def soft_percentile_normalization(
+    image: np.ndarray, percentiles: Tuple[float, float] = (1, 99)
 ) -> np.ndarray:
     """Normalize image using sigmoid-based percentile scaling.
 
@@ -133,8 +112,8 @@ def percentile_normalization(
     ----------
     image : np.ndarray
         Input image, dtype float32
-    percentile : Tuple[float, float], optional
-        Lower and upper percentiles, by default (0.5, 99.5)
+    percentiles : Tuple[float, float], optional
+        Lower and upper percentiles, by default (1, 99)
 
     Returns
     -------
@@ -142,103 +121,66 @@ def percentile_normalization(
         Normalized image, dtype uint8
     """
     image = image.astype(np.float32)
-    p_low, p_high = np.percentile(image, percentile)
-    image = np.clip(image, p_low, p_high)
+    p_low, p_high = np.percentile(image, percentiles)
     scaled = (image - p_low) / (p_high - p_low)
 
     # Sigmoid stretch for smooth transition to preserve fine details
-    # scaled = 1 / (1 + np.exp(-10 * (scaled - 0.5)))  # [0, 1]
-
-    return scaled
-
-
-def enhance_fluorescence(
-    image: np.ndarray,
-    ksize: int = 11,
-    cutoff: int = 3,
-    clip_limit: float = 2.0,
-    tile_grid_size: int = 8,
-    percentile: Tuple[float, float] = (0.01, 99.9),
-) -> np.ndarray:
-    """Enhance fluorescence microscopy images.
-
-    Applies sequential filtering operations:
-    1. Fourier high-pass to remove background
-    2. CLAHE for local contrast enhancement
-    3. Soft percentile normalization
-
-    Parameters
-    ----------
-    image : np.ndarray
-        Input grayscale fluorescence image with shape (H, W)
-    ksize : int, optional
-        Kernel size for high-pass filter, by default 11
-    cutoff : int, optional
-        Cutoff frequency for high-pass, by default 3
-    clip_limit : float, optional
-        CLAHE clip limit, by default 2.0
-    tile_grid_size : int, optional
-        CLAHE tile size, by default 8
-    percentile : Tuple[float, float], optional
-        Normalization percentiles, by default (0.01, 99.9)
-
-    Returns
-    -------
-    np.ndarray
-        Enhanced image, dtype float32 with values in [0, 1]
-    """
-    if len(image.shape) != 2:
-        raise ValueError("Input image must have shape (H, W)")
-    if image.dtype != np.uint8:
-        raise ValueError("Input image must be dtype uint8")
-
-    # Step 1: Remove Low-Frequency Background (Fourier High-Pass)
-    # high_pass_filtered = fourier_high_pass(image, ksize=ksize, cutoff=cutoff)
-    high_pass_filtered = image
-
-    # Step 2: Apply CLAHE for local contrast enhancement
-    image_clahe = apply_clahe(
-        high_pass_filtered, clip_limit=clip_limit, tile_grid_size=tile_grid_size
-    )
-
-    frame_blur = cv2.GaussianBlur(image_clahe, (11, 11), 0)
-
-    # Step 3: Soft Percentile Normalization
-    scaled = percentile_normalization(frame_blur, percentile=percentile)
+    scaled = 1 / (1 + np.exp(-10 * (scaled - 0.5)))  # [0, 1]
 
     return scaled
 
 
 def preprocess_video(
     frames: np.ndarray,
+    ksize: int = 5,
+    clip_limit: float = 2.0,
+    tile_grid_size: int = 8,
+    percentiles: Tuple[float, float] = (1, 99),
     preview_path: str = None,
-    **enhance_kwargs,
 ) -> np.ndarray:
     """Enhance fluorescence microscopy video frames.
 
-    Applies the `enhance_fluorescence` function to each frame.
+    Apply background subtraction, Gaussian blur, CLAHE and normalization.
 
     Parameters
     ----------
     frames : np.ndarray
         Input video frames with shape (T, H, W)
+    ksize : int, optional
+        Kernel size for Gaussian blur, by default 5
+    clip_limit : float, optional
+        Threshold for contrast limiting, by default 2.0
+    tile_grid_size : int, optional
+        Size of grid for histogram equalization, by default 8
+    percentiles : Tuple[float, float], optional
+        Lower and upper percentiles for normalization, by default (1, 99)
     preview_path : str, optional
         Path to save the first frame comparison image, by default None
-    enhance_kwargs : dict, optional
-        Keyword arguments for `enhance_fluorescence`
-
+    
     Returns
     -------
     np.ndarray
         Enhanced video frames with shape (T, H, W)
     """
+    if len(frames.shape) != 3:
+        raise ValueError("Input frames must have shape (T, H, W)")
+    if frames.dtype != np.uint8:
+        raise ValueError("Input frames must be dtype uint8")
+
+    print("Removing background...")
+    frames = remove_background(frames)
+    print("Background removed!")
+
     enhanced_frames = []
     for i, frame in enumerate(tqdm(frames, desc="Enhancing frames")):
-        enhanced_frame = enhance_fluorescence(frame, **enhance_kwargs)
-        enhanced_frames.append(enhanced_frame)
+        blurred = cv2.GaussianBlur(frame, (ksize, ksize), 0)
+        enhanced_frame = apply_clahe(blurred, clip_limit=clip_limit, tile_grid_size=tile_grid_size)
+        scaled = soft_percentile_normalization(enhanced_frame, percentiles=percentiles)
+        enhanced_frames.append(scaled)
+
         if preview_path is not None and i == 0:
             comparison_image = np.hstack(
-                (frame, (enhanced_frame * 255).astype(np.uint8))
+                (frame, (scaled * 255).astype(np.uint8))
             )
             cv2.imwrite(preview_path, comparison_image)
             file_name = os.path.basename(preview_path)
@@ -414,31 +356,36 @@ def save_video(frames: np.ndarray, save_path: str, fps: int = 30):
     file_name = os.path.basename(save_path)
     print(f"Video saved to {file_name}")
 
-
+#%%
 if __name__ == "__main__":
-    # Example usage
-    samples = (
-        "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/LT0001_02/00001_01.mp4",
-    )
-    video_path = samples[0]
-    sample_name = os.path.splitext(os.path.basename(video_path))[0]
-    preview_dir = os.path.join(os.path.dirname(__file__), "preview")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    preview_path = os.path.join(
-        preview_dir, f"enhanced_{sample_name}_{timestamp}.png"
-    )
+    
+    # Example usage
+    preview_dir = os.path.join(os.path.dirname(__file__), "preview")
+    data_dir = os.path.join(preview_dir, "data")
+    samples = sorted(os.listdir(data_dir))
+
+    sample_idx = 0
+    video_path = os.path.join(data_dir, samples[sample_idx])
+    sample_name = os.path.splitext(samples[sample_idx])[0]
+    print(f"Processing video: {sample_name}")
 
     # Load video
-    frames = load_video(video_path)
-    print("\nVideo loaded successfully!")
+    preview_path = os.path.join(preview_dir, f"original_{sample_name}.png")
+    frames = load_video(video_path, preview_path)
+    print("Video loaded successfully!")
 
     # Process video frames
+    enhanced_preview_path = os.path.join(
+        preview_dir, f"enhanced_{sample_name}_{timestamp}.png"
+    )
     enhanced_image = preprocess_video(
         frames,
-        preview_path=preview_path,
-        ksize=11,
-        cutoff=3,
+        ksize=5,
         clip_limit=2.0,
         tile_grid_size=8,
-        percentile=(30, 99.9),
+        percentiles=(1, 99),
+        preview_path=enhanced_preview_path
     )
+
+# %%

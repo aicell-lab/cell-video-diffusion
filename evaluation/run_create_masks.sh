@@ -1,26 +1,30 @@
-#!/usr/bin/env bash
+#!/bin/bash
+#SBATCH -A berzelius-2025-23    # Your project/account
+#SBATCH --gpus=1 -C "thin"
+#SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
+#SBATCH -J create_masks         # Job name
+#SBATCH -o logs/%x_%j.out        # Standard output log
+#SBATCH -e logs/%x_%j.err        # Standard error log
 
-# ensure that if the script is interrupted, all background jobs are killed
-trap "echo 'Received SIGINT. Killing background jobs...'; kill 0" SIGINT
+module load Mambaforge/23.3.1-1-hpc1-bdist
 
-# run_distributions.sh
+conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
+
+# run_create_masks.sh
 #
 # Example usage:
-#   bash run_distributions.sh
+#   bash run_create_masks.sh
 #
 # This script:
-# 1) Iterates through a list of directories containing .mp4 files.
-# 2) Calls compute_distribution.py for each directory in parallel.
-# 3) Saves logs for each run to logs/ subdirectory.
+# 1) Iterates through a list of directories, each containing .mp4 files.
+# 2) Calls create_masks.py for each directory in parallel (background).
+# 3) Saves logs for each run in a logs/ subdirectory.
 
-##############################
-# USER-DEFINED PATHS/PARAMS #
-##############################
+SCRIPT_PATH="create_masks.py"    # Path to your create_masks.py
+OUTPUT_BASE_DIR="masks_output"   # Where each directory's .npy files go
+LOG_DIR="logs"                   # Where to store each run's log
 
-SCRIPT_PATH="compute_distributions.py"
-OUTPUT_BASE_DIR="results"
-LOG_DIR="logs"
-
+# List of directories to process
 DIRS=(
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_150"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_250"
@@ -37,12 +41,8 @@ DIRS=(
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_750"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_900"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/real_videos_10"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
+  "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
 )
-
-#############################
-# CREATE LOG DIR IF NEEDED #
-#############################
 
 mkdir -p "${LOG_DIR}"
 
@@ -51,21 +51,19 @@ mkdir -p "${LOG_DIR}"
 #############################
 
 for DIR in "${DIRS[@]}"; do
-  BASENAME=$(basename "$DIR")         # e.g. 'i2v_r64_500'
+  BASENAME=$(basename "$DIR")  # e.g. 'i2v_r64_500'
   OUTPUT_DIR="${OUTPUT_BASE_DIR}/${BASENAME}"
   LOG_FILE="${LOG_DIR}/${BASENAME}.log"
 
-  echo "Launching distribution computation for: ${DIR}"
+  echo "Launching mask creation for: ${DIR}"
   python "${SCRIPT_PATH}" \
     --input_dir "${DIR}" \
     --output_dir "${OUTPUT_DIR}" \
     > "${LOG_FILE}" 2>&1 &
 
-  # The '>' redirects stdout to the log file, '2>&1' redirects stderr there as well
-  # '&' indicates run this job in the background
 done
 
 # Wait for all background jobs to finish
 wait
 
-echo "All compute_distribution.py jobs have completed."
+echo "All create_masks.py jobs have completed."

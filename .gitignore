@@ -84,3 +84,4 @@ visualizations/
 /models/    
 evaluation/preview/*
 evaluation/results/*
+evaluation/masks_output/*

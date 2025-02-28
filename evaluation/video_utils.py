@@ -234,7 +234,7 @@ def save_overlay(
     frame: np.ndarray, 
     mask: np.ndarray,
     overlay: np.ndarray,
-    out_path: str,
+    output_path: str,
 ):
     """Save a preview image showing original frame, segmentation mask and overlay.
 
@@ -246,10 +246,10 @@ def save_overlay(
         Cellpose segmentation mask, shape (H, W), dtype uint16/int32
     overlay : np.ndarray
         Pre-computed overlay image, shape (H, W, 3)
-    out_path : str
+    output_path : str
         Path to save the preview image
     """
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
     # Ensure frame is uint8 and in BGR format for display
     if frame.dtype != np.uint8:
@@ -281,9 +281,9 @@ def save_overlay(
         cv2.putText(comparison, label, (x, y), font, font_scale, color, thickness)
     
     # Save the comparison image
-    cv2.imwrite(out_path, comparison)
+    cv2.imwrite(output_path, comparison)
 
-    file_name = os.path.basename(out_path)
+    file_name = os.path.basename(output_path)
     print(f"Overlay preview saved to {file_name}")
 
 
@@ -360,7 +360,8 @@ def save_video(frames, output_path, fps=30) -> None:
         for frame in tqdm(frames, desc="Saving frames"):
             writer.append_data(frame)
     
-    print(f"Video saved to: {output_path}")
+    file_name = os.path.basename(output_path)
+    print(f"Video saved to: {file_name}")
 
 
 #%%

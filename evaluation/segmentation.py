@@ -95,7 +95,7 @@ if __name__ == "__main__":
     data_dir = os.path.join(preview_dir, "data")
     samples = sorted(os.listdir(data_dir))
 
-    sample_idx = 2
+    sample_idx = 0
     video_path = os.path.join(data_dir, samples[sample_idx])
     sample_name = os.path.splitext(samples[sample_idx])[0]
     print(f"Segmenting video: {sample_name}")

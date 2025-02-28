@@ -37,3 +37,4 @@ dependencies:
     - ipykernel
     - h5py
     - pytorch-fid
+    - torch-fidelity

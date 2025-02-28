@@ -1,0 +1,3 @@
+Real images: ../data/processed/idr0013/final_frames/
+Generated images: ../data/generated/test_generations_plateval/i2v_r128_250/frame_final/
+FID score: 263.8026

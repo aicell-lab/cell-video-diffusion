@@ -25,29 +25,29 @@ GENERATE_TYPE="i2v"
 # -------------------------------
 # Array of image paths
 IMAGE_PATHS=(
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00139_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00327_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00301_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00358_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00149_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00271_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00008_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_11-00177_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_11-00376_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_11-00008_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00083_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00053_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00189_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00093_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0003_02-00171_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_02-00313_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_02-00266_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_09-00073_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_09-00195_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00376_01.png
 )
 
 # Corresponding prompts for each image
 PROMPTS=(
   "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
   "<ALEXANDER> Time-lapse microscopy video with low proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
   "<ALEXANDER> Time-lapse microscopy video with high proliferation."
   "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
   "<ALEXANDER> Time-lapse microscopy video with high proliferation."
 )
 
@@ -55,7 +55,7 @@ PROMPTS=(
 SEED=9
 
 # Output folder
-OUTDIR="./test_generations_gpt4o_mtscore/i2v_r64_${CHECKPOINT}"
+OUTDIR="../../data/generated/test_generations_realval/i2v_r64_${CHECKPOINT}"
 mkdir -p "$OUTDIR"
 
 # Fixed parameters for all generations

@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import Tuple
 
 import cv2
+import imageio
 import numpy as np
 from tqdm import tqdm
 
@@ -328,33 +329,39 @@ def create_video_overlay(
 
     overlay_frames = np.stack(overlay_frames)
     print(f"Created overlay frames with shape {overlay_frames.shape}")
-    return overlay_frames
+    return overlay_frames.astype(np.uint8)
 
 
-def save_video(frames: np.ndarray, save_path: str, fps: int = 30):
+def save_video(frames, output_path, fps=30) -> None:
     """
-    Save frames as video file
-
+    Save a sequence of frames as a video file.
+    
     Parameters
     ----------
     frames : np.ndarray
-        Frames array with shape (T, H, W, 3)
+        Frames array with shape (T, H, W, 3) in BGR format
     save_path : str
         Path to save the video file
     fps : int, optional
         Frames per second, by default 30
     """
-    h, w, _ = frames[0].shape
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter(save_path, fourcc, fps, (w, h), isColor=True)
+    if not isinstance(frames, np.ndarray):
+        raise ValueError("Input frames must be a numpy array")
+    if len(frames.shape) != 4:
+        raise ValueError("Input frames must have shape (T, H, W, 3)")
+    if frames.dtype != np.uint8:
+        frames = (frames * 255).astype(np.uint8)
 
-    # Write frames with progress bar
-    for frame in tqdm(frames, desc="Saving frames"):
-        out.write(frame)
+    # Change to RGB format for imageio
+    frames = frames[..., ::-1]
+    
+    imageio.plugins.ffmpeg.get_exe()
+    with imageio.get_writer(output_path, fps=fps) as writer:
+        for frame in tqdm(frames, desc="Saving frames"):
+            writer.append_data(frame)
+    
+    print(f"Video saved to: {output_path}")
 
-    out.release()
-    file_name = os.path.basename(save_path)
-    print(f"Video saved to {file_name}")
 
 #%%
 if __name__ == "__main__":
@@ -373,7 +380,6 @@ if __name__ == "__main__":
     # Load video
     preview_path = os.path.join(preview_dir, f"original_{sample_name}.png")
     frames = load_video(video_path, preview_path)
-    print("Video loaded successfully!")
 
     # Process video frames
     enhanced_preview_path = os.path.join(

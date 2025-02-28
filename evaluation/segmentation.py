@@ -1,3 +1,4 @@
+#%%
 import os
 from datetime import datetime
 
@@ -12,6 +13,10 @@ from video_utils import preprocess_video, create_overlay, save_overlay, create_v
 def segment_video(
     frames: np.ndarray,
     preview_path: str = None,
+    diameter: int = None,  # Approximate nuclei size (e.g. 30)
+    flow_threshold: float = 0.6,  # Slightly higher to catch dim nuclei
+    cellprob_threshold: float = -2,  # Much lower to catch dim nuclei
+    min_size: int = 15,  # Default value
     **cellpose_kwargs,
 ) -> np.ndarray:  # Changed return type to np.ndarray
     """
@@ -40,16 +45,13 @@ def segment_video(
     )
     masks = []
 
-    # Default Cellpose parameters that can be overridden
-    default_params = {
-        "diameter": 30,  # Approximate nuclei size
-        "flow_threshold": 0.6,  # Slightly higher to catch dim nuclei
-        "cellprob_threshold": -2,  # Much lower to catch dim nuclei
-        "min_size": 15,  # Default value
-        'stitch_threshold': -1,  # Disable stitching between frames
-    }
-
     # Update defaults with any user-specified parameters
+    default_params = {
+        "diameter": diameter,
+        "flow_threshold": flow_threshold,
+        "cellprob_threshold": cellprob_threshold,
+        "min_size": min_size,
+    }
     cellpose_kwargs = {**default_params, **cellpose_kwargs}
     print(f"Running Cellpose with parameters: {cellpose_kwargs}")
 
@@ -82,38 +84,31 @@ def segment_video(
     return masks
 
 
+#%%
 if __name__ == "__main__":
     from video_utils import load_video, create_overlay, save_video
 
-    samples = (
-        "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/LT0001_02/00001_01.mp4",
-        "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/test_generations/i2v_eval1_night/LT0001_02-00223_01_noLORA_lowPROF.mp4",
-        "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/test_generations/i2v_eval2_night/LT0001_02-00223_01_S50_G8_F97_FPS16.mp4",
-    )
-    video_path = samples[1]
-
-    sample_name = os.path.splitext(os.path.basename(video_path))[0]
-    preview_dir = os.path.join(os.path.dirname(__file__), "preview")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Example usage
+    preview_dir = os.path.join(os.path.dirname(__file__), "preview")
+    data_dir = os.path.join(preview_dir, "data")
+    samples = sorted(os.listdir(data_dir))
+
+    sample_idx = 2
+    video_path = os.path.join(data_dir, samples[sample_idx])
+    sample_name = os.path.splitext(samples[sample_idx])[0]
+    print(f"Segmenting video: {sample_name}")
 
     # Load video
     frames = load_video(video_path)
 
-    # Preprocess video frames
-    preview_path = os.path.join(preview_dir, f"enhanced_{sample_name}_{timestamp}.png")
-    frames_proc = preprocess_video(
-        frames,
-        preview_path=preview_path,
-        ksize=3,
-        cutoff=1,
-        clip_limit=3.0,
-        tile_grid_size=8,
-        percentile=(10, 99.9),
-    )
+    # Process video frames
+    enhanced_image = preprocess_video(frames)
 
     # Segment video
     preview_path = os.path.join(preview_dir, f"segmented_{sample_name}_{timestamp}.png")
-    masks = segment_video(frames_proc, preview_path=preview_path)
+    masks = segment_video(enhanced_image, preview_path=preview_path)
 
     file_name = f"masks_{sample_name}_{timestamp}.npy"
     save_path = os.path.join(preview_dir, file_name)
@@ -122,8 +117,10 @@ if __name__ == "__main__":
 
     # Create an overlay video
     overlay_frames = create_video_overlay(
-        frames_proc, masks, color=(0, 0, 255), alpha=0.8,
+        enhanced_image, masks, color=(0, 0, 255), alpha=0.8,
     )
     save_path = os.path.join(preview_dir, f"segmented_{sample_name}_{timestamp}.mp4")
     save_video(overlay_frames, save_path, fps=15)
 
+
+# %%

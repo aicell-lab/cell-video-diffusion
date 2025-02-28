@@ -4,6 +4,8 @@ import glob
 import h5py
 import numpy as np
 import imageio
+from skimage.transform import resize
+import cv2
 
 def find_ch5_image_datasets(h5file):
     """
@@ -47,10 +49,17 @@ def load_ch5_as_timeseries(ch5_path):
         return data_squeezed
 
 
-def make_mp4(timeseries, out_path, fps=10):
+def make_mp4(timeseries, out_path, fps=10, max_frames=None, target_size=None):
     """
     Write a 3D numpy array (T, Y, X) to an MP4 file.
     No per-frame normalization—use raw pixel values.
+    
+    Parameters:
+    - timeseries: 3D numpy array (T, Y, X)
+    - out_path: Path to save the MP4 file
+    - fps: Frames per second
+    - max_frames: Maximum number of frames to include (None = all frames)
+    - target_size: Tuple (height, width) to resize frames (None = original size)
     """    
     print(f"Creating MP4 with data shape={timeseries.shape}, dtype={timeseries.dtype}")
 
@@ -58,12 +67,31 @@ def make_mp4(timeseries, out_path, fps=10):
     if timeseries.dtype != np.uint8:
         print("WARNING: Data is not uint8. Consider scaling or casting to avoid unexpected clipping.")
 
+    # Limit number of frames if specified
+    if max_frames is not None and max_frames < timeseries.shape[0]:
+        timeseries = timeseries[:max_frames]
+        print(f"  Limited to first {max_frames} frames")
+    
     T = timeseries.shape[0]
     writer = imageio.get_writer(out_path, fps=fps)
-
+    
+    # Import OpenCV only when needed
+    if target_size is not None and timeseries.shape[1:] != target_size:
+        need_resize = True
+        # OpenCV uses (width, height) order, opposite of our (height, width)
+        cv2_size = (target_size[1], target_size[0])
+        print(f"  Resizing frames from {timeseries.shape[1:]} to {target_size}")
+    else:
+        need_resize = False
+    
     for t in range(T):
-        frame_8bit = timeseries[t]
-        writer.append_data(frame_8bit)
+        frame = timeseries[t]
+        
+        # Resize if needed using OpenCV (much faster than scikit-image)
+        if need_resize:
+            frame = cv2.resize(frame, cv2_size, interpolation=cv2.INTER_AREA)
+        
+        writer.append_data(frame)
     
     writer.close()
 
@@ -97,6 +125,10 @@ def main():
         print(f"No .ch5 files found in {hdf5_folder}")
         sys.exit(0)
     
+    # Set parameters for video processing
+    max_frames = 81  # Limit to first 81 frames
+    target_size = (768, 1360)  # Height, Width
+    
     for ch5_file in ch5_files:
         file_stem = os.path.splitext(os.path.basename(ch5_file))[0]
         # e.g. "00046_01"
@@ -110,7 +142,7 @@ def main():
         
         print(f"  shape={data_squeezed.shape}, dtype={data_squeezed.dtype}")
         
-        make_mp4(data_squeezed, out_mp4_path, fps=fps)
+        make_mp4(data_squeezed, out_mp4_path, fps=fps, max_frames=max_frames, target_size=target_size)
         print(f"  Wrote {out_mp4_path}")
 
 if __name__ == "__main__":

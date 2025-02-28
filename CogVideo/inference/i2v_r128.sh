@@ -17,20 +17,45 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 # MODEL & LORA
 # -------------------------------
 MODEL_PATH="../models/CogVideoX1.5-5B-I2V"
-LORA_PATH="../models/loras/i2v-r128-a64-dups/IDR0013-10plates-i2v-r128-a64/checkpoint-${CHECKPOINT}"
+LORA_PATH="../models/loras/IDR0013-10plates-i2v-r128-a64/checkpoint-${CHECKPOINT}"
 GENERATE_TYPE="i2v"
 
 # -------------------------------
-# ONE PROMPT, MULTIPLE IMAGES
+# EVALUATION SETUP: 5 IMAGES, SINGLE SEED
 # -------------------------------
-# Single prompt for all generations
-PROMPT="<ALEXANDER> Time-lapse microscopy video with high proliferation."
+# Array of image paths
+IMAGE_PATHS=(
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00139_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00327_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00301_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00358_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00149_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00271_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_47-00008_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_11-00177_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_11-00376_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames/LT0004_11-00008_01.png
+)
 
-# Base directory for input images
-IMAGE_BASE_DIR="/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/first_frames"
+# Corresponding prompts for each image
+PROMPTS=(
+  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with low proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+)
+
+# Use a single seed for all generations
+SEED=9
 
 # Output folder
-OUTDIR="./test_generations/i2v_r128_${CHECKPOINT}"
+OUTDIR="./test_generations_gpt4o_mtscore/i2v_r128_${CHECKPOINT}"
 mkdir -p "$OUTDIR"
 
 # Fixed parameters for all generations
@@ -39,27 +64,27 @@ SCALE=8
 NUM_FRAMES=81
 FPS=10
 
-# Loop through image numbers from 1 to 10
-for i in $(seq -f "%05g" 1 10); do
-  # Construct the image path using the pattern
-  IMAGE_PATH="${IMAGE_BASE_DIR}/LT0004_11-${i}_01.png"
+# Loop through each image-prompt pair
+for i in {0..9}; do
+  IMAGE_PATH="${IMAGE_PATHS[$i]}"
+  PROMPT="${PROMPTS[$i]}"
   
   # Get basename for the image
   BASENAME=$(basename "$IMAGE_PATH" .png)
   
   echo "=================================================="
-  echo "Generating video for image: $BASENAME"
+  echo "Processing image $((i+1))/10: $BASENAME"
   echo "Prompt: $PROMPT"
-  echo "Image:  $IMAGE_PATH"
+  echo "Using seed: $SEED"
   
   # Construct output filename
-  OUTPUT_PATH="${OUTDIR}/${BASENAME}_S${STEPS}_G${SCALE}_F${NUM_FRAMES}_FPS${FPS}.mp4"
+  OUTPUT_PATH="${OUTDIR}/${BASENAME}_seed${SEED}_S${STEPS}_G${SCALE}_F${NUM_FRAMES}_FPS${FPS}.mp4"
   
   echo "Output => ${OUTPUT_PATH}"
-  echo "--------------------------------------------------"
   
   python cli_demo.py \
     --prompt "$PROMPT" \
+    --seed "$SEED" \
     --model_path "$MODEL_PATH" \
     --lora_path "$LORA_PATH" \
     --image_or_video_path "$IMAGE_PATH" \
@@ -71,4 +96,4 @@ for i in $(seq -f "%05g" 1 10); do
     --output_path "$OUTPUT_PATH"
 done
 
-echo "All done! Created 25 videos in $OUTDIR" 
+echo "All done! Created 10 videos (10 images x 1 seed) in $OUTDIR" 

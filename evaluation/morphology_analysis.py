@@ -1,3 +1,4 @@
+#%%
 import os
 
 import matplotlib.pyplot as plt
@@ -83,12 +84,12 @@ def plot_temporal_morphology(temporal_stats, output_path):
     plt.close()
 
 
-def compute_emd_over_time(masks1, masks2):
+def compute_emd_over_time(real_masks, gen_masks):
     """Compare morphology distributions between two videos using Earth Mover's Distance.
 
     Args:
-        masks1 (np.ndarray): First sequence of binary masks
-        masks2 (np.ndarray): Second sequence of binary masks
+        real_masks (np.ndarray): First sequence of binary masks
+        gen_masks (np.ndarray): Second sequence of binary masks
 
     Returns:
         pd.DataFrame: DataFrame containing EMD values for each parameter over time
@@ -97,11 +98,11 @@ def compute_emd_over_time(masks1, masks2):
     emd_series = []
     parameters = ["area", "eccentricity", "solidity", "perimeter"]
 
-    n_frames = min(masks1.shape[0], masks2.shape[0])
+    n_frames = min(real_masks.shape[0], gen_masks.shape[0])
 
     for t in tqdm(range(n_frames), desc="Computing EMD"):
-        morph1 = get_nucleus_morphology(masks1[t])
-        morph2 = get_nucleus_morphology(masks2[t])
+        morph1 = get_nucleus_morphology(real_masks[t])
+        morph2 = get_nucleus_morphology(gen_masks[t])
 
         if not morph1 or not morph2:
             print(f"Warning: No nuclei detected in frame {t}")
@@ -142,40 +143,46 @@ def plot_emd_comparison(emd_df, output_path):
     plt.savefig(output_path)
     plt.close()
 
-
+#%%
 if __name__ == "__main__":
     preview_dir = os.path.join(os.path.dirname(__file__), "preview")
+    segmentation_dir = os.path.join(preview_dir, "segmentation")
+    analysis_dir = os.path.join(preview_dir, "morphology_analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+
+    real_masks_path = os.path.join(segmentation_dir, "masks_validation-real-600-1-<ALEXANDER>-Time-lapse-mi-23565_20250228_164150.npy")
+    gen_masks_path = os.path.join(segmentation_dir, "masks_validation-gen-600-1-<ALEXANDER>-Time-lapse-mi-23565_20250228_163511.npy")
 
     print("\nLoading mask sequences...")
-    masks1_path = os.path.join(preview_dir, "masks_00001_01_20250226_221211.npy")
-    masks1 = np.load(masks1_path)
-    masks2_path = os.path.join(preview_dir, "masks_LT0001_02-00223_01_noLORA_lowPROF_20250226_223239.npy")
-    masks2 = np.load(masks2_path)
-    print(f"Loaded masks with shapes: {masks1.shape} and {masks2.shape}")
+    real_masks = np.load(real_masks_path)
+    gen_masks = np.load(gen_masks_path)
+    print(f"Loaded masks with shapes: {real_masks.shape} and {gen_masks.shape}")
 
-    if masks1.shape[0] != masks2.shape[0]:
+    if real_masks.shape[0] != gen_masks.shape[0]:
         print("Warning: Mask sequences have different lengths, truncating to match")
-        min_length = min(masks1.shape[0], masks2.shape[0])
-        masks1 = masks1[:min_length]
-        masks2 = masks2[:min_length]
+        min_length = min(real_masks.shape[0], gen_masks.shape[0])
+        real_masks = real_masks[:min_length]
+        gen_masks = gen_masks[:min_length]
         print(f"Truncated masks to {min_length} frames")
 
     # Compute and plot EMD comparison
-    emd_df = compute_emd_over_time(masks1, masks2)
-    plot_emd_comparison(emd_df, os.path.join(preview_dir, "emd_comparison.png"))
+    emd_df = compute_emd_over_time(real_masks, gen_masks)
+    plot_emd_comparison(emd_df, os.path.join(analysis_dir, "emd_comparison.png"))
 
     # Static morphology analysis
-    morphology = get_nucleus_morphology(masks1[0])
-    plot_nucleus_morphology(morphology, os.path.join(preview_dir, "morphology_frame1_masks1.png"))
-    morphology = get_nucleus_morphology(masks2[0])
-    plot_nucleus_morphology(morphology, os.path.join(preview_dir, "morphology_frame1_masks2.png"))
+    morphology = get_nucleus_morphology(real_masks[0])
+    plot_nucleus_morphology(morphology, os.path.join(analysis_dir, "morphology_frame1_real_masks.png"))
+    morphology = get_nucleus_morphology(gen_masks[0])
+    plot_nucleus_morphology(morphology, os.path.join(analysis_dir, "morphology_frame1_gen_masks.png"))
 
     # Temporal morphology analysis
-    temporal_stats = compute_temporal_morphology(masks1)
+    temporal_stats = compute_temporal_morphology(real_masks)
     plot_temporal_morphology(
-        temporal_stats, os.path.join(preview_dir, "temporal_morphology_video1.png")
+        temporal_stats, os.path.join(analysis_dir, "temporal_morphology_real_video.png")
     )
-    temporal_stats = compute_temporal_morphology(masks2)
+    temporal_stats = compute_temporal_morphology(gen_masks)
     plot_temporal_morphology(
-        temporal_stats, os.path.join(preview_dir, "temporal_morphology_video2.png")
+        temporal_stats, os.path.join(analysis_dir, "temporal_morphology_generated_video.png")
     )
+
+# %%

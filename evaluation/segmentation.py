@@ -93,6 +93,8 @@ if __name__ == "__main__":
     # Example usage
     preview_dir = os.path.join(os.path.dirname(__file__), "preview")
     data_dir = os.path.join(preview_dir, "data")
+    segmentation_dir = os.path.join(preview_dir, "segmentation")
+    os.makedirs(segmentation_dir, exist_ok=True)
     samples = sorted(os.listdir(data_dir))
 
     sample_idx = 0
@@ -107,11 +109,11 @@ if __name__ == "__main__":
     enhanced_image = preprocess_video(frames)
 
     # Segment video
-    preview_path = os.path.join(preview_dir, f"segmented_{sample_name}_{timestamp}.png")
+    preview_path = os.path.join(segmentation_dir, f"segmented_{sample_name}_{timestamp}.png")
     masks = segment_video(enhanced_image, preview_path=preview_path)
 
     file_name = f"masks_{sample_name}_{timestamp}.npy"
-    save_path = os.path.join(preview_dir, file_name)
+    save_path = os.path.join(segmentation_dir, file_name)
     np.save(save_path, masks)
     print(f"Segmentation masks saved to {file_name}")
 
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     overlay_frames = create_video_overlay(
         enhanced_image, masks, color=(0, 0, 255), alpha=0.8,
     )
-    save_path = os.path.join(preview_dir, f"segmented_{sample_name}_{timestamp}.mp4")
+    save_path = os.path.join(segmentation_dir, f"segmented_{sample_name}_{timestamp}.mp4")
     save_video(overlay_frames, save_path, fps=15)
 
 

@@ -1,4 +1,4 @@
-#%%
+# %%
 import os
 from datetime import datetime
 
@@ -7,7 +7,12 @@ import torch
 from cellpose import models
 from tqdm import tqdm
 
-from video_utils import preprocess_video, create_overlay, save_overlay, create_video_overlay
+from video_utils import (
+    preprocess_video,
+    create_overlay,
+    save_overlay,
+    create_video_overlay,
+)
 
 
 def segment_video(
@@ -84,12 +89,12 @@ def segment_video(
     return masks
 
 
-#%%
+# %%
 if __name__ == "__main__":
     from video_utils import load_video, create_overlay, save_video
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+
     # Example usage
     preview_dir = os.path.join(os.path.dirname(__file__), "preview")
     data_dir = os.path.join(preview_dir, "data")
@@ -109,7 +114,9 @@ if __name__ == "__main__":
     enhanced_image = preprocess_video(frames)
 
     # Segment video
-    preview_path = os.path.join(segmentation_dir, f"segmented_{sample_name}_{timestamp}.png")
+    preview_path = os.path.join(
+        segmentation_dir, f"segmented_{sample_name}_{timestamp}.png"
+    )
     masks = segment_video(enhanced_image, preview_path=preview_path)
 
     file_name = f"masks_{sample_name}_{timestamp}.npy"
@@ -119,9 +126,14 @@ if __name__ == "__main__":
 
     # Create an overlay video
     overlay_frames = create_video_overlay(
-        enhanced_image, masks, color=(0, 0, 255), alpha=0.8,
+        enhanced_image,
+        masks,
+        color=(0, 0, 255),
+        alpha=0.8,
     )
-    save_path = os.path.join(segmentation_dir, f"segmented_{sample_name}_{timestamp}.mp4")
+    save_path = os.path.join(
+        segmentation_dir, f"segmented_{sample_name}_{timestamp}.mp4"
+    )
     save_video(overlay_frames, save_path, fps=15)
 
 

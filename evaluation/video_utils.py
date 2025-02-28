@@ -7,7 +7,7 @@ This module provides functions for:
 - Creating overlays with segmentation masks
 """
 
-#%%
+# %%
 import os
 from datetime import datetime
 from typing import Tuple
@@ -49,12 +49,13 @@ def load_video(video_path: str, preview_path: str = None) -> np.ndarray:
             cv2.imwrite(preview_path, frame)
             file_name = os.path.basename(preview_path)
             print(f"\nPreview saved to {file_name}")
-        
+
     cap.release()
     frames = np.stack(frames)
     print(f"Loaded {len(frames)} frames with shape {frames.shape}")
 
     return frames
+
 
 def remove_background(frames: np.ndarray) -> np.ndarray:
     """
@@ -157,7 +158,7 @@ def preprocess_video(
         Lower and upper percentiles for normalization, by default (1, 99)
     preview_path : str, optional
         Path to save the first frame comparison image, by default None
-    
+
     Returns
     -------
     np.ndarray
@@ -175,14 +176,14 @@ def preprocess_video(
     enhanced_frames = []
     for i, frame in enumerate(tqdm(frames, desc="Enhancing frames")):
         blurred = cv2.GaussianBlur(frame, (ksize, ksize), 0)
-        enhanced_frame = apply_clahe(blurred, clip_limit=clip_limit, tile_grid_size=tile_grid_size)
+        enhanced_frame = apply_clahe(
+            blurred, clip_limit=clip_limit, tile_grid_size=tile_grid_size
+        )
         scaled = soft_percentile_normalization(enhanced_frame, percentiles=percentiles)
         enhanced_frames.append(scaled)
 
         if preview_path is not None and i == 0:
-            comparison_image = np.hstack(
-                (frame, (scaled * 255).astype(np.uint8))
-            )
+            comparison_image = np.hstack((frame, (scaled * 255).astype(np.uint8)))
             cv2.imwrite(preview_path, comparison_image)
             file_name = os.path.basename(preview_path)
             print(f"\nPreview saved to {file_name}")
@@ -231,7 +232,7 @@ def create_overlay(
 
 
 def save_overlay(
-    frame: np.ndarray, 
+    frame: np.ndarray,
     mask: np.ndarray,
     overlay: np.ndarray,
     output_path: str,
@@ -250,36 +251,36 @@ def save_overlay(
         Path to save the preview image
     """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
+
     # Ensure frame is uint8 and in BGR format for display
     if frame.dtype != np.uint8:
         raise ValueError("Frame must be dtype uint8")
     frame_bgr = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-    
+
     # Create visualization of cellpose mask
     mask_viz = np.zeros_like(frame)
     if mask.max() > 0:  # Avoid division by zero
         mask_viz = ((mask > 0) * 255).astype(np.uint8)
     mask_viz_bgr = cv2.cvtColor(mask_viz, cv2.COLOR_GRAY2BGR)
-    
+
     # Stack images horizontally: [Original | Mask | Overlay]
     comparison = np.hstack([frame_bgr, mask_viz_bgr, overlay])
-    
+
     # Add labels
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 1
     thickness = 2
     color = (255, 255, 255)  # White text
-    
+
     h, w = frame.shape
-    labels = ['Original', 'Mask', 'Overlay']
+    labels = ["Original", "Mask", "Overlay"]
     for i, label in enumerate(labels):
         # Position text above each image in the comparison
         text_size = cv2.getTextSize(label, font, font_scale, thickness)[0]
-        x = (i * w + (w - text_size[0]) // 2)  # Center text
+        x = i * w + (w - text_size[0]) // 2  # Center text
         y = 30  # Y position from top
         cv2.putText(comparison, label, (x, y), font, font_scale, color, thickness)
-    
+
     # Save the comparison image
     cv2.imwrite(output_path, comparison)
 
@@ -319,7 +320,9 @@ def create_video_overlay(
     if frames.dtype != np.uint8:
         frames = (frames * 255).astype(np.uint8)
     overlay_frames = []
-    for i, (frame, mask) in enumerate(tqdm(zip(frames, masks), desc="Creating overlays", total=len(frames))):
+    for i, (frame, mask) in enumerate(
+        tqdm(zip(frames, masks), desc="Creating overlays", total=len(frames))
+    ):
         overlay = create_overlay(frame, mask, color, alpha)
         overlay_frames.append(overlay)
         if preview_path is not None and i == 0:
@@ -335,7 +338,7 @@ def create_video_overlay(
 def save_video(frames, output_path, fps=30) -> None:
     """
     Save a sequence of frames as a video file.
-    
+
     Parameters
     ----------
     frames : np.ndarray
@@ -354,20 +357,20 @@ def save_video(frames, output_path, fps=30) -> None:
 
     # Change to RGB format for imageio
     frames = frames[..., ::-1]
-    
+
     imageio.plugins.ffmpeg.get_exe()
     with imageio.get_writer(output_path, fps=fps) as writer:
         for frame in tqdm(frames, desc="Saving frames"):
             writer.append_data(frame)
-    
+
     file_name = os.path.basename(output_path)
     print(f"Video saved to: {file_name}")
 
 
-#%%
+# %%
 if __name__ == "__main__":
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+
     # Example usage
     preview_dir = os.path.join(os.path.dirname(__file__), "preview")
     data_dir = os.path.join(preview_dir, "data")
@@ -392,7 +395,18 @@ if __name__ == "__main__":
         clip_limit=2.0,
         tile_grid_size=8,
         percentiles=(1, 99),
-        preview_path=enhanced_preview_path
+        preview_path=enhanced_preview_path,
     )
+
+    # Make mean projection of the frames and save as preview
+    mean_projection = np.mean(enhanced_image, axis=0)
+    mean_projection = (mean_projection * 255).astype(np.uint8)
+    mean_preview_path = os.path.join(
+        preview_dir, f"mean_projection_{sample_name}_{timestamp}.png"
+    )
+    cv2.imwrite(mean_preview_path, mean_projection)
+    file_name = os.path.basename(mean_preview_path)
+    print(f"Mean projection saved to {file_name}")
+
 
 # %%

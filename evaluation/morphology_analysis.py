@@ -1,4 +1,4 @@
-#%%
+# %%
 import os
 
 import matplotlib.pyplot as plt
@@ -143,15 +143,22 @@ def plot_emd_comparison(emd_df, output_path):
     plt.savefig(output_path)
     plt.close()
 
-#%%
+
+# %%
 if __name__ == "__main__":
     preview_dir = os.path.join(os.path.dirname(__file__), "preview")
     segmentation_dir = os.path.join(preview_dir, "segmentation")
     analysis_dir = os.path.join(preview_dir, "morphology_analysis")
     os.makedirs(analysis_dir, exist_ok=True)
 
-    real_masks_path = os.path.join(segmentation_dir, "masks_validation-real-600-1-<ALEXANDER>-Time-lapse-mi-23565_20250228_164150.npy")
-    gen_masks_path = os.path.join(segmentation_dir, "masks_validation-gen-600-1-<ALEXANDER>-Time-lapse-mi-23565_20250228_163511.npy")
+    real_masks_path = os.path.join(
+        segmentation_dir,
+        "masks_validation-real-600-1-<ALEXANDER>-Time-lapse-mi-23565_20250228_164150.npy",
+    )
+    gen_masks_path = os.path.join(
+        segmentation_dir,
+        "masks_validation-gen-600-1-<ALEXANDER>-Time-lapse-mi-23565_20250228_163511.npy",
+    )
 
     print("\nLoading mask sequences...")
     real_masks = np.load(real_masks_path)
@@ -171,9 +178,13 @@ if __name__ == "__main__":
 
     # Static morphology analysis
     morphology = get_nucleus_morphology(real_masks[0])
-    plot_nucleus_morphology(morphology, os.path.join(analysis_dir, "morphology_frame1_real_masks.png"))
+    plot_nucleus_morphology(
+        morphology, os.path.join(analysis_dir, "morphology_frame1_real_masks.png")
+    )
     morphology = get_nucleus_morphology(gen_masks[0])
-    plot_nucleus_morphology(morphology, os.path.join(analysis_dir, "morphology_frame1_gen_masks.png"))
+    plot_nucleus_morphology(
+        morphology, os.path.join(analysis_dir, "morphology_frame1_gen_masks.png")
+    )
 
     # Temporal morphology analysis
     temporal_stats = compute_temporal_morphology(real_masks)
@@ -182,7 +193,8 @@ if __name__ == "__main__":
     )
     temporal_stats = compute_temporal_morphology(gen_masks)
     plot_temporal_morphology(
-        temporal_stats, os.path.join(analysis_dir, "temporal_morphology_generated_video.png")
+        temporal_stats,
+        os.path.join(analysis_dir, "temporal_morphology_generated_video.png"),
     )
 
 # %%

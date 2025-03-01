@@ -26,6 +26,7 @@ LOG_DIR="logs"                   # Where to store each run's log
 
 # List of directories to process
 DIRS=(
+  "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_150"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_250"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_500"
@@ -40,8 +41,6 @@ DIRS=(
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_375"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_750"
   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_900"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/real_videos_10"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
 )
 
 mkdir -p "${LOG_DIR}"

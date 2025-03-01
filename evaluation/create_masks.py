@@ -31,6 +31,16 @@ def convert_videos_to_masks(input_dir, output_dir, diameter=None, flow_threshold
 
     for i, video_name in enumerate(video_files, start=1):
         video_path = os.path.join(input_dir, video_name)
+        
+        # Check if mask already exists
+        base_name = os.path.splitext(video_name)[0]
+        mask_filename = f"{base_name}_masks.npy"
+        mask_path = os.path.join(output_dir, mask_filename)
+        
+        if os.path.exists(mask_path):
+            print(f"\n[{i}/{len(video_files)}] Skipping {video_name} - mask already exists at {mask_path}")
+            continue
+            
         print(f"\n[{i}/{len(video_files)}] Processing {video_name}")
         
         # 1) Load frames
@@ -50,10 +60,6 @@ def convert_videos_to_masks(input_dir, output_dir, diameter=None, flow_threshold
         )
         
         # 4) Save .npy
-        # e.g. "my_video_001.mp4" -> "my_video_001_masks.npy"
-        base_name = os.path.splitext(video_name)[0]
-        mask_filename = f"{base_name}_masks.npy"
-        mask_path = os.path.join(output_dir, mask_filename)
         np.save(mask_path, masks)
         print(f"Saved masks to {mask_path}")
 

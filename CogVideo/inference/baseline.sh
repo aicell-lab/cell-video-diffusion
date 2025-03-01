@@ -2,13 +2,9 @@
 #SBATCH -A berzelius-2025-23
 #SBATCH --gpus=1 -C "thin"
 #SBATCH -t 1-00:00:00
-#SBATCH -J i2v_gen_r64
+#SBATCH -J i2v_gen_baseline
 #SBATCH -o logs/%x_%j.out
 #SBATCH -e logs/%x_%j.err
-
-# Get checkpoint from command line argument
-CHECKPOINT=$1
-echo "Using checkpoint: $CHECKPOINT"
 
 module load Mambaforge/23.3.1-1-hpc1-bdist
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
@@ -17,7 +13,6 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 # MODEL & LORA
 # -------------------------------
 MODEL_PATH="../models/CogVideoX1.5-5B-I2V"
-LORA_PATH="../models/loras/IDR0013-10plates-i2v-r64-a32/checkpoint-${CHECKPOINT}"
 GENERATE_TYPE="i2v"
 
 # -------------------------------
@@ -35,16 +30,16 @@ IMAGE_PATHS=(
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_09-00073_01.png
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_09-00195_01.png
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00376_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00263_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00072_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00239_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_02-00122_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0003_02-00210_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00241_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_24-00314_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00111_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00053_01.png
-/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00086_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00263_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00072_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00239_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_02-00122_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0003_02-00210_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00241_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_24-00314_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00111_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00053_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00086_01.png
 )
 
 # Corresponding prompts for each image
@@ -75,7 +70,7 @@ PROMPTS=(
 SEED=9
 
 # Output folder
-OUTDIR="../../data/generated/test_generations_realval/i2v_r64_${CHECKPOINT}"
+OUTDIR="../../data/generated/test_generations_realval/i2v_baseline"
 mkdir -p "$OUTDIR"
 
 # Fixed parameters for all generations
@@ -85,7 +80,6 @@ NUM_FRAMES=81
 FPS=10
 
 # Loop through each image-prompt pair
-# Loop through each image-prompt pair
 for i in "${!IMAGE_PATHS[@]}"; do
   IMAGE_PATH="${IMAGE_PATHS[$i]}"
   PROMPT="${PROMPTS[$i]}"
@@ -94,7 +88,7 @@ for i in "${!IMAGE_PATHS[@]}"; do
   BASENAME=$(basename "$IMAGE_PATH" .png)
   
   echo "=================================================="
-  echo "Processing image $((i+1))/10: $BASENAME"
+  echo "Processing image $((i+1))/${#IMAGE_PATHS[@]}: $BASENAME"
   echo "Prompt: $PROMPT"
   echo "Using seed: $SEED"
   
@@ -107,7 +101,6 @@ for i in "${!IMAGE_PATHS[@]}"; do
     --prompt "$PROMPT" \
     --seed "$SEED" \
     --model_path "$MODEL_PATH" \
-    --lora_path "$LORA_PATH" \
     --image_or_video_path "$IMAGE_PATH" \
     --generate_type "$GENERATE_TYPE" \
     --num_inference_steps "$STEPS" \
@@ -117,4 +110,4 @@ for i in "${!IMAGE_PATHS[@]}"; do
     --output_path "$OUTPUT_PATH"
 done
 
-echo "All done! Created 10 videos (10 images x 1 seed) in $OUTDIR" 
+echo "All done! Created ${#IMAGE_PATHS[@]} videos (${#IMAGE_PATHS[@]} images x 1 seed) in $OUTDIR"

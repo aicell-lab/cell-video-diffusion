@@ -86,7 +86,7 @@ NUM_FRAMES=81
 FPS=10
 
 # Loop through each image-prompt pair
-for i in {0..9}; do
+for i in "${!IMAGE_PATHS[@]}"; do
   IMAGE_PATH="${IMAGE_PATHS[$i]}"
   PROMPT="${PROMPTS[$i]}"
   

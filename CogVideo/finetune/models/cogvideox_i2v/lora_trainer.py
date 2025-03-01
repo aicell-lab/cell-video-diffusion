@@ -99,62 +99,66 @@ class CogVideoXI2VLoraTrainer(Trainer):
     def compute_loss(self, batch) -> torch.Tensor:
         prompt_embedding = batch["prompt_embedding"]
         latent = batch["encoded_videos"]
-        images = batch["images"]
+        images = batch["images"] # conditioning images
 
-        # Shape of prompt_embedding: [B, seq_len, hidden_size]
-        # Shape of latent: [B, C, F, H, W]
-        # Shape of images: [B, C, H, W]
+        # Shape of prompt_embedding: [B, seq_len, hidden_size] = [2, 226, 4096]
+        # Shape of latent: [B, C, F, H, W] = [2, 16, 21, 96, 170]
+        # Shape of images: [B, C, H, W] = [2, 3, 768, 1360]
 
-        patch_size_t = self.state.transformer_config.patch_size_t
+        # pad the latent (prepend frames) so that the math works out
+        patch_size_t = self.state.transformer_config.patch_size_t # 2
         if patch_size_t is not None:
             ncopy = latent.shape[2] % patch_size_t
             # Copy the first frame ncopy times to match patch_size_t
             first_frame = latent[:, :, :1, :, :]  # Get first frame [B, C, 1, H, W]
-            latent = torch.cat([first_frame.repeat(1, 1, ncopy, 1, 1), latent], dim=2)
+            latent = torch.cat([first_frame.repeat(1, 1, ncopy, 1, 1), latent], dim=2) # [2, 16, 22, 96, 170]
             assert latent.shape[2] % patch_size_t == 0
 
         batch_size, num_channels, num_frames, height, width = latent.shape
 
-        # Get prompt embeddings
+        # Get prompt embeddings (this step is just ensuring consistency, shape is unchanged)
         _, seq_len, _ = prompt_embedding.shape
         prompt_embedding = prompt_embedding.view(batch_size, seq_len, -1).to(dtype=latent.dtype)
 
         # Add frame dimension to images [B,C,H,W] -> [B,C,F,H,W]
         images = images.unsqueeze(2)
-        # Add noise to images
+        # Add noise to images (referred to in appendix D in the paper)
         image_noise_sigma = torch.normal(mean=-3.0, std=0.5, size=(1,), device=self.accelerator.device)
-        image_noise_sigma = torch.exp(image_noise_sigma).to(dtype=images.dtype)
+        image_noise_sigma = torch.exp(image_noise_sigma).to(dtype=images.dtype) # convert from log space to linear space
         noisy_images = images + torch.randn_like(images) * image_noise_sigma[:, None, None, None, None]
-        image_latent_dist = self.components.vae.encode(noisy_images.to(dtype=self.components.vae.dtype)).latent_dist
-        image_latents = image_latent_dist.sample() * self.components.vae.config.scaling_factor
 
-        # Sample a random timestep for each sample
+        # encode the noisy images, go from [2, 3, 1, 768, 1360] to [2, 16, 1, 96, 170]
+        image_latent_dist = self.components.vae.encode(noisy_images.to(dtype=self.components.vae.dtype)).latent_dist
+        image_latents = image_latent_dist.sample() * self.components.vae.config.scaling_factor # [2, 16, 1, 96, 170]
+
+        # Sample a random timestep for each sample (between 0 and 1000)
         timesteps = torch.randint(
             0, self.components.scheduler.config.num_train_timesteps, (batch_size,), device=self.accelerator.device
         )
         timesteps = timesteps.long()
 
         # from [B, C, F, H, W] to [B, F, C, H, W]
-        latent = latent.permute(0, 2, 1, 3, 4)
-        image_latents = image_latents.permute(0, 2, 1, 3, 4)
+        latent = latent.permute(0, 2, 1, 3, 4) # [2, 22, 16, 96, 170]
+        image_latents = image_latents.permute(0, 2, 1, 3, 4) # [2, 1, 16, 96, 170]
         assert (latent.shape[0], *latent.shape[2:]) == (image_latents.shape[0], *image_latents.shape[2:])
 
         # Padding image_latents to the same frame number as latent
-        padding_shape = (latent.shape[0], latent.shape[1] - 1, *latent.shape[2:])
+        padding_shape = (latent.shape[0], latent.shape[1] - 1, *latent.shape[2:]) # [2, 21, 16, 96, 170]
         latent_padding = image_latents.new_zeros(padding_shape)
-        image_latents = torch.cat([image_latents, latent_padding], dim=1)
+        image_latents = torch.cat([image_latents, latent_padding], dim=1) # [2, 22, 16, 96, 170]
 
         # Add noise to latent
         noise = torch.randn_like(latent)
         latent_noisy = self.components.scheduler.add_noise(latent, noise, timesteps)
 
         # Concatenate latent and image_latents in the channel dimension
-        latent_img_noisy = torch.cat([latent_noisy, image_latents], dim=2)
+        latent_img_noisy = torch.cat([latent_noisy, image_latents], dim=2) # [2, 22, 32, 96, 170]
+
 
         # Prepare rotary embeds
         vae_scale_factor_spatial = 2 ** (len(self.components.vae.config.block_out_channels) - 1)
         transformer_config = self.state.transformer_config
-        rotary_emb = (
+        rotary_emb = ( # ([4880, 64], [4880, 64]) for sin/cos embeddings
             self.prepare_rotary_positional_embeddings(
                 height=height * vae_scale_factor_spatial,
                 width=width * vae_scale_factor_spatial,
@@ -166,12 +170,13 @@ class CogVideoXI2VLoraTrainer(Trainer):
             if transformer_config.use_rotary_positional_embeddings
             else None
         )
-
+        import pdb; pdb.set_trace()
         # Predict noise, For CogVideoX1.5 Only.
+        # a special feature in CogVideoX 1.5 that helps control the strength of motion/optical flow in the generated video
         ofs_emb = (
             None if self.state.transformer_config.ofs_embed_dim is None else latent.new_full((1,), fill_value=2.0)
         )
-        predicted_noise = self.components.transformer(
+        predicted_noise = self.components.transformer( # [2, 22, 16, 96, 170]
             hidden_states=latent_img_noisy,
             encoder_hidden_states=prompt_embedding,
             timestep=timesteps,
@@ -181,6 +186,7 @@ class CogVideoXI2VLoraTrainer(Trainer):
         )[0]
 
         # Denoise
+        # important: we use latent_noisy (which has C=16) here, not latent_img_noisy (which has C=32)!
         latent_pred = self.components.scheduler.get_velocity(predicted_noise, latent_noisy, timesteps)
 
         alphas_cumprod = self.components.scheduler.alphas_cumprod[timesteps]

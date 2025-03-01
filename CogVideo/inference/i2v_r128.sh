@@ -24,7 +24,7 @@ GENERATE_TYPE="i2v"
 # EVALUATION SETUP: 5 IMAGES, SINGLE SEED
 # -------------------------------
 # Array of image paths
-MAGE_PATHS=(
+IMAGE_PATHS=(
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00083_01.png
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00053_01.png
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00189_01.png

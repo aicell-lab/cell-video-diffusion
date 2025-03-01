@@ -4,11 +4,11 @@
 mkdir -p logs
 
 # Submit jobs for each model type and checkpoint
-echo "Submitting LoRA rank 64 jobs..."
-for CHECKPOINT in 150 250 500 750 900 ; do
-    sbatch i2v_r64.sh $CHECKPOINT
-    echo "Submitted job for rank 64, checkpoint $CHECKPOINT"
-done
+# echo "Submitting LoRA rank 64 jobs..."
+# for CHECKPOINT in 150 250 500 750 900 ; do
+#     sbatch i2v_r64.sh $CHECKPOINT
+#     echo "Submitted job for rank 64, checkpoint $CHECKPOINT"
+# done
 
 echo "Submitting LoRA rank 128 jobs..."
 for CHECKPOINT in 250 500 750 900; do

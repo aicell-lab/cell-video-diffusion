@@ -24,13 +24,28 @@ def copy_videos_to_val_dir():
         # Get the filename from the path
         filename = os.path.basename(video_path)
         
+        # Get the plate ID (parent directory name)
+        path_parts = Path(video_path).parts
+        plate_id = None
+        for part in path_parts:
+            if part.startswith("LT") and "_" in part:
+                plate_id = part
+                break
+        
+        if plate_id:
+            # Create new filename with plate ID prefix
+            new_filename = f"{plate_id}-{filename}"
+        else:
+            print(f"Warning: Could not find plate ID for {video_path}")
+            new_filename = filename
+        
         # Define the destination path
-        dest_path = os.path.join(destination_dir, filename)
+        dest_path = os.path.join(destination_dir, new_filename)
         
         # Copy the file
         try:
             shutil.copy2(video_path, dest_path)
-            print(f"[{i+1}/{len(video_paths)}] Copied: {filename}")
+            print(f"[{i+1}/{len(video_paths)}] Copied: {filename} → {new_filename}")
         except FileNotFoundError:
             print(f"[{i+1}/{len(video_paths)}] Error: File not found - {video_path}")
         except PermissionError:

@@ -479,7 +479,8 @@ class Trainer:
 
                 with accelerator.accumulate(models_to_accumulate):
                     # These weighting schemes use a uniform timestep sampling and instead post-weight the loss
-                    loss = self.compute_loss(batch)
+                    loss_dict = self.compute_loss(batch)
+                    loss = loss_dict["loss"]
                     accelerator.backward(loss)
 
                     if accelerator.sync_gradients:
@@ -509,6 +510,12 @@ class Trainer:
 
                 logs["loss"] = loss.detach().item()
                 logs["lr"] = self.lr_scheduler.get_last_lr()[0]
+
+                # Add component losses to logs
+                if "components" in loss_dict:
+                    for name, value in loss_dict["components"].items():
+                        logs[name] = value
+
                 progress_bar.set_postfix(logs)
 
                 # Maybe run validation

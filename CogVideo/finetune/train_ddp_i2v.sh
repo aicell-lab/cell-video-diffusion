@@ -2,7 +2,7 @@
 #SBATCH -A berzelius-2025-23    # Your project/account
 #SBATCH --gpus=2 -C "fat"        # Number of GPUs needed
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
-#SBATCH -J i2v_r128_no_noise         # Job name
+#SBATCH -J ffe_2_0               # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -14,6 +14,8 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 LORA_RANK=128
 LORA_ALPHA=64
 DATASET_NAME="IDR0013-10plates"
+LOSS_FUNCTION="ffe"
+FFE_WEIGHT=2
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -28,7 +30,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/${DATASET_NAME}-i2v-r${LORA_RANK}-a${LORA_ALPHA}-no_noise"
+    --output_dir "../models/loras/${DATASET_NAME}-${LOSS_FUNCTION}-${FIRST_FRAME_WEIGHT}"
     --report_to "wandb"
 )
 
@@ -51,6 +53,8 @@ TRAIN_ARGS=(
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
     --rank ${LORA_RANK}
     --lora_alpha ${LORA_ALPHA}
+    --loss_function ${LOSS_FUNCTION}
+    --ffe_weight ${FFE_WEIGHT}
 )
 
 # System Configuration
@@ -62,15 +66,15 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 50 # save checkpoint every x steps
-    --checkpointing_limit 20 # maximum number of checkpoints to keep, after which the oldest one is deleted
+    --checkpointing_steps 25 # save checkpoint every x steps
+    --checkpointing_limit 50 # maximum number of checkpoints to keep, after which the oldest one is deleted
     # --resume_from_checkpoint "../models/loras/${DATASET_NAME}-i2v-r${LORA_RANK}-a${LORA_ALPHA}/checkpoint-150"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "../../data/ready/${DATASET_NAME}-Val"
+    --validation_dir "../../data/ready/${DATASET_NAME}-Val2"
     --validation_steps 50  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_images "images.txt"

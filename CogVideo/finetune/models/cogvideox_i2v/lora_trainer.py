@@ -96,7 +96,7 @@ class CogVideoXI2VLoraTrainer(Trainer):
         return ret
 
     @override
-    def compute_loss(self, batch) -> torch.Tensor:
+    def compute_loss(self, batch) -> dict:
         prompt_embedding = batch["prompt_embedding"]
         latent = batch["encoded_videos"]
         images = batch["images"] # conditioning images
@@ -170,7 +170,6 @@ class CogVideoXI2VLoraTrainer(Trainer):
             if transformer_config.use_rotary_positional_embeddings
             else None
         )
-        import pdb; pdb.set_trace()
         # Predict noise, For CogVideoX1.5 Only.
         # a special feature in CogVideoX 1.5 that helps control the strength of motion/optical flow in the generated video
         ofs_emb = (
@@ -195,9 +194,30 @@ class CogVideoXI2VLoraTrainer(Trainer):
             weights = weights.unsqueeze(-1)
 
         loss = torch.mean((weights * (latent_pred - latent) ** 2).reshape(batch_size, -1), dim=1)
-        loss = loss.mean()
+        orig_loss = loss.mean()
 
-        return loss
+        if self.args.loss_function == "ffe":
+            return self.ffe_loss(orig_loss, latent_pred, latent)
+        
+        return {"loss": orig_loss, "components": {}}
+
+    def ffe_loss(self, orig_loss, latent_pred, latent):
+        first_frame_pred = latent_pred[:, 0]  # First predicted frame
+        first_frame_gt = latent[:, 0]         # First ground truth frame
+        
+        # Calculate MSE specifically for the first frame
+        ffe_loss = torch.mean((first_frame_pred - first_frame_gt) ** 2, dim=(1, 2, 3)).mean()
+        ffe_weight = self.args.ffe_weight
+        
+        total_loss = orig_loss + ffe_weight * ffe_loss
+        
+        return {
+            "loss": total_loss,
+            "components": {
+                "orig_loss": orig_loss.detach().item(),
+                "ffe_loss": ffe_loss.detach().item()
+            }
+        }
 
     @override
     def validation_step(

@@ -76,6 +76,10 @@ class Args(BaseModel):
     lora_alpha: int = 64
     target_modules: List[str] = ["to_q", "to_k", "to_v", "to_out.0"]
 
+    ########## Loss Function ##########
+    loss_function: Literal["default", "ffe"] = "default"
+    ffe_weight: float = 0.0
+
     ########## Validation ##########
     do_validation: bool = False
     validation_steps: int | None  # if set, should be a multiple of checkpointing_steps
@@ -199,6 +203,12 @@ class Args(BaseModel):
         parser.add_argument("--epsilon", type=float, default=1e-8)
         parser.add_argument("--weight_decay", type=float, default=1e-4)
         parser.add_argument("--max_grad_norm", type=float, default=1.0)
+        # Loss function options
+        parser.add_argument("--loss_function", type=str, default="default", 
+                            choices=["default", "ffe"], 
+                            help="Type of loss function to use")
+        parser.add_argument("--ffe_weight", type=float, default=0.0,
+                            help="Weight for the first frame emphasis loss (used with ffe)")
 
         # Learning rate scheduler
         parser.add_argument("--lr_scheduler", type=str, default="constant_with_warmup")

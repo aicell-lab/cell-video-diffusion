@@ -28,7 +28,7 @@ mkdir -p logs
 # done
 
 echo "Submitting full finetune jobs..."
-for CHECKPOINT in 250 500 750 900; do
+for CHECKPOINT in 500 750 900; do
     sbatch i2v_sft.sh $CHECKPOINT
     echo "Submitted job for SFT, checkpoint $CHECKPOINT"
 done

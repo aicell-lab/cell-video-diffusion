@@ -17,7 +17,7 @@ trap "echo 'Received SIGINT. Killing background jobs...'; kill 0" SIGINT
 # USER-DEFINED PATHS/PARAMS #
 ##############################
 
-SCRIPT_PATH="compute_morphology_distributions.py"
+SCRIPT_PATH="compute_morphology_distributions_delayed.py"
 OUTPUT_BASE_DIR="results"
 LOG_DIR="logs/morphology"
 

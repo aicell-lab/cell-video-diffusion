@@ -12,7 +12,7 @@ Amount of data:
 43G     data/raw/idr0115
 113G    data/raw/20180215 - REMOVED
 284G    data/raw/idr0067-king-yeastmeiosis - REMOVED
-302G    data/raw/idr0040-aymoz-singlecell
+302G    data/raw/idr0040-aymoz-singlecell - REMOVED
 326G    data/raw/S-BIAD725
 462G    data/raw/mitotic_cell_atlas_v1.0.1_fulldata
 4.3T    data/raw/idr0013-neumann-mitocheck

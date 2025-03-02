@@ -2,7 +2,7 @@
 #SBATCH -A berzelius-2025-23    # Your project/account
 #SBATCH --gpus=2 -C "fat"        # Number of GPUs needed
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
-#SBATCH -J ffe_2_0               # Job name
+#SBATCH -J i2v_r128                   # Job name (mfe_numframes_weight_decay)
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -14,8 +14,6 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 LORA_RANK=128
 LORA_ALPHA=64
 DATASET_NAME="IDR0013-10plates"
-LOSS_FUNCTION="ffe"
-FFE_WEIGHT=2
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -30,7 +28,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/${DATASET_NAME}-${LOSS_FUNCTION}-${FIRST_FRAME_WEIGHT}"
+    --output_dir "../models/loras/${DATASET_NAME}-${LOSS_FUNCTION}-${MFE_NUM_FRAMES}-${MFE_WEIGHT}-${MFE_DECAY}"
     --report_to "wandb"
 )
 
@@ -53,8 +51,6 @@ TRAIN_ARGS=(
     --mixed_precision "bf16"  # ["no", "fp16"] # Only CogVideoX-2B supports fp16 training
     --rank ${LORA_RANK}
     --lora_alpha ${LORA_ALPHA}
-    --loss_function ${LOSS_FUNCTION}
-    --ffe_weight ${FFE_WEIGHT}
 )
 
 # System Configuration
@@ -90,4 +86,4 @@ accelerate launch --main_process_port=29501 train.py \
     "${TRAIN_ARGS[@]}" \
     "${SYSTEM_ARGS[@]}" \
     "${CHECKPOINT_ARGS[@]}" \
-    "${VALIDATION_ARGS[@]}"
+    "${VALIDATION_ARGS[@]}" 

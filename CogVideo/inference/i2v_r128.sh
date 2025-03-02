@@ -2,7 +2,7 @@
 #SBATCH -A berzelius-2025-23
 #SBATCH --gpus=1 -C "thin"
 #SBATCH -t 1-00:00:00
-#SBATCH -J i2v_gen_r128
+#SBATCH -J i2v_gen_r128_mfe
 #SBATCH -o logs/%x_%j.out
 #SBATCH -e logs/%x_%j.err
 
@@ -17,8 +17,11 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 # MODEL & LORA
 # -------------------------------
 MODEL_PATH="../models/CogVideoX1.5-5B-I2V"
-LORA_PATH="../models/loras/IDR0013-10plates-i2v-r128-a64/checkpoint-${CHECKPOINT}"
 GENERATE_TYPE="i2v"
+REG_FRAMES=3
+MFE_WEIGHT=5.0
+MFE_DECAY=0.5
+LORA_PATH="../models/loras/IDR0013-10plates-mfe-${REG_FRAMES}-${MFE_WEIGHT}-${MFE_DECAY}/checkpoint-${CHECKPOINT}"
 
 # -------------------------------
 # EVALUATION SETUP: 5 IMAGES, SINGLE SEED
@@ -75,7 +78,7 @@ PROMPTS=(
 SEED=9
 
 # Output folder
-OUTDIR="../../data/generated/test_generations_realval/i2v_r128_${CHECKPOINT}"
+OUTDIR="../../data/generated/test_generations_realval/mfe_${REG_FRAMES}_${CHECKPOINT}"
 mkdir -p "$OUTDIR"
 
 # Fixed parameters for all generations

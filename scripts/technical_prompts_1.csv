@@ -1,0 +1,796 @@
+Gene Symbol,technical_prompt
+ABCA1,HeLa cells with ABCA1 knockdown showing low migration (distance)
+ABCA10,HeLa cells with ABCA10 knockdown showing low migration (distance)
+ABCA12,HeLa cells with ABCA12 knockdown showing high migration (distance) and migration (speed)
+ABCA13,HeLa cells with ABCA13 knockdown showing high migration (distance) and migration (speed)
+ABCA2,HeLa cells with ABCA2 knockdown showing high migration (distance) and increased proliferation
+ABCA3,HeLa cells with ABCA3 knockdown showing high migration (distance) and increased proliferation
+ABCA4,HeLa cells with ABCA4 knockdown showing high migration (distance) and migration (speed)
+ABCA5,HeLa cells with ABCA5 knockdown showing low migration (distance)
+ABCA6,HeLa cells with ABCA6 knockdown showing high migration (distance) and migration (speed)
+ABCA7,
+ABCA8,HeLa cells with ABCA8 knockdown showing high migration (distance)
+ABCA9,HeLa cells with ABCA9 knockdown showing high migration (distance) and migration (speed)
+ABCB1,HeLa cells with ABCB1 knockdown showing high migration (distance)
+ABCB10,HeLa cells with ABCB10 knockdown showing high migration (distance)
+ABCB11,HeLa cells with ABCB11 knockdown showing high migration (distance) and migration (speed)
+ABCB4,HeLa cells with ABCB4 knockdown showing high migration (distance) and migration (speed)
+ABCB5,HeLa cells with ABCB5 knockdown showing high migration (distance) and migration (speed)
+ABCB6,HeLa cells with ABCB6 knockdown showing high migration (distance)
+ABCB7,HeLa cells with ABCB7 knockdown showing high migration (distance)
+ABCB8,HeLa cells with ABCB8 knockdown showing high migration (distance)
+ABCB9,HeLa cells with ABCB9 knockdown showing low migration (distance)
+ABCC1,HeLa cells with ABCC1 knockdown showing low migration (distance)
+ABCC10,HeLa cells with ABCC10 knockdown showing high migration (distance)
+ABCC11,HeLa cells with ABCC11 knockdown showing high migration (distance)
+ABCC12,HeLa cells with ABCC12 knockdown showing high migration (distance)
+ABCC13,
+ABCC2,HeLa cells with ABCC2 knockdown showing low migration (distance)
+ABCC3,HeLa cells with ABCC3 knockdown showing high migration (distance) and migration (speed)
+ABCC4,HeLa cells with ABCC4 knockdown showing high migration (distance)
+ABCC5,HeLa cells with ABCC5 knockdown showing high migration (distance) and migration (speed)
+ABCC6,HeLa cells with ABCC6 knockdown showing high migration (distance)
+ABCC8,HeLa cells with ABCC8 knockdown showing low migration (distance)
+ABCC9,HeLa cells with ABCC9 knockdown showing high migration (distance) and migration (speed)
+ABCD1,HeLa cells with ABCD1 knockdown showing high migration (distance) and migration (speed)
+ABCD2,HeLa cells with ABCD2 knockdown showing high migration (distance)
+ABCD3,HeLa cells with ABCD3 knockdown showing high migration (distance) and migration (speed)
+ABCD4,HeLa cells with ABCD4 knockdown showing high migration (distance) and migration (speed)
+ABCE1,HeLa cells with ABCE1 knockdown showing low migration (distance)
+ABCF1,"HeLa cells with ABCF1 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+ABCF2,
+ABCF3,HeLa cells with ABCF3 knockdown showing high migration (distance)
+ABCG1,HeLa cells with ABCG1 knockdown showing high migration (distance)
+ABCG2,HeLa cells with ABCG2 knockdown showing high migration (distance) and migration (speed)
+ABCG4,HeLa cells with ABCG4 knockdown showing high migration (distance) and migration (speed)
+ABCG5,
+ABCG8,HeLa cells with ABCG8 knockdown showing high migration (distance)
+ACP1,HeLa cells with ACP1 knockdown showing high migration (distance)
+ACP2,HeLa cells with ACP2 knockdown showing low migration (distance)
+ACP5,HeLa cells with ACP5 knockdown showing high migration (distance) and migration (speed)
+ACP6,HeLa cells with ACP6 knockdown showing high migration (distance)
+ACPP,
+ACPT,HeLa cells with ACPT knockdown showing high migration (distance)
+ACR,HeLa cells with ACR knockdown showing high migration (distance) and migration (speed)
+ACTL6A,HeLa cells with ACTL6A knockdown showing high migration (distance)
+ACYP2,HeLa cells with ACYP2 knockdown showing high migration (distance)
+ADCK1,HeLa cells with ADCK1 knockdown showing high migration (distance) and migration (speed)
+ALDH16A1,HeLa cells with ALDH16A1 knockdown showing high migration (distance)
+ALKBH1,HeLa cells with ALKBH1 knockdown showing low migration (distance)
+ALOX12B,
+ALOX15,HeLa cells with ALOX15 knockdown showing high migration (distance) and migration (speed)
+ALOX5AP,HeLa cells with ALOX5AP knockdown showing high migration (distance)
+ALPI,
+ALPL,HeLa cells with ALPL knockdown showing high migration (distance)
+ALPPL2,HeLa cells with ALPPL2 knockdown showing high migration (distance)
+ANK2,HeLa cells with ANK2 knockdown showing high migration (distance)
+APEH,HeLa cells with APEH knockdown showing high migration (distance)
+AQP7,HeLa cells with AQP7 knockdown showing low migration (distance)
+ASNA1,HeLa cells with ASNA1 knockdown showing low migration (distance)
+ATP10A,
+ATP10D,HeLa cells with ATP10D knockdown showing high migration (distance)
+ATP11A,HeLa cells with ATP11A knockdown showing high migration (distance) and migration (speed)
+ATP11B,HeLa cells with ATP11B knockdown showing low migration (distance)
+ATP8A1,HeLa cells with ATP8A1 knockdown showing high migration (distance)
+ATP8A2,HeLa cells with ATP8A2 knockdown showing high migration (distance) and increased proliferation
+ATP8B1,HeLa cells with ATP8B1 knockdown showing high migration (distance)
+ATP8B2,HeLa cells with ATP8B2 knockdown showing high migration (distance)
+ATP8B3,
+ATP9A,HeLa cells with ATP9A knockdown showing high migration (distance)
+AUH,HeLa cells with AUH knockdown showing high migration (distance)
+BACE1,HeLa cells with BACE1 knockdown showing low migration (distance)
+BACE2,HeLa cells with BACE2 knockdown showing high migration (distance)
+BANK1,HeLa cells with BANK1 knockdown showing high migration (distance) and migration (speed)
+BLMH,HeLa cells with BLMH knockdown showing low migration (distance)
+C13orf23,HeLa cells with C13orf23 knockdown showing high migration (distance)
+C15orf27,HeLa cells with C15orf27 knockdown showing high migration (distance) and migration (speed)
+C1QTNF3,HeLa cells with C1QTNF3 knockdown showing high migration (distance)
+C1RL,HeLa cells with C1RL knockdown showing low migration (distance)
+C1S,HeLa cells with C1S knockdown showing low migration (distance)
+C2,HeLa cells with C2 knockdown showing high migration (distance)
+C20orf79,
+C6orf85,HeLa cells with C6orf85 knockdown showing low migration (distance)
+CANT1,HeLa cells with CANT1 knockdown showing high migration (distance)
+CBR4,HeLa cells with CBR4 knockdown showing high migration (distance)
+CDC14A,
+CDC14C,HeLa cells with CDC14C knockdown showing high migration (distance) and migration (speed)
+CDKN3,HeLa cells with CDKN3 knockdown showing high migration (distance)
+CDYL,HeLa cells with CDYL knockdown showing high migration (distance)
+CDYL2,HeLa cells with CDYL2 knockdown showing high migration (distance)
+CFB,HeLa cells with CFB knockdown showing low migration (distance)
+CFD,HeLa cells with CFD knockdown showing low migration (distance)
+CFI,HeLa cells with CFI knockdown showing high migration (distance) and migration (speed)
+CLNS1A,"HeLa cells with CLNS1A knockdown showing high migration (distance), migration (speed) and increased proliferation"
+CLPP,HeLa cells with CLPP knockdown showing high migration (distance) and migration (speed)
+CLPX,HeLa cells with CLPX knockdown showing low migration (distance)
+CPVL,HeLa cells with CPVL knockdown showing high migration (distance) and migration (speed)
+CRYZ,HeLa cells with CRYZ knockdown showing high migration (distance) and migration (speed)
+CRYZL1,HeLa cells with CRYZL1 knockdown showing high migration (speed)
+CTDP1,HeLa cells with CTDP1 knockdown showing high migration (distance)
+CTRC,HeLa cells with CTRC knockdown showing low migration (distance)
+CTRL,HeLa cells with CTRL knockdown showing high migration (distance) and migration (speed)
+CTSA,HeLa cells with CTSA knockdown showing high migration (distance)
+CTSD,HeLa cells with CTSD knockdown showing high migration (distance)
+CTSE,HeLa cells with CTSE knockdown showing high migration (distance) and migration (speed)
+CTSG,HeLa cells with CTSG knockdown showing high migration (speed) and low migration (distance)
+CTSK,HeLa cells with CTSK knockdown showing high migration (distance) and low increased proliferation
+CTSS,
+CTSZ,HeLa cells with CTSZ knockdown showing high migration (distance)
+CYP11A1,HeLa cells with CYP11A1 knockdown showing high migration (distance)
+CYP11B1,HeLa cells with CYP11B1 knockdown showing high migration (distance)
+CYP11B2,HeLa cells with CYP11B2 knockdown showing high migration (distance) and migration (speed)
+CYP17A1,HeLa cells with CYP17A1 knockdown showing high migration (distance)
+CYP19A1,HeLa cells with CYP19A1 knockdown showing high migration (distance) and migration (speed)
+CYP1A1,HeLa cells with CYP1A1 knockdown showing high migration (distance)
+CYP1A2,HeLa cells with CYP1A2 knockdown showing high migration (distance)
+CYP1B1,HeLa cells with CYP1B1 knockdown showing low migration (distance)
+CYP20A1,
+CYP21A2,HeLa cells with CYP21A2 knockdown showing high migration (distance)
+CYP24A1,HeLa cells with CYP24A1 knockdown showing high migration (distance)
+CYP26A1,
+CYP26B1,HeLa cells with CYP26B1 knockdown showing high migration (distance)
+CYP27A1,HeLa cells with CYP27A1 knockdown showing high migration (distance) and migration (speed)
+CYP27B1,HeLa cells with CYP27B1 knockdown showing high migration (distance)
+CYP2A13,HeLa cells with CYP2A13 knockdown showing high increased proliferation and low migration (distance)
+CYP2A7,HeLa cells with CYP2A7 knockdown showing low migration (distance)
+CYP2B6,HeLa cells with CYP2B6 knockdown showing high migration (distance)
+CYP2C18,HeLa cells with CYP2C18 knockdown showing high migration (distance)
+CYP2C8,HeLa cells with CYP2C8 knockdown showing high migration (distance)
+CYP2C9,HeLa cells with CYP2C9 knockdown showing high migration (distance)
+CYP2E1,HeLa cells with CYP2E1 knockdown showing high migration (distance)
+CYP2F1,
+CYP2J2,
+CYP2S1,HeLa cells with CYP2S1 knockdown showing high migration (distance)
+CYP39A1,HeLa cells with CYP39A1 knockdown showing high migration (distance)
+CYP3A4,HeLa cells with CYP3A4 knockdown showing high migration (distance)
+CYP3A43,HeLa cells with CYP3A43 knockdown showing high migration (distance)
+CYP3A5,HeLa cells with CYP3A5 knockdown showing high migration (distance)
+CYP4F12,HeLa cells with CYP4F12 knockdown showing high migration (distance)
+CYP4F8,HeLa cells with CYP4F8 knockdown showing high migration (distance)
+CYP4X1,HeLa cells with CYP4X1 knockdown showing high migration (distance)
+CYP4Z1,HeLa cells with CYP4Z1 knockdown showing high migration (distance)
+CYP51A1,HeLa cells with CYP51A1 knockdown showing high migration (distance)
+CYP7A1,HeLa cells with CYP7A1 knockdown showing high migration (distance) and increased proliferation
+CYP7B1,HeLa cells with CYP7B1 knockdown showing high migration (distance)
+CYP8B1,HeLa cells with CYP8B1 knockdown showing high migration (distance)
+DCXR,HeLa cells with DCXR knockdown showing low migration (distance)
+DECR1,HeLa cells with DECR1 knockdown showing high migration (distance)
+DECR2,HeLa cells with DECR2 knockdown showing high migration (distance)
+DHRS7B,HeLa cells with DHRS7B knockdown showing high migration (distance)
+DPP10,
+DPP3,
+DPP4,HeLa cells with DPP4 knockdown showing high migration (distance)
+DPP6,
+DPP7,HeLa cells with DPP7 knockdown showing high migration (distance)
+DPP8,HeLa cells with DPP8 knockdown showing low migration (distance)
+DPP9,HeLa cells with DPP9 knockdown showing high migration (speed) and low migration (distance)
+DUSP1,
+DUSP10,HeLa cells with DUSP10 knockdown showing low migration (distance)
+DUSP11,HeLa cells with DUSP11 knockdown showing high migration (distance)
+DUSP12,HeLa cells with DUSP12 knockdown showing high migration (distance) and increased proliferation
+DUSP13,HeLa cells with DUSP13 knockdown showing high migration (distance)
+DUSP14,HeLa cells with DUSP14 knockdown showing high migration (distance)
+DUSP15,
+DUSP18,HeLa cells with DUSP18 knockdown showing high migration (distance)
+DUSP19,HeLa cells with DUSP19 knockdown showing low migration (distance)
+DUSP2,HeLa cells with DUSP2 knockdown showing low migration (distance)
+DUSP21,HeLa cells with DUSP21 knockdown showing high migration (distance)
+DUSP22,HeLa cells with DUSP22 knockdown showing high migration (distance)
+DUSP23,HeLa cells with DUSP23 knockdown showing high migration (distance)
+DUSP26,HeLa cells with DUSP26 knockdown showing high migration (distance) and migration (speed)
+DUSP3,HeLa cells with DUSP3 knockdown showing high migration (distance)
+DUSP4,HeLa cells with DUSP4 knockdown showing high migration (distance)
+DUSP5,
+DUSP6,HeLa cells with DUSP6 knockdown showing high migration (distance)
+DUSP7,"HeLa cells with DUSP7 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+DUSP8,HeLa cells with DUSP8 knockdown showing low migration (distance) and increased proliferation
+DUSP9,HeLa cells with DUSP9 knockdown showing high migration (distance) and migration (speed)
+DUT,"HeLa cells with DUT knockdown showing high migration (distance), increased proliferation and migration (speed)"
+ECH1,HeLa cells with ECH1 knockdown showing high migration (distance)
+ECHDC2,HeLa cells with ECHDC2 knockdown showing high migration (distance)
+ECHS1,HeLa cells with ECHS1 knockdown showing high migration (distance)
+ELA1,HeLa cells with ELA1 knockdown showing low migration (distance)
+ELA2,HeLa cells with ELA2 knockdown showing high migration (distance)
+ELA2A_HUMAN,HeLa cells with ELA2A_HUMAN knockdown showing high migration (distance)
+ELA2B_HUMAN,"HeLa cells with ELA2B_HUMAN knockdown showing high migration (distance), migration (speed) and increased proliferation"
+ENPP1,HeLa cells with ENPP1 knockdown showing high migration (distance)
+ENPP2,HeLa cells with ENPP2 knockdown showing high migration (distance)
+ENPP3,HeLa cells with ENPP3 knockdown showing high migration (distance)
+ENPP5,HeLa cells with ENPP5 knockdown showing high migration (distance)
+EPM2A,HeLa cells with EPM2A knockdown showing high migration (distance)
+F10,HeLa cells with F10 knockdown showing low migration (distance)
+F11,HeLa cells with F11 knockdown showing low migration (distance)
+F12,
+F7,
+F9,
+FANCA,HeLa cells with FANCA knockdown showing high migration (distance)
+FAP,HeLa cells with FAP knockdown showing high migration (distance) and migration (speed)
+FASN,HeLa cells with FASN knockdown showing high migration (distance)
+FBP1,HeLa cells with FBP1 knockdown showing high migration (distance)
+FBP2,HeLa cells with FBP2 knockdown showing high migration (distance)
+FCGRT,HeLa cells with FCGRT knockdown showing high migration (distance)
+FGL2,
+FMO9P,HeLa cells with FMO9P knockdown showing high migration (distance) and migration (speed)
+FOLR1,HeLa cells with FOLR1 knockdown showing low migration (distance)
+FOLR3,HeLa cells with FOLR3 knockdown showing high migration (distance)
+FURIN,HeLa cells with FURIN knockdown showing high migration (distance) and migration (speed)
+FVT1,HeLa cells with FVT1 knockdown showing high migration (distance)
+G6PC,HeLa cells with G6PC knockdown showing high migration (distance) and migration (speed)
+G6PC2,HeLa cells with G6PC2 knockdown showing high migration (distance)
+G6PC3,HeLa cells with G6PC3 knockdown showing high migration (distance)
+GGH,HeLa cells with GGH knockdown showing high migration (distance)
+GGTL3,HeLa cells with GGTL3 knockdown showing high migration (distance)
+GGTL4,HeLa cells with GGTL4 knockdown showing high migration (distance)
+GGTLA1,HeLa cells with GGTLA1 knockdown showing high migration (distance)
+GMIP,HeLa cells with GMIP knockdown showing low migration (distance)
+GMPR,HeLa cells with GMPR knockdown showing high migration (distance)
+GMPR2,HeLa cells with GMPR2 knockdown showing low migration (distance)
+GPD1L,HeLa cells with GPD1L knockdown showing high migration (distance) and migration (speed)
+GRHPR,
+GZMA,HeLa cells with GZMA knockdown showing high migration (distance) and migration (speed)
+GZMB,HeLa cells with GZMB knockdown showing low migration (distance)
+GZMH,HeLa cells with GZMH knockdown showing low migration (distance)
+GZMK,
+GZMM,HeLa cells with GZMM knockdown showing low migration (distance)
+HABP2,HeLa cells with HABP2 knockdown showing high migration (distance) and migration (speed)
+HAO1,HeLa cells with HAO1 knockdown showing high migration (distance) and migration (speed)
+HAO2,HeLa cells with HAO2 knockdown showing high migration (distance) and increased proliferation
+HGF,HeLa cells with HGF knockdown showing high migration (distance) and migration (speed)
+HGFAC,HeLa cells with HGFAC knockdown showing low migration (distance)
+HIBCH,HeLa cells with HIBCH knockdown showing high migration (distance)
+HMCN1,HeLa cells with HMCN1 knockdown showing high migration (distance)
+HMOX1,
+HP,HeLa cells with HP knockdown showing high migration (distance) and migration (speed)
+HPDL,HeLa cells with HPDL knockdown showing low migration (distance)
+HPN,HeLa cells with HPN knockdown showing high migration (distance) and migration (speed)
+HS3ST1,HeLa cells with HS3ST1 knockdown showing low migration (distance)
+HS3ST2,HeLa cells with HS3ST2 knockdown showing low migration (distance)
+HS3ST3A1,HeLa cells with HS3ST3A1 knockdown showing high migration (distance)
+HS3ST3B1,
+HS3ST5,HeLa cells with HS3ST5 knockdown showing low migration (distance)
+HSD17B6,HeLa cells with HSD17B6 knockdown showing high migration (distance)
+HSD17B7P2,HeLa cells with HSD17B7P2 knockdown showing high migration (distance) and migration (speed)
+HSDL2,HeLa cells with HSDL2 knockdown showing high migration (distance) and increased proliferation
+HTRA1,HeLa cells with HTRA1 knockdown showing high migration (distance)
+HTRA2,HeLa cells with HTRA2 knockdown showing high migration (distance)
+HTRA3,HeLa cells with HTRA3 knockdown showing high migration (distance) and migration (speed)
+HTRA4,HeLa cells with HTRA4 knockdown showing high migration (distance)
+ILKAP,HeLa cells with ILKAP knockdown showing high migration (distance) and migration (speed)
+IMMP1L,HeLa cells with IMMP1L knockdown showing high migration (distance)
+IMMP2L,HeLa cells with IMMP2L knockdown showing low migration (distance)
+IMPA1,HeLa cells with IMPA1 knockdown showing high migration (distance)
+IMPA2,HeLa cells with IMPA2 knockdown showing high migration (distance)
+INCENP,HeLa cells with INCENP knockdown showing high migration (distance) and migration (speed)
+INDOL1,HeLa cells with INDOL1 knockdown showing low migration (distance)
+INPP1,
+INPP4B,HeLa cells with INPP4B knockdown showing high migration (distance) and migration (speed)
+INPP5A,HeLa cells with INPP5A knockdown showing high migration (distance) and migration (speed)
+INPP5D,HeLa cells with INPP5D knockdown showing high migration (distance) and increased proliferation
+INPP5E,HeLa cells with INPP5E knockdown showing high migration (distance)
+INPP5F,HeLa cells with INPP5F knockdown showing high migration (distance)
+INPPL1,
+IPO4,HeLa cells with IPO4 knockdown showing high migration (distance)
+ITGB3,HeLa cells with ITGB3 knockdown showing high migration (distance)
+ITPA,
+K1576_HUMAN,HeLa cells with K1576_HUMAN knockdown showing high migration (distance) and migration (speed)
+KIF11,HeLa cells with KIF11 knockdown showing low migration (distance) and increased proliferation
+KLK1,"HeLa cells with KLK1 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+KLK10,HeLa cells with KLK10 knockdown showing low migration (distance)
+KLK11,HeLa cells with KLK11 knockdown showing high migration (distance)
+KLK12,HeLa cells with KLK12 knockdown showing high migration (distance)
+KLK13,HeLa cells with KLK13 knockdown showing high migration (distance)
+KLK14,HeLa cells with KLK14 knockdown showing low migration (distance)
+KLK15,HeLa cells with KLK15 knockdown showing low migration (distance)
+KLK2,HeLa cells with KLK2 knockdown showing high migration (distance) and migration (speed)
+KLK4,HeLa cells with KLK4 knockdown showing high migration (distance) and migration (speed)
+KLK5,HeLa cells with KLK5 knockdown showing high migration (distance) and migration (speed)
+KLK6,HeLa cells with KLK6 knockdown showing high migration (distance) and migration (speed)
+KLK7,HeLa cells with KLK7 knockdown showing high migration (distance)
+KLK9,HeLa cells with KLK9 knockdown showing high migration (speed)
+KLKB1,HeLa cells with KLKB1 knockdown showing low migration (distance)
+KREMEN1,HeLa cells with KREMEN1 knockdown showing high migration (distance)
+KREMEN2,HeLa cells with KREMEN2 knockdown showing high migration (distance) and migration (speed)
+LGMN,
+LMTK2,HeLa cells with LMTK2 knockdown showing high migration (distance) and increased proliferation
+LONP1,HeLa cells with LONP1 knockdown showing high migration (distance)
+LONP2,
+LPA,HeLa cells with LPA knockdown showing high migration (distance) and migration (speed)
+LYPLA1,HeLa cells with LYPLA1 knockdown showing high migration (distance) and low increased proliferation
+LYPLA2P1,
+LYPLA3,
+LYPLAL1,HeLa cells with LYPLAL1 knockdown showing low migration (distance)
+MASP1,HeLa cells with MASP1 knockdown showing low migration (distance)
+MASP2,"HeLa cells with MASP2 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+MBTPS1,HeLa cells with MBTPS1 knockdown showing high migration (distance) and increased proliferation
+ME1,HeLa cells with ME1 knockdown showing high migration (distance)
+ME2,HeLa cells with ME2 knockdown showing high migration (distance)
+ME3,HeLa cells with ME3 knockdown showing high migration (distance)
+MED20,HeLa cells with MED20 knockdown showing high migration (distance) and migration (speed)
+MINPP1,HeLa cells with MINPP1 knockdown showing high migration (distance)
+MITD1,
+MTM1,HeLa cells with MTM1 knockdown showing high migration (distance) and migration (speed)
+MTMR1,HeLa cells with MTMR1 knockdown showing high migration (distance) and migration (speed)
+MTMR2,HeLa cells with MTMR2 knockdown showing high migration (distance)
+MTMR4,HeLa cells with MTMR4 knockdown showing high migration (distance) and migration (speed)
+MTMR6,HeLa cells with MTMR6 knockdown showing high migration (distance)
+MTMR7,HeLa cells with MTMR7 knockdown showing high migration (distance) and migration (speed)
+MTMR8,HeLa cells with MTMR8 knockdown showing high migration (distance)
+NAALAD2,
+NAALADL1,HeLa cells with NAALADL1 knockdown showing high migration (distance)
+NAPSA,HeLa cells with NAPSA knockdown showing high migration (distance) and migration (speed)
+NDST1,HeLa cells with NDST1 knockdown showing low increased proliferation
+NDST2,HeLa cells with NDST2 knockdown showing high migration (distance)
+NDST3,HeLa cells with NDST3 knockdown showing low migration (distance)
+NLRP11,
+NPHP3,HeLa cells with NPHP3 knockdown showing high migration (distance)
+NP_057218.1,HeLa cells with NP_057218.1 knockdown showing low migration (distance) and increased proliferation
+NP_071409.2,HeLa cells with NP_071409.2 knockdown showing high migration (distance)
+NP_073574.1,HeLa cells with NP_073574.1 knockdown showing high migration (distance)
+NP_077284.1,HeLa cells with NP_077284.1 knockdown showing high migration (distance)
+NP_115958.2,HeLa cells with NP_115958.2 knockdown showing high migration (distance) and increased proliferation
+NP_663779.1,HeLa cells with NP_663779.1 knockdown showing high migration (distance) and migration (speed)
+NP_775783.1,HeLa cells with NP_775783.1 knockdown showing low migration (distance)
+NP_848548.1,"HeLa cells with NP_848548.1 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+NP_874361.1,HeLa cells with NP_874361.1 knockdown showing low migration (distance)
+NP_899231.1,
+NR3C2,HeLa cells with NR3C2 knockdown showing high migration (distance)
+NRIP2,HeLa cells with NRIP2 knockdown showing high migration (distance)
+NR_001296.2,HeLa cells with NR_001296.2 knockdown showing high migration (distance) and increased proliferation
+OCRL,
+OFD1,HeLa cells with OFD1 knockdown showing high migration (distance) and increased proliferation
+OGDHL,HeLa cells with OGDHL knockdown showing high migration (distance)
+OTUB1,HeLa cells with OTUB1 knockdown showing high migration (distance)
+OVCH1,HeLa cells with OVCH1 knockdown showing high migration (distance)
+OVCH2,HeLa cells with OVCH2 knockdown showing high migration (distance)
+PAM,HeLa cells with PAM knockdown showing high migration (distance)
+PCSK1,"HeLa cells with PCSK1 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+PCSK2,HeLa cells with PCSK2 knockdown showing high migration (distance)
+PCSK5,HeLa cells with PCSK5 knockdown showing high migration (distance) and increased proliferation
+PCSK6,
+PCSK7,HeLa cells with PCSK7 knockdown showing high migration (distance) and migration (speed)
+PCSK9,HeLa cells with PCSK9 knockdown showing low migration (distance)
+PDP2_HUMAN,HeLa cells with PDP2_HUMAN knockdown showing low migration (distance)
+PECI,HeLa cells with PECI knockdown showing high migration (distance)
+PECR,HeLa cells with PECR knockdown showing high migration (distance)
+PFKFB1,
+PFKFB2,
+PFKFB3,HeLa cells with PFKFB3 knockdown showing high migration (distance)
+PFKFB4,HeLa cells with PFKFB4 knockdown showing high migration (distance)
+PGC,HeLa cells with PGC knockdown showing low migration (distance)
+PHOSPHO1,
+PIB5PA,HeLa cells with PIB5PA knockdown showing high migration (distance)
+PITPNA,HeLa cells with PITPNA knockdown showing high migration (distance)
+PITPNB,HeLa cells with PITPNB knockdown showing low migration (distance)
+PITPNM1,HeLa cells with PITPNM1 knockdown showing low migration (distance)
+PLA1A,HeLa cells with PLA1A knockdown showing low migration (distance) and increased proliferation
+PLA2G10,
+PLA2G12A,
+PLA2G12B,HeLa cells with PLA2G12B knockdown showing high migration (distance)
+PLA2G1B,
+PLA2G2A,HeLa cells with PLA2G2A knockdown showing high migration (distance)
+PLA2G2D,HeLa cells with PLA2G2D knockdown showing low migration (distance)
+PLA2G2F,HeLa cells with PLA2G2F knockdown showing high migration (distance)
+PLA2G3,HeLa cells with PLA2G3 knockdown showing high migration (distance)
+PLA2G4A,HeLa cells with PLA2G4A knockdown showing high migration (distance) and migration (speed)
+PLA2G4B,HeLa cells with PLA2G4B knockdown showing high migration (distance) and migration (speed)
+PLA2G4C,HeLa cells with PLA2G4C knockdown showing high increased proliferation
+PLA2G4D,
+PLA2G5,HeLa cells with PLA2G5 knockdown showing high migration (distance)
+PLA2G6,HeLa cells with PLA2G6 knockdown showing low migration (distance)
+PLA2G7,HeLa cells with PLA2G7 knockdown showing high migration (distance) and increased proliferation
+PLAA,
+PLAT,HeLa cells with PLAT knockdown showing high migration (distance) and migration (speed)
+PLAU,
+PLB1,HeLa cells with PLB1 knockdown showing high migration (distance)
+PLCB2,HeLa cells with PLCB2 knockdown showing high migration (distance)
+PLCB3,HeLa cells with PLCB3 knockdown showing high increased proliferation
+PLCB4,HeLa cells with PLCB4 knockdown showing high migration (distance)
+PLCD1,HeLa cells with PLCD1 knockdown showing high migration (distance)
+PLCD3,HeLa cells with PLCD3 knockdown showing high migration (distance)
+PLCD4,
+PLCE1,
+PLCG1,HeLa cells with PLCG1 knockdown showing low migration (distance)
+PLCG2,HeLa cells with PLCG2 knockdown showing high migration (distance) and migration (speed)
+PLCL1,HeLa cells with PLCL1 knockdown showing low migration (distance)
+PLCL2,HeLa cells with PLCL2 knockdown showing high migration (distance)
+PLCZ1,
+PLD2,HeLa cells with PLD2 knockdown showing high migration (distance)
+PLD3,HeLa cells with PLD3 knockdown showing high migration (distance)
+PLG,HeLa cells with PLG knockdown showing high migration (distance)
+PNPLA1,HeLa cells with PNPLA1 knockdown showing high migration (distance)
+PNPLA10P,
+POR,HeLa cells with POR knockdown showing high migration (distance)
+PP11_HUMAN,HeLa cells with PP11_HUMAN knockdown showing high migration (distance)
+PPA1,HeLa cells with PPA1 knockdown showing low migration (distance)
+PPA2,HeLa cells with PPA2 knockdown showing low migration (distance)
+PPAP2A,HeLa cells with PPAP2A knockdown showing high migration (distance)
+PPAP2B,HeLa cells with PPAP2B knockdown showing low migration (distance)
+PPAP2C,HeLa cells with PPAP2C knockdown showing high migration (distance)
+PPEF1,HeLa cells with PPEF1 knockdown showing high migration (distance)
+PPEF2,HeLa cells with PPEF2 knockdown showing low migration (distance)
+PPM1A,
+PPM1B,HeLa cells with PPM1B knockdown showing high migration (distance)
+PPM1D,HeLa cells with PPM1D knockdown showing low migration (distance) and increased proliferation
+PPM1E,
+PPM1F,HeLa cells with PPM1F knockdown showing high migration (distance)
+PPM1G,HeLa cells with PPM1G knockdown showing high migration (distance)
+PPM1L,HeLa cells with PPM1L knockdown showing high migration (distance)
+PPM2C,HeLa cells with PPM2C knockdown showing high migration (distance) and migration (speed)
+PPP1CA,HeLa cells with PPP1CA knockdown showing high migration (distance)
+PPP1CB,HeLa cells with PPP1CB knockdown showing low migration (distance)
+PPP1CC,
+PPP1R10,HeLa cells with PPP1R10 knockdown showing high migration (distance)
+PPP1R11,
+PPP1R12A,HeLa cells with PPP1R12A knockdown showing low migration (distance)
+PPP1R12B,
+PPP1R16A,HeLa cells with PPP1R16A knockdown showing low migration (distance)
+PPP1R1A,HeLa cells with PPP1R1A knockdown showing high migration (distance)
+PPP1R1B,HeLa cells with PPP1R1B knockdown showing high migration (distance)
+PPP1R2,HeLa cells with PPP1R2 knockdown showing low migration (distance)
+PPP1R3C,HeLa cells with PPP1R3C knockdown showing high migration (distance)
+PPP1R3D,HeLa cells with PPP1R3D knockdown showing high migration (distance)
+PPP1R7,HeLa cells with PPP1R7 knockdown showing low migration (distance)
+PPP1R8,
+PPP2CA,HeLa cells with PPP2CA knockdown showing high migration (distance)
+PPP2CB,HeLa cells with PPP2CB knockdown showing high migration (distance)
+PPP2R1A,HeLa cells with PPP2R1A knockdown showing high migration (distance)
+PPP2R1B,HeLa cells with PPP2R1B knockdown showing high migration (distance)
+PPP2R2A,HeLa cells with PPP2R2A knockdown showing high migration (distance)
+PPP2R2B,HeLa cells with PPP2R2B knockdown showing high migration (distance)
+PPP2R2C,HeLa cells with PPP2R2C knockdown showing high migration (distance)
+PPP2R3A,HeLa cells with PPP2R3A knockdown showing high migration (distance)
+PPP2R3B,HeLa cells with PPP2R3B knockdown showing high migration (distance)
+PPP2R4,HeLa cells with PPP2R4 knockdown showing high migration (distance)
+PPP2R5A,HeLa cells with PPP2R5A knockdown showing high migration (distance)
+PPP2R5B,HeLa cells with PPP2R5B knockdown showing high migration (distance) and increased proliferation
+PPP2R5C,HeLa cells with PPP2R5C knockdown showing high migration (distance)
+PPP2R5D,HeLa cells with PPP2R5D knockdown showing high migration (distance)
+PPP2R5E,HeLa cells with PPP2R5E knockdown showing high migration (distance) and migration (speed)
+PPP3CA,HeLa cells with PPP3CA knockdown showing high migration (distance)
+PPP3CB,HeLa cells with PPP3CB knockdown showing high migration (distance)
+PPP3CC,HeLa cells with PPP3CC knockdown showing high migration (distance) and migration (speed)
+PPP3R2,HeLa cells with PPP3R2 knockdown showing high migration (distance)
+PPP4C,HeLa cells with PPP4C knockdown showing high migration (distance)
+PPP4R1,HeLa cells with PPP4R1 knockdown showing high migration (distance)
+PPP4R2,HeLa cells with PPP4R2 knockdown showing high migration (distance) and migration (speed)
+PPP5C,HeLa cells with PPP5C knockdown showing high migration (distance)
+PPP6C,HeLa cells with PPP6C knockdown showing high migration (distance) and migration (speed)
+PRCP,HeLa cells with PRCP knockdown showing high migration (distance) and migration (speed)
+PREP,HeLa cells with PREP knockdown showing low migration (distance)
+PROC,HeLa cells with PROC knockdown showing low migration (distance)
+PROM2,
+PROZ,HeLa cells with PROZ knockdown showing high migration (distance) and migration (speed)
+PRSS12,HeLa cells with PRSS12 knockdown showing low migration (distance)
+PRSS16,"HeLa cells with PRSS16 knockdown showing high migration (distance), increased proliferation and migration (speed)"
+PRSS2,HeLa cells with PRSS2 knockdown showing high migration (distance)
+PRSS21,HeLa cells with PRSS21 knockdown showing low migration (distance)
+PRSS22,HeLa cells with PRSS22 knockdown showing high migration (distance) and migration (speed)
+PRSS23,HeLa cells with PRSS23 knockdown showing high migration (distance) and migration (speed)
+PRSS27,
+PRSS3,HeLa cells with PRSS3 knockdown showing low migration (distance)
+PRSS33,HeLa cells with PRSS33 knockdown showing high migration (distance)
+PRSS35,HeLa cells with PRSS35 knockdown showing low migration (distance)
+PRSS36,HeLa cells with PRSS36 knockdown showing high migration (distance) and migration (speed)
+PRSS7,HeLa cells with PRSS7 knockdown showing low migration (distance)
+PRSS8,HeLa cells with PRSS8 knockdown showing high migration (speed)
+PRTN3,
+PSEN1,HeLa cells with PSEN1 knockdown showing high migration (distance) and increased proliferation
+PSEN2,
+PSL1_HUMAN,HeLa cells with PSL1_HUMAN knockdown showing high migration (distance) and migration (speed)
+PSL2_HUMAN,
+PSMA1,HeLa cells with PSMA1 knockdown showing high migration (distance)
+PSMA2,HeLa cells with PSMA2 knockdown showing low migration (distance)
+PSMA3,HeLa cells with PSMA3 knockdown showing low migration (distance) and increased proliferation
+PSMA4,HeLa cells with PSMA4 knockdown showing high migration (speed) and low migration (distance) and increased proliferation
+PSMA5,HeLa cells with PSMA5 knockdown showing high migration (distance)
+PSMA8,HeLa cells with PSMA8 knockdown showing high migration (distance)
+PSMB10,
+PSMB2,HeLa cells with PSMB2 knockdown showing high migration (distance)
+PSMB3,HeLa cells with PSMB3 knockdown showing high migration (distance)
+PSMB4,HeLa cells with PSMB4 knockdown showing high migration (distance)
+PSMB5,HeLa cells with PSMB5 knockdown showing high migration (distance) and migration (speed) and low increased proliferation
+PSMB6,HeLa cells with PSMB6 knockdown showing high migration (distance)
+PSMB7,HeLa cells with PSMB7 knockdown showing low migration (distance)
+PSMB8,HeLa cells with PSMB8 knockdown showing high migration (distance)
+PSMB9,HeLa cells with PSMB9 knockdown showing low migration (distance)
+PSMD9,HeLa cells with PSMD9 knockdown showing high migration (distance) and low increased proliferation
+PSPH,HeLa cells with PSPH knockdown showing high migration (distance)
+PTENP1,HeLa cells with PTENP1 knockdown showing high migration (distance) and migration (speed)
+PYCARD,HeLa cells with PYCARD knockdown showing high migration (distance) and migration (speed)
+Q7RTY9_HUMAN,HeLa cells with Q7RTY9_HUMAN knockdown showing high migration (speed)
+Q8IV80_HUMAN,HeLa cells with Q8IV80_HUMAN knockdown showing low migration (distance)
+QDPR,HeLa cells with QDPR knockdown showing high migration (distance)
+RAD50,HeLa cells with RAD50 knockdown showing high migration (distance)
+RCE1,HeLa cells with RCE1 knockdown showing high migration (distance)
+RCHY1,HeLa cells with RCHY1 knockdown showing high migration (distance) and migration (speed)
+REN,HeLa cells with REN knockdown showing high migration (distance)
+RILP,HeLa cells with RILP knockdown showing high migration (distance)
+RIPK4,HeLa cells with RIPK4 knockdown showing high migration (distance)
+RNGTT,HeLa cells with RNGTT knockdown showing high migration (distance)
+RPE65,HeLa cells with RPE65 knockdown showing low migration (distance)
+RSC1A1,HeLa cells with RSC1A1 knockdown showing high migration (distance) and migration (speed)
+RTN4IP1,HeLa cells with RTN4IP1 knockdown showing high migration (distance) and increased proliferation
+SCPEP1,HeLa cells with SCPEP1 knockdown showing high migration (distance) and migration (speed)
+SEC11A,HeLa cells with SEC11A knockdown showing high migration (distance) and migration (speed)
+SEC11C,HeLa cells with SEC11C knockdown showing high migration (distance)
+SEC24B,HeLa cells with SEC24B knockdown showing high migration (distance) and migration (speed)
+SEC24C,HeLa cells with SEC24C knockdown showing low migration (distance)
+SEC24D,HeLa cells with SEC24D knockdown showing low migration (distance)
+SENP1,HeLa cells with SENP1 knockdown showing high migration (distance) and low increased proliferation
+SENP2,HeLa cells with SENP2 knockdown showing low migration (distance)
+SENP3,HeLa cells with SENP3 knockdown showing low migration (distance)
+SENP5,HeLa cells with SENP5 knockdown showing high migration (distance)
+SENP6,HeLa cells with SENP6 knockdown showing low increased proliferation
+SENP7,HeLa cells with SENP7 knockdown showing high migration (distance)
+SERPINA4,HeLa cells with SERPINA4 knockdown showing high migration (distance)
+SERPINA6,HeLa cells with SERPINA6 knockdown showing low migration (distance)
+SGPP1,HeLa cells with SGPP1 knockdown showing low migration (distance)
+SKIP_HUMAN,HeLa cells with SKIP_HUMAN knockdown showing high migration (distance)
+SLC10A1,HeLa cells with SLC10A1 knockdown showing high migration (distance)
+SLC10A2,HeLa cells with SLC10A2 knockdown showing high migration (distance)
+SLC10A3,
+SLC10A4,
+SLC10A6,HeLa cells with SLC10A6 knockdown showing low migration (distance)
+SLC11A1,HeLa cells with SLC11A1 knockdown showing high migration (distance)
+SLC11A2,HeLa cells with SLC11A2 knockdown showing low migration (distance)
+SLC12A1,HeLa cells with SLC12A1 knockdown showing high migration (distance) and migration (speed)
+SLC12A2,HeLa cells with SLC12A2 knockdown showing high migration (distance)
+SLC12A3,HeLa cells with SLC12A3 knockdown showing high migration (distance)
+SLC12A4,
+SLC12A5,HeLa cells with SLC12A5 knockdown showing low migration (distance)
+SLC12A6,HeLa cells with SLC12A6 knockdown showing high migration (distance)
+SLC12A7,
+SLC12A8,HeLa cells with SLC12A8 knockdown showing high migration (distance)
+SLC12A9,HeLa cells with SLC12A9 knockdown showing low migration (distance)
+SLC13A1,HeLa cells with SLC13A1 knockdown showing low migration (distance)
+SLC13A2,
+SLC13A3,HeLa cells with SLC13A3 knockdown showing high migration (distance) and migration (speed)
+SLC13A4,HeLa cells with SLC13A4 knockdown showing low migration (distance)
+SLC13A5,HeLa cells with SLC13A5 knockdown showing high migration (distance)
+SLC14A1,HeLa cells with SLC14A1 knockdown showing high migration (distance)
+SLC14A2,HeLa cells with SLC14A2 knockdown showing high migration (distance)
+SLC15A1,HeLa cells with SLC15A1 knockdown showing high migration (distance)
+SLC15A2,
+SLC16A1,
+SLC16A10,HeLa cells with SLC16A10 knockdown showing low migration (distance)
+SLC16A11,HeLa cells with SLC16A11 knockdown showing high migration (distance)
+SLC16A2,HeLa cells with SLC16A2 knockdown showing low migration (distance)
+SLC16A3,
+SLC16A4,HeLa cells with SLC16A4 knockdown showing high migration (distance)
+SLC16A5,HeLa cells with SLC16A5 knockdown showing high migration (speed) and migration (distance)
+SLC16A6,HeLa cells with SLC16A6 knockdown showing high migration (distance)
+SLC16A7,HeLa cells with SLC16A7 knockdown showing high migration (distance)
+SLC16A8,HeLa cells with SLC16A8 knockdown showing high migration (distance)
+SLC17A1,HeLa cells with SLC17A1 knockdown showing high migration (distance)
+SLC17A2,HeLa cells with SLC17A2 knockdown showing low migration (distance)
+SLC17A3,HeLa cells with SLC17A3 knockdown showing low migration (distance)
+SLC17A4,
+SLC17A5,HeLa cells with SLC17A5 knockdown showing high migration (distance)
+SLC17A6,HeLa cells with SLC17A6 knockdown showing high migration (distance)
+SLC17A7,HeLa cells with SLC17A7 knockdown showing low migration (distance)
+SLC17A8,HeLa cells with SLC17A8 knockdown showing high migration (distance)
+SLC18A1,HeLa cells with SLC18A1 knockdown showing high migration (distance)
+SLC18A2,
+SLC18A3,HeLa cells with SLC18A3 knockdown showing high migration (distance)
+SLC19A1,HeLa cells with SLC19A1 knockdown showing low migration (distance)
+SLC19A2,HeLa cells with SLC19A2 knockdown showing high migration (distance)
+SLC19A3,
+SLC1A1,HeLa cells with SLC1A1 knockdown showing high migration (distance)
+SLC1A2,HeLa cells with SLC1A2 knockdown showing high migration (distance)
+SLC1A3,HeLa cells with SLC1A3 knockdown showing high migration (distance)
+SLC1A4,HeLa cells with SLC1A4 knockdown showing high migration (distance)
+SLC1A5,HeLa cells with SLC1A5 knockdown showing high migration (distance)
+SLC1A6,HeLa cells with SLC1A6 knockdown showing high migration (distance)
+SLC1A7,HeLa cells with SLC1A7 knockdown showing high migration (distance)
+SLC20A1,HeLa cells with SLC20A1 knockdown showing low migration (distance)
+SLC20A2,HeLa cells with SLC20A2 knockdown showing high migration (distance)
+SLC22A1,HeLa cells with SLC22A1 knockdown showing high migration (distance)
+SLC22A11,HeLa cells with SLC22A11 knockdown showing low migration (distance)
+SLC22A12,HeLa cells with SLC22A12 knockdown showing high migration (distance)
+SLC22A13,HeLa cells with SLC22A13 knockdown showing high migration (distance)
+SLC22A14,HeLa cells with SLC22A14 knockdown showing high migration (distance)
+SLC22A15,HeLa cells with SLC22A15 knockdown showing high migration (distance)
+SLC22A16,HeLa cells with SLC22A16 knockdown showing high migration (distance)
+SLC22A17,HeLa cells with SLC22A17 knockdown showing low migration (distance)
+SLC22A18,HeLa cells with SLC22A18 knockdown showing high migration (distance) and migration (speed)
+SLC22A2,HeLa cells with SLC22A2 knockdown showing low migration (distance)
+SLC22A3,HeLa cells with SLC22A3 knockdown showing high migration (distance)
+SLC22A4,HeLa cells with SLC22A4 knockdown showing low migration (distance)
+SLC22A5,HeLa cells with SLC22A5 knockdown showing low migration (distance)
+SLC22A7,HeLa cells with SLC22A7 knockdown showing high migration (distance)
+SLC22A8,
+SLC22A9,HeLa cells with SLC22A9 knockdown showing high migration (distance)
+SLC23A1,HeLa cells with SLC23A1 knockdown showing high migration (distance)
+SLC23A2,HeLa cells with SLC23A2 knockdown showing high increased proliferation
+SLC25A1,HeLa cells with SLC25A1 knockdown showing low migration (distance) and increased proliferation
+SLC25A10,HeLa cells with SLC25A10 knockdown showing low migration (distance)
+SLC25A15,HeLa cells with SLC25A15 knockdown showing high migration (distance) and migration (speed)
+SLC25A17,HeLa cells with SLC25A17 knockdown showing high migration (distance)
+SLC25A2,HeLa cells with SLC25A2 knockdown showing high migration (distance) and migration (speed)
+SLC25A32,HeLa cells with SLC25A32 knockdown showing low migration (distance)
+SLC26A1,HeLa cells with SLC26A1 knockdown showing low migration (distance)
+SLC26A2,HeLa cells with SLC26A2 knockdown showing high migration (distance)
+SLC26A4,
+SLC26A6,HeLa cells with SLC26A6 knockdown showing low migration (distance)
+SLC26A7,HeLa cells with SLC26A7 knockdown showing high migration (distance) and low increased proliferation
+SLC26A8,HeLa cells with SLC26A8 knockdown showing low migration (distance)
+SLC27A2,HeLa cells with SLC27A2 knockdown showing low migration (distance) and increased proliferation
+SLC27A3,HeLa cells with SLC27A3 knockdown showing low migration (distance)
+SLC27A4,HeLa cells with SLC27A4 knockdown showing high migration (distance)
+SLC27A6,HeLa cells with SLC27A6 knockdown showing low migration (distance)
+SLC28A1,HeLa cells with SLC28A1 knockdown showing high migration (distance)
+SLC28A2,HeLa cells with SLC28A2 knockdown showing high migration (distance)
+SLC28A3,HeLa cells with SLC28A3 knockdown showing low migration (distance)
+SLC29A1,HeLa cells with SLC29A1 knockdown showing low migration (distance)
+SLC29A2,HeLa cells with SLC29A2 knockdown showing high migration (distance) and migration (speed)
+SLC29A3,HeLa cells with SLC29A3 knockdown showing high migration (distance) and increased proliferation
+SLC2A1,HeLa cells with SLC2A1 knockdown showing high migration (distance)
+SLC2A10,
+SLC2A12,HeLa cells with SLC2A12 knockdown showing high migration (distance)
+SLC2A2,HeLa cells with SLC2A2 knockdown showing high migration (speed)
+SLC2A3,HeLa cells with SLC2A3 knockdown showing high migration (distance) and migration (speed)
+SLC2A4,
+SLC2A5,
+SLC2A6,
+SLC2A8,HeLa cells with SLC2A8 knockdown showing low migration (distance)
+SLC2A9,HeLa cells with SLC2A9 knockdown showing low migration (distance)
+SLC30A1,HeLa cells with SLC30A1 knockdown showing low migration (distance)
+SLC30A10,HeLa cells with SLC30A10 knockdown showing high migration (distance)
+SLC30A2,HeLa cells with SLC30A2 knockdown showing low migration (distance) and increased proliferation
+SLC30A5,HeLa cells with SLC30A5 knockdown showing low migration (distance)
+SLC30A7,HeLa cells with SLC30A7 knockdown showing low migration (distance)
+SLC30A8,HeLa cells with SLC30A8 knockdown showing low migration (distance)
+SLC31A1,
+SLC32A1,HeLa cells with SLC32A1 knockdown showing low migration (distance)
+SLC35A2,HeLa cells with SLC35A2 knockdown showing high increased proliferation and low migration (distance)
+SLC35A3,HeLa cells with SLC35A3 knockdown showing low migration (distance)
+SLC37A1,HeLa cells with SLC37A1 knockdown showing high migration (distance)
+SLC37A3,HeLa cells with SLC37A3 knockdown showing low migration (distance)
+SLC37A4,HeLa cells with SLC37A4 knockdown showing high migration (speed)
+SLC38A2,
+SLC38A3,HeLa cells with SLC38A3 knockdown showing high migration (distance)
+SLC39A1,
+SLC39A2,HeLa cells with SLC39A2 knockdown showing high migration (distance)
+SLC39A3,HeLa cells with SLC39A3 knockdown showing low migration (distance)
+SLC39A4,HeLa cells with SLC39A4 knockdown showing low migration (distance)
+SLC39A8,HeLa cells with SLC39A8 knockdown showing low migration (distance) and increased proliferation
+SLC3A1,HeLa cells with SLC3A1 knockdown showing high migration (distance)
+SLC40A1,HeLa cells with SLC40A1 knockdown showing high migration (distance) and migration (speed)
+SLC44A5,HeLa cells with SLC44A5 knockdown showing high migration (distance)
+SLC4A1,HeLa cells with SLC4A1 knockdown showing high migration (distance) and migration (speed)
+SLC4A10,HeLa cells with SLC4A10 knockdown showing low migration (distance)
+SLC4A11,HeLa cells with SLC4A11 knockdown showing high migration (distance)
+SLC4A2,HeLa cells with SLC4A2 knockdown showing high migration (speed)
+SLC4A3,HeLa cells with SLC4A3 knockdown showing high migration (distance)
+SLC4A4,HeLa cells with SLC4A4 knockdown showing high migration (distance) and increased proliferation
+SLC4A5,HeLa cells with SLC4A5 knockdown showing low migration (distance)
+SLC4A7,HeLa cells with SLC4A7 knockdown showing low migration (distance)
+SLC4A8,HeLa cells with SLC4A8 knockdown showing high migration (distance)
+SLC4A9,HeLa cells with SLC4A9 knockdown showing low migration (distance)
+SLC5A1,HeLa cells with SLC5A1 knockdown showing high migration (distance)
+SLC5A10,HeLa cells with SLC5A10 knockdown showing high migration (distance) and migration (speed)
+SLC5A11,HeLa cells with SLC5A11 knockdown showing low migration (distance)
+SLC5A12,HeLa cells with SLC5A12 knockdown showing low migration (distance)
+SLC5A2,HeLa cells with SLC5A2 knockdown showing high migration (distance) and migration (speed)
+SLC5A3,HeLa cells with SLC5A3 knockdown showing low migration (distance)
+SLC5A4,HeLa cells with SLC5A4 knockdown showing low migration (distance)
+SLC5A5,HeLa cells with SLC5A5 knockdown showing low migration (distance)
+SLC5A6,HeLa cells with SLC5A6 knockdown showing low migration (distance)
+SLC5A7,HeLa cells with SLC5A7 knockdown showing high migration (distance)
+SLC5A8,HeLa cells with SLC5A8 knockdown showing high migration (distance)
+SLC6A1,
+SLC6A10P,HeLa cells with SLC6A10P knockdown showing low migration (distance)
+SLC6A11,
+SLC6A12,HeLa cells with SLC6A12 knockdown showing high migration (distance)
+SLC6A13,HeLa cells with SLC6A13 knockdown showing high migration (distance)
+SLC6A14,HeLa cells with SLC6A14 knockdown showing low migration (distance)
+SLC6A15,HeLa cells with SLC6A15 knockdown showing low migration (distance)
+SLC6A16,HeLa cells with SLC6A16 knockdown showing low migration (distance)
+SLC6A2,HeLa cells with SLC6A2 knockdown showing high migration (distance)
+SLC6A20,HeLa cells with SLC6A20 knockdown showing high migration (distance)
+SLC6A3,HeLa cells with SLC6A3 knockdown showing high migration (distance)
+SLC6A4,HeLa cells with SLC6A4 knockdown showing high migration (distance)
+SLC6A5,HeLa cells with SLC6A5 knockdown showing high migration (distance)
+SLC6A6,
+SLC6A7,HeLa cells with SLC6A7 knockdown showing high migration (distance)
+SLC6A8,
+SLC6A9,HeLa cells with SLC6A9 knockdown showing high migration (speed) and low increased proliferation
+SLC7A1,HeLa cells with SLC7A1 knockdown showing low migration (distance)
+SLC7A10,HeLa cells with SLC7A10 knockdown showing high migration (distance) and migration (speed)
+SLC7A11,HeLa cells with SLC7A11 knockdown showing high migration (distance)
+SLC7A13,
+SLC7A2,HeLa cells with SLC7A2 knockdown showing high migration (distance) and migration (speed)
+SLC7A3,HeLa cells with SLC7A3 knockdown showing low migration (distance)
+SLC7A4,HeLa cells with SLC7A4 knockdown showing high migration (distance)
+SLC7A5,
+SLC7A7,HeLa cells with SLC7A7 knockdown showing high migration (distance)
+SLC7A8,"HeLa cells with SLC7A8 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+SLC7A9,HeLa cells with SLC7A9 knockdown showing low migration (distance)
+SLC8A1,HeLa cells with SLC8A1 knockdown showing high migration (distance)
+SLC8A3,HeLa cells with SLC8A3 knockdown showing low migration (distance)
+SLCO1A2,HeLa cells with SLCO1A2 knockdown showing low migration (distance) and increased proliferation
+SLCO1B3,HeLa cells with SLCO1B3 knockdown showing high migration (distance)
+SLCO1C1,HeLa cells with SLCO1C1 knockdown showing low migration (distance)
+SLCO2A1,HeLa cells with SLCO2A1 knockdown showing high migration (distance)
+SLCO2B1,
+SLCO3A1,HeLa cells with SLCO3A1 knockdown showing high migration (distance)
+SLCO4A1,HeLa cells with SLCO4A1 knockdown showing low migration (distance)
+SLCO4C1,HeLa cells with SLCO4C1 knockdown showing high migration (distance)
+SLCO5A1,HeLa cells with SLCO5A1 knockdown showing high migration (distance)
+SLCO6A1,HeLa cells with SLCO6A1 knockdown showing high migration (distance)
+SNUPN,HeLa cells with SNUPN knockdown showing high migration (distance) and migration (speed)
+SNX13,HeLa cells with SNX13 knockdown showing high migration (distance) and increased proliferation
+SPDYA,HeLa cells with SPDYA knockdown showing high migration (distance) and migration (speed)
+SPR,HeLa cells with SPR knockdown showing high migration (distance)
+SSH1,HeLa cells with SSH1 knockdown showing high migration (distance)
+SSH3,HeLa cells with SSH3 knockdown showing high migration (distance)
+ST14,HeLa cells with ST14 knockdown showing low migration (distance)
+STX10,HeLa cells with STX10 knockdown showing low migration (distance)
+STX11,HeLa cells with STX11 knockdown showing high migration (distance)
+STX16,HeLa cells with STX16 knockdown showing high migration (distance) and migration (speed)
+STX18,HeLa cells with STX18 knockdown showing high migration (distance) and migration (speed)
+STX1A,HeLa cells with STX1A knockdown showing low migration (distance)
+STX3,HeLa cells with STX3 knockdown showing high migration (distance)
+STX4,HeLa cells with STX4 knockdown showing high migration (distance) and migration (speed)
+STX5,HeLa cells with STX5 knockdown showing low migration (distance) and migration (speed)
+STX7,HeLa cells with STX7 knockdown showing low migration (distance)
+STYX,HeLa cells with STYX knockdown showing high migration (distance) and migration (speed)
+STYXL1,HeLa cells with STYXL1 knockdown showing high migration (distance) and migration (speed)
+SVOP,HeLa cells with SVOP knockdown showing low migration (distance)
+SYNJ1,HeLa cells with SYNJ1 knockdown showing high migration (distance)
+SYNJ2,HeLa cells with SYNJ2 knockdown showing high migration (distance)
+TAP1,HeLa cells with TAP1 knockdown showing high migration (distance) and migration (speed)
+TAP2,HeLa cells with TAP2 knockdown showing high migration (distance)
+TBXAS1,HeLa cells with TBXAS1 knockdown showing low migration (distance)
+TIMM13,HeLa cells with TIMM13 knockdown showing high migration (distance) and migration (speed)
+TIMM8A,HeLa cells with TIMM8A knockdown showing low migration (distance)
+TIMM8B,HeLa cells with TIMM8B knockdown showing high migration (distance) and migration (speed)
+TINAGL1,HeLa cells with TINAGL1 knockdown showing low migration (distance) and increased proliferation
+TMPRSS11A,HeLa cells with TMPRSS11A knockdown showing high migration (distance) and migration (speed)
+TMPRSS11B,HeLa cells with TMPRSS11B knockdown showing low migration (distance)
+TMPRSS11D,HeLa cells with TMPRSS11D knockdown showing low migration (distance)
+TMPRSS12,HeLa cells with TMPRSS12 knockdown showing high migration (speed) and low migration (distance)
+TMPRSS13,HeLa cells with TMPRSS13 knockdown showing low migration (distance)
+TMPRSS2,
+TMPRSS3,HeLa cells with TMPRSS3 knockdown showing high migration (distance)
+TMPRSS4,
+TMPRSS5,HeLa cells with TMPRSS5 knockdown showing high migration (distance)
+TMPRSS6,HeLa cells with TMPRSS6 knockdown showing low migration (distance)
+TMPRSS9,HeLa cells with TMPRSS9 knockdown showing high migration (speed)
+TP53I3,HeLa cells with TP53I3 knockdown showing high migration (distance)
+TPP2,HeLa cells with TPP2 knockdown showing high migration (distance)
+TPSD1,"HeLa cells with TPSD1 knockdown showing high migration (distance), migration (speed) and increased proliferation"
+TPSG1,HeLa cells with TPSG1 knockdown showing high migration (distance) and migration (speed)
+TPTE,HeLa cells with TPTE knockdown showing high migration (distance)
+TPTE2,
+TSP50_HUMAN,"HeLa cells with TSP50_HUMAN knockdown showing high migration (distance), migration (speed) and increased proliferation"
+TSPO,HeLa cells with TSPO knockdown showing high migration (distance)
+TYRP1,HeLa cells with TYRP1 knockdown showing high migration (distance)
+UBAC2,HeLa cells with UBAC2 knockdown showing low migration (distance)
+UBE2G1,HeLa cells with UBE2G1 knockdown showing high migration (distance) and migration (speed)
+UCHL1,HeLa cells with UCHL1 knockdown showing low migration (distance)
+USP1,HeLa cells with USP1 knockdown showing low migration (distance) and increased proliferation
+USP14,HeLa cells with USP14 knockdown showing high migration (distance)
+USP16,
+USP18,HeLa cells with USP18 knockdown showing low migration (distance)
+USP28,HeLa cells with USP28 knockdown showing low migration (distance)
+USP31,HeLa cells with USP31 knockdown showing high migration (distance)
+USP33,HeLa cells with USP33 knockdown showing high migration (distance)
+USP37,
+USP39,
+USP47,HeLa cells with USP47 knockdown showing high migration (distance)
+USP48,HeLa cells with USP48 knockdown showing low migration (distance)
+USP49,HeLa cells with USP49 knockdown showing low migration (distance)
+USP52,HeLa cells with USP52 knockdown showing low migration (distance)
+USP9X,HeLa cells with USP9X knockdown showing low migration (distance)
+USP9Y,HeLa cells with USP9Y knockdown showing high migration (distance) and migration (speed)
+VAT1,HeLa cells with VAT1 knockdown showing high migration (distance)
+VAV3,HeLa cells with VAV3 knockdown showing high migration (distance)
+VCL,HeLa cells with VCL knockdown showing high migration (distance) and migration (speed)
+VPS29,HeLa cells with VPS29 knockdown showing high migration (distance)
+WDR31,HeLa cells with WDR31 knockdown showing high migration (distance) and increased proliferation
+WDR92,HeLa cells with WDR92 knockdown showing high migration (distance)
+WWOX,HeLa cells with WWOX knockdown showing high migration (distance)
+XK,HeLa cells with XK knockdown showing high migration (distance) and migration (speed)
+YWHAE,HeLa cells with YWHAE knockdown showing high migration (distance)
+ZADH2,HeLa cells with ZADH2 knockdown showing high migration (distance)

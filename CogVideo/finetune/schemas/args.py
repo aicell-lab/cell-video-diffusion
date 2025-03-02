@@ -77,8 +77,11 @@ class Args(BaseModel):
     target_modules: List[str] = ["to_q", "to_k", "to_v", "to_out.0"]
 
     ########## Loss Function ##########
-    loss_function: Literal["default", "ffe"] = "default"
+    loss_function: Literal["default", "ffe", "mfe"]
     ffe_weight: float = 0.0
+    mfe_weight: float = 5.0
+    mfe_num_frames: int = 3
+    mfe_decay: float = 0.5
 
     ########## Validation ##########
     do_validation: bool = False
@@ -205,10 +208,16 @@ class Args(BaseModel):
         parser.add_argument("--max_grad_norm", type=float, default=1.0)
         # Loss function options
         parser.add_argument("--loss_function", type=str, default="default", 
-                            choices=["default", "ffe"], 
+                            choices=["default", "ffe", "mfe"], 
                             help="Type of loss function to use")
         parser.add_argument("--ffe_weight", type=float, default=0.0,
-                            help="Weight for the first frame emphasis loss (used with ffe)")
+                            help="Weight for the first frame emphasis loss")
+        parser.add_argument("--mfe_weight", type=float, default=5.0,
+                            help="Base weight for multi-frame emphasis loss")
+        parser.add_argument("--mfe_num_frames", type=int, default=3,
+                            help="Number of frames to apply emphasis to")
+        parser.add_argument("--mfe_decay", type=float, default=0.5,
+                            help="Decay factor for weights in multi-frame emphasis")
 
         # Learning rate scheduler
         parser.add_argument("--lr_scheduler", type=str, default="constant_with_warmup")

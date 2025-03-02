@@ -160,7 +160,7 @@ class CogVideoXT2VLoraTrainer(Trainer):
         loss = torch.mean((weights * (latent_pred - latent) ** 2).reshape(batch_size, -1), dim=1)
         loss = loss.mean()
 
-        return loss
+        return {"loss": loss, "components": {}}
 
     @override
     def validation_step(

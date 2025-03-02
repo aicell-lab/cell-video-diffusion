@@ -107,6 +107,7 @@ class CogVideoXI2VLoraTrainer(Trainer):
 
         # pad the latent (prepend frames) so that the math works out
         patch_size_t = self.state.transformer_config.patch_size_t # 2
+        ncopy = 0
         if patch_size_t is not None:
             ncopy = latent.shape[2] % patch_size_t
             # Copy the first frame ncopy times to match patch_size_t
@@ -197,13 +198,16 @@ class CogVideoXI2VLoraTrainer(Trainer):
         orig_loss = loss.mean()
 
         if self.args.loss_function == "ffe":
-            return self.ffe_loss(orig_loss, latent_pred, latent)
+            return self.ffe_loss(orig_loss, latent_pred, latent, ncopy)
+        elif self.args.loss_function == "mfe":
+            return self.mfe_loss(orig_loss, latent_pred, latent, ncopy)
         
         return {"loss": orig_loss, "components": {}}
-
-    def ffe_loss(self, orig_loss, latent_pred, latent):
-        first_frame_pred = latent_pred[:, 0]  # First predicted frame
-        first_frame_gt = latent[:, 0]         # First ground truth frame
+    
+    def ffe_loss(self, orig_loss, latent_pred, latent, ncopy):
+        # Get the actual first frame (skip duplicated frames)
+        first_frame_pred = latent_pred[:, ncopy]  # First actual predicted frame
+        first_frame_gt = latent[:, ncopy]         # First actual ground truth frame
         
         # Calculate MSE specifically for the first frame
         ffe_loss = torch.mean((first_frame_pred - first_frame_gt) ** 2, dim=(1, 2, 3)).mean()
@@ -216,6 +220,42 @@ class CogVideoXI2VLoraTrainer(Trainer):
             "components": {
                 "orig_loss": orig_loss.detach().item(),
                 "ffe_loss": ffe_loss.detach().item()
+            }
+        }
+
+    def mfe_loss(self, orig_loss, latent_pred, latent, ncopy):
+        # Number of frames to apply emphasis to
+        n_frames = self.args.mfe_num_frames  # e.g., 3
+        base_weight = self.args.mfe_weight  # e.g., 5.0
+        decay_factor = self.args.mfe_decay  # e.g., 0.5
+        
+        # Calculate weights for each frame: [base_weight, base_weight*exp(-decay), base_weight*exp(-2*decay), ...]
+        frame_indices = torch.arange(n_frames, device=latent_pred.device)
+        frame_weights = base_weight * torch.exp(-decay_factor * frame_indices)
+        
+        # Initialize the total emphasis loss
+        mfe_loss = 0.0
+        
+        # Calculate weighted MSE for each of the first n frames, skipping duplicated frames
+        for i in range(n_frames):
+            # Adjust index to skip duplicated frames
+            actual_idx = i + ncopy
+            
+            if actual_idx < latent_pred.shape[1]:  # Ensure we don't exceed the number of frames
+                frame_pred = latent_pred[:, actual_idx]
+                frame_gt = latent[:, actual_idx]
+                frame_loss = torch.mean((frame_pred - frame_gt) ** 2, dim=(1, 2, 3)).mean()
+                # Use the original i for the weight index (not actual_idx)
+                mfe_loss += frame_weights[i] * frame_loss
+        
+        # Combine with original loss
+        total_loss = orig_loss + mfe_loss
+        
+        return {
+            "loss": total_loss,
+            "components": {
+                "orig_loss": orig_loss.detach().item(),
+                "mfe_loss": mfe_loss.detach().item()
             }
         }
 

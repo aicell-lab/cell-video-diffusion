@@ -30,16 +30,17 @@ IMAGE_PATHS=(
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_09-00073_01.png
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_09-00195_01.png
   # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00376_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00263_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00072_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00239_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_02-00122_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0003_02-00210_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00241_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_24-00314_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00111_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00053_01.png
-  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00086_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00263_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00072_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00239_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0001_02-00122_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0003_02-00210_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00241_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_24-00314_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_51-00111_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00053_01.png
+  # /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0002_02-00086_01.png
+  /proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/first_frames/LT0004_06-00247_01.png
 )
 
 # Corresponding prompts for each image
@@ -54,15 +55,16 @@ PROMPTS=(
   # "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
   # "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
   # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
-  "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with high proliferation."
+  # "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
   "<ALEXANDER> Time-lapse microscopy video with medium proliferation."
 )
 

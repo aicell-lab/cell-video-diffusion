@@ -4,9 +4,9 @@
 mkdir -p logs
 
 # Submit baseline job (no LoRA)
-echo "Submitting baseline job (no LoRA)..."
-sbatch baseline.sh
-echo "Submitted baseline job"
+# echo "Submitting baseline job (no LoRA)..."
+# sbatch baseline.sh
+# echo "Submitted baseline job"
 
 # Submit jobs for each model type and checkpoint
 # echo "Submitting LoRA rank 64 jobs..."
@@ -27,10 +27,10 @@ echo "Submitted baseline job"
 #     echo "Submitted job for rank 256, checkpoint $CHECKPOINT"
 # done
 
-# echo "Submitting full finetune jobs..."
-# for CHECKPOINT in 100 400 700; do
-#     sbatch i2v_sft.sh $CHECKPOINT
-#     echo "Submitted job for SFT, checkpoint $CHECKPOINT"
-# done
+echo "Submitting full finetune jobs..."
+for CHECKPOINT in 250 500 750 900; do
+    sbatch i2v_sft.sh $CHECKPOINT
+    echo "Submitted job for SFT, checkpoint $CHECKPOINT"
+done
 
 echo "All evaluation jobs have been submitted!"

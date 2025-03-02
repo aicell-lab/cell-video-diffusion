@@ -31,6 +31,7 @@ from diffusers import (
     CogVideoXImageToVideoPipeline,
     CogVideoXPipeline,
     CogVideoXVideoToVideoPipeline,
+    CogVideoXTransformer3DModel,
 )
 from diffusers.utils import export_to_video, load_image, load_video
 
@@ -56,6 +57,7 @@ def generate_video(
     model_path: str,
     lora_path: str = None,
     lora_rank: int = 128,
+    sft_path: str = None,  # Add SFT path parameter
     num_frames: int = 81,
     width: Optional[int] = None,
     height: Optional[int] = None,
@@ -77,6 +79,7 @@ def generate_video(
     - model_path (str): The path of the pre-trained model to be used.
     - lora_path (str): The path of the LoRA weights to be used.
     - lora_rank (int): The rank of the LoRA weights.
+    - sft_path (str): The path of the SFT fine-tuned model weights to be used.
     - output_path (str): The path where the generated video will be saved.
     - num_inference_steps (int): Number of steps for the inference process. More steps can result in better quality.
     - num_frames (int): Number of frames to generate. CogVideoX1.0 generates 49 frames for 6 seconds at 8 fps, while CogVideoX1.5 produces either 81 or 161 frames, corresponding to 5 seconds or 10 seconds at 16 fps.
@@ -124,9 +127,22 @@ def generate_video(
         pipe = CogVideoXVideoToVideoPipeline.from_pretrained(model_path, torch_dtype=dtype)
         video = load_video(image_or_video_path)
 
+    # If you're using with SFT, load the SFT model's transformer
+    if sft_path:        
+        print(f"Loading SFT transformer from {sft_path}")
+        # Load only the transformer component from the SFT model
+        transformer = CogVideoXTransformer3DModel.from_pretrained(
+            sft_path,
+            subfolder="",  # No subfolder since the model is at the root
+            torch_dtype=dtype  # Use the same dtype as the rest of the pipeline (bfloat16)
+        )
+        
+        # Replace the transformer in the pipeline
+        pipe.transformer = transformer
+        print(f"Successfully replaced transformer with SFT model (dtype: {next(transformer.parameters()).dtype})")
+    
     # If you're using with lora, add this code
     if lora_path:
-        # import pdb; pdb.set_trace()
         print(f"Loading LoRA weights from {lora_path}")
         pipe.load_lora_weights(lora_path, weight_name="pytorch_lora_weights.safetensors", adapter_name="test_1")
         pipe.fuse_lora(components=["transformer"], lora_scale=1)
@@ -209,6 +225,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--lora_path", type=str, default=None, help="The path of the LoRA weights to be used")
     parser.add_argument("--lora_rank", type=int, default=128, help="The rank of the LoRA weights")
+    parser.add_argument("--sft_path", type=str, default=None, help="The path of the SFT model weights to be used")  # Add SFT path
     parser.add_argument("--output_path", type=str, default="./output.mp4", help="The path save generated video")
     parser.add_argument("--guidance_scale", type=float, default=6.0, help="The scale for classifier-free guidance")
     parser.add_argument("--num_inference_steps", type=int, default=50, help="Inference steps")
@@ -228,6 +245,7 @@ if __name__ == "__main__":
         model_path=args.model_path,
         lora_path=args.lora_path,
         lora_rank=args.lora_rank,
+        sft_path=args.sft_path,  # Add SFT path
         output_path=args.output_path,
         num_frames=args.num_frames,
         width=args.width,

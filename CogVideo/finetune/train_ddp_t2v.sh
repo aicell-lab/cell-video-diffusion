@@ -61,7 +61,7 @@ SYSTEM_ARGS=(
 CHECKPOINT_ARGS=(
     --checkpointing_steps 50 # save checkpoint every x steps
     --checkpointing_limit 50 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    # --resume_from_checkpoint "/absolute/path/to/checkpoint_dir"  # if you want to resume from a checkpoint, otherwise, comment this line
+    --resume_from_checkpoint "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/models/loras/IDR0013-10plates-lora-t2v-r128/checkpoint-100"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration

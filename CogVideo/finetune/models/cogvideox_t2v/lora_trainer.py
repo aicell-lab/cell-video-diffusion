@@ -170,7 +170,8 @@ class CogVideoXT2VLoraTrainer(Trainer):
         Return the data that needs to be saved. For videos, the data format is List[PIL],
         and for images, the data format is PIL
         """
-        prompt, image, video = eval_data["prompt"], eval_data["image"], eval_data["video"]
+        # prompt, image, video = eval_data["prompt"], eval_data["image"], eval_data["video"]
+        prompt = eval_data["prompt"]
 
         video_generate = pipe(
             num_frames=self.state.train_frames,

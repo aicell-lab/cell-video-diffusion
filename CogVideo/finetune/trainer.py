@@ -546,7 +546,110 @@ class Trainer:
 
         accelerator.end_training()
 
-    def validate(self, step: int) -> None:
+    def validate(self, global_step: int) -> None:
+        logger.info(f"Starting validation on process {self.accelerator.process_index}")
+        
+        # Create validation directory at the beginning
+        validation_path = self.args.output_dir / "validation_res"
+        validation_path.mkdir(parents=True, exist_ok=True)
+        
+        if self.args.model_type == "i2v":
+            self.validate_i2v(global_step)
+        else:
+            self.validate_t2v(global_step)
+
+    def validate_t2v(self, step: int) -> None:
+        logger.info(f"Starting text-to-video validation on process {self.accelerator.process_index}")
+        
+        accelerator = self.accelerator
+        num_validation_samples = len(self.state.validation_prompts)
+        
+        if num_validation_samples == 0:
+            logger.warning("No validation samples found. Skipping validation.")
+            return
+        
+        self.components.transformer.eval()
+        torch.set_grad_enabled(False)
+        
+        memory_statistics = get_memory_statistics()
+        logger.info(f"Memory before validation start: {json.dumps(memory_statistics, indent=4)}")
+        
+        # Initialize pipeline
+        pipe = self.initialize_pipeline()
+        
+        # Handle device placement based on training setup
+        if self.state.using_deepspeed:
+            self.__move_components_to_device(dtype=self.state.weight_dtype, ignore_list=["transformer"])
+        else:
+            pipe.enable_model_cpu_offload(device=self.accelerator.device)
+            pipe = pipe.to(dtype=self.state.weight_dtype)
+        
+        # Process validation samples
+        all_processes_artifacts = []
+        for i in range(num_validation_samples):
+            # Skip samples not assigned to this process
+            if i % accelerator.num_processes != accelerator.process_index:
+                continue
+            
+            prompt = self.state.validation_prompts[i]
+            logger.info(f"Process {accelerator.process_index}, i: {i}, Prompt: {prompt}", main_process_only=False)
+            
+            # Run validation step with just the prompt for t2v
+            validation_artifacts = self.validation_step({"prompt": prompt}, pipe)
+            
+            # Process generated artifacts
+            for k, (artifact_type, artifact_value) in enumerate(validation_artifacts):
+                if artifact_type not in ["video"] or artifact_value is None:
+                    continue
+                    
+                # Generate filename and save video
+                prompt_filename = string_to_filename(prompt)[:25]
+                hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
+                gen_filename = f"validation-gen-{step}-{i}-{prompt_filename}-{hash_suffix}.mp4"
+                validation_path = self.args.output_dir / "validation_res"
+                gen_path = str(validation_path / gen_filename)
+                
+                logger.info(f"Process {accelerator.process_index}, i: {i}, Saving generated video to {gen_path}", main_process_only=False)
+                export_to_video(artifact_value, gen_path, fps=self.args.gen_fps)
+                
+                # Log to wandb
+                video_wandb = wandb.Video(gen_path, caption=f"Sample {i} - {prompt}")
+                all_processes_artifacts.append(video_wandb)
+        
+        # Gather artifacts from all processes
+        all_artifacts = gather_object(all_processes_artifacts)
+        
+        # Log to wandb from main process
+        if accelerator.is_main_process:
+            for tracker in accelerator.trackers:
+                if tracker.name == "wandb":
+                    tracker.log(
+                        {"validation": {"videos": all_artifacts}},
+                        step=step,
+                    )
+        
+        # Clean up
+        if self.state.using_deepspeed:
+            del pipe
+            self.__move_components_to_cpu(unload_list=self.UNLOAD_LIST)
+        else:
+            pipe.remove_all_hooks()
+            del pipe
+            self.__move_components_to_device(dtype=self.state.weight_dtype, ignore_list=self.UNLOAD_LIST)
+            self.components.transformer.to(self.accelerator.device, dtype=self.state.weight_dtype)
+            cast_training_params([self.components.transformer], dtype=torch.float32)
+            
+        free_memory()
+        accelerator.wait_for_everyone()
+        
+        memory_statistics = get_memory_statistics()
+        logger.info(f"Memory after validation end: {json.dumps(memory_statistics, indent=4)}")
+        torch.cuda.reset_peak_memory_stats(accelerator.device)
+        
+        torch.set_grad_enabled(True)
+        self.components.transformer.train()
+    
+    def validate_i2v(self, step: int) -> None:
         logger.info(f"Starting validation on process {self.accelerator.process_index}")
 
         accelerator = self.accelerator

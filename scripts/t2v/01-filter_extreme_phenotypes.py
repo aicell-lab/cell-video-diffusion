@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 import numpy as np
+import re
 from pathlib import Path
 
 # Path to the annotation file
@@ -20,6 +21,7 @@ def load_annotations():
     # Extract relevant columns
     columns_of_interest = [
         'Plate', 'Well', 'Plate_Well',
+        'Well Number', # This should correspond to the CH5 filename (without extension)
         'Score - cell death (automatic)',
         'Score - migration (speed) (automatic)',
         'Score - increased proliferation (automatic)',
@@ -33,7 +35,8 @@ def load_annotations():
     filtered_df = filtered_df.rename(columns={
         'Score - cell death (automatic)': 'cell_death',
         'Score - migration (speed) (automatic)': 'migration_speed',
-        'Score - increased proliferation (automatic)': 'proliferation'
+        'Score - increased proliferation (automatic)': 'proliferation',
+        'Well Number': 'well_number'  # Standardize name
     })
     
     # Remove rows with NaN values in critical columns
@@ -41,6 +44,7 @@ def load_annotations():
     
     print(f"Loaded {len(filtered_df)} valid samples with complete phenotype scores")
     return filtered_df
+
 
 def assign_phenotype_labels(df, percentile_threshold=10):
     """

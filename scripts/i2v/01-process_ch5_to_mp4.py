@@ -4,7 +4,6 @@ import glob
 import h5py
 import numpy as np
 import imageio
-from skimage.transform import resize
 import cv2
 
 def find_ch5_image_datasets(h5file):
@@ -97,13 +96,18 @@ def make_mp4(timeseries, out_path, fps=10, max_frames=None, target_size=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python 01-process_ch5_to_mp4.py /path/to/hdf5_folder [fps=10]")
+        print("Usage: python 01-process_ch5_to_mp4.py /path/to/hdf5_folder [fps=10] [output_dir=auto]")
         sys.exit(1)
     
     hdf5_folder = sys.argv[1]
     fps = 10
+    output_dir = None  # Default to auto-generate
+    
     if len(sys.argv) >= 3:
         fps = int(sys.argv[2])
+    
+    if len(sys.argv) >= 4:
+        output_dir = sys.argv[3]
     
     # The plate directory might look like "LT0001_02--ex2005_11_16--sp2005_02_17--tt17--c3/hdf5"
     # We create a simpler output folder named after the first segment (e.g., "LT0001_02") or the entire path?
@@ -114,7 +118,13 @@ def main():
     # If you'd rather parse just "LT0001_02" from that string, you'd do:
     plate_name = plate_name.split('--')[0]
     
-    out_dir = plate_name  # or "output_" + plate_name
+    # If output_dir is specified, use that as the base directory
+    if output_dir is None:
+        out_dir = plate_name  # Original behavior
+    else:
+        # Create a subdirectory for the plate within the specified output directory
+        out_dir = os.path.join(output_dir, plate_name)
+    
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     

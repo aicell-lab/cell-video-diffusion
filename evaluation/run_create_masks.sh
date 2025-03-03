@@ -41,7 +41,11 @@ DIRS=(
   # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_375"
   # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_750"
   # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_900"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_baseline"
+  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_baseline"
+  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_250"
+  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_500"
+  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_750"
+  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_900"
 )
 
 mkdir -p "${LOG_DIR}"

@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 import argparse
+import numpy as np
 
 # Path to the previous CSV with video paths
 INPUT_CSV_PATH = "/proj/aicell/users/x_aleho/video-diffusion/scripts/t2v/output/extreme_phenotypes_with_videos.csv"
@@ -79,12 +80,31 @@ def create_visual_prompt(row):
     # Construct the prompt with the new format
     return f"Time-lapse microscopy video of multiple cells. The cells {', '.join(visual_parts[:-1])}, and {visual_parts[-1]}."
 
+def normalize_phenotype_scores(df):
+    """
+    Normalize phenotype scores to a range of [0, 1] for better model conditioning.
+    Creates new columns with normalized scores.
+    """
+    score_columns = ['proliferation_score', 'migration_speed_score', 'cell_death_score']
+    
+    # Create normalized versions of each score
+    for col in score_columns:
+        if col in df.columns:
+            min_val = df[col].min()
+            max_val = df[col].max()
+            norm_col = f"{col}_normalized"
+            df[norm_col] = (df[col] - min_val) / (max_val - min_val)
+            
+    return df
+
 def main():
     parser = argparse.ArgumentParser(description="Create technical and visual prompts for time-lapse videos")
     parser.add_argument('--input', type=str, default=INPUT_CSV_PATH, 
                         help='Path to input CSV with video paths')
     parser.add_argument('--output', type=str, default=OUTPUT_CSV_PATH,
                         help='Path to output CSV with prompts')
+    parser.add_argument('--normalize_scores', action='store_true',
+                        help='Normalize phenotype scores to [0,1] range')
     args = parser.parse_args()
     
     print(f"Loading data from {args.input}")
@@ -103,16 +123,29 @@ def main():
     df['technical_prompt'] = df.apply(create_technical_prompt, axis=1)
     df['visual_prompt'] = df.apply(create_visual_prompt, axis=1)
     
+    # Normalize phenotype scores if requested
+    if args.normalize_scores:
+        print("Normalizing phenotype scores...")
+        df = normalize_phenotype_scores(df)
+    
     # Save the enhanced CSV
     print(f"Saving enhanced data to {args.output}")
     df.to_csv(args.output, index=False)
     
-    # Print example prompts
-    print("\nExample prompts:")
+    # Print example prompts and scores
+    print("\nExample prompts and scores:")
     for i in range(min(5, len(df))):
         print(f"\nSample {i+1}:")
         print(f"- Technical: {df.iloc[i]['technical_prompt']}")
         print(f"- Visual: {df.iloc[i]['visual_prompt']}")
+        
+        # Print score information if available
+        score_cols = [col for col in df.columns if 'score' in col]
+        if score_cols:
+            print("- Phenotype scores:")
+            for col in score_cols:
+                if col in df.iloc[i]:
+                    print(f"  {col}: {df.iloc[i][col]:.4f}")
     
     print(f"\nComplete! Generated {len(df)} prompts")
 

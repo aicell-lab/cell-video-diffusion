@@ -254,6 +254,9 @@ def main():
                         'cell_death_label': metadata['cell_death'],
                         'migration_speed_label': metadata['migration_speed'],
                         'proliferation_label': metadata['proliferation'],
+                        'cell_death_score': samples_df.loc[metadata['row_idx'], 'cell_death'],
+                        'migration_speed_score': samples_df.loc[metadata['row_idx'], 'migration_speed'],
+                        'proliferation_score': samples_df.loc[metadata['row_idx'], 'proliferation'],
                         'extreme_count': metadata['extreme_count'],
                         'video_path': os.path.abspath(out_mp4_path),  # Absolute path
                         'video_filename': out_filename,  # Just the filename
@@ -280,6 +283,9 @@ def main():
                             'cell_death_label': metadata['cell_death'],
                             'migration_speed_label': metadata['migration_speed'],
                             'proliferation_label': metadata['proliferation'],
+                            'cell_death_score': samples_df.loc[metadata['row_idx'], 'cell_death'],
+                            'migration_speed_score': samples_df.loc[metadata['row_idx'], 'migration_speed'],
+                            'proliferation_score': samples_df.loc[metadata['row_idx'], 'proliferation'],
                             'extreme_count': metadata['extreme_count'],
                             'video_path': os.path.abspath(out_mp4_path),  # Absolute path
                             'video_filename': out_filename,  # Just the filename

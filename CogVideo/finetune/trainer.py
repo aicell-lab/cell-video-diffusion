@@ -414,6 +414,7 @@ class Trainer:
 
     def prepare_for_training(self) -> None:
         # Prepare phenotype_embedder if it exists and is enabled
+        import pdb; pdb.set_trace()
         if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
             self.components.transformer, self.components.phenotype_embedder, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
                 self.components.transformer, self.components.phenotype_embedder, self.optimizer, self.data_loader, self.lr_scheduler

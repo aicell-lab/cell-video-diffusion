@@ -12,7 +12,8 @@ module load Mambaforge/23.3.1-1-hpc1-bdist
 
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
-DATASET_NAME="IDR0013-FILTERED"
+DATASET_NAME="IDR0013-FILTERED-2"
+PHENOTYPE_MODULE="multi"
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -23,12 +24,13 @@ MODEL_ARGS=(
     --model_name "cogvideox1.5-t2v"
     --model_type "t2v"
     --training_type "sft"
-    --use_phenotype_conditioning false  # Whether to use phenotype conditioning (default: false)
+    --use_phenotype_conditioning True  # Whether to use phenotype conditioning (default: false)
+    --phenotype_module ${PHENOTYPE_MODULE}  # Use "single" or "multi" for different embedding approaches
 )
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/sft/${DATASET_NAME}-t2v"
+    --output_dir "../models/sft/${DATASET_NAME}-t2v-special-${PHENOTYPE_MODULE}"
     --report_to "wandb"
 )
 
@@ -75,7 +77,7 @@ VALIDATION_ARGS=(
 )
 
 # Combine all arguments and launch training with ZeRO optimization
-accelerate launch --main_process_port=29502 --config_file accelerate_config2.yaml train.py \
+accelerate launch --main_process_port=29502 --config_file accelerate_config1.yaml train.py \
     "${MODEL_ARGS[@]}" \
     "${OUTPUT_ARGS[@]}" \
     "${DATA_ARGS[@]}" \

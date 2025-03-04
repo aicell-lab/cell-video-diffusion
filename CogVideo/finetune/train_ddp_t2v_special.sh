@@ -15,7 +15,7 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 LORA_RANK=128
 LORA_ALPHA=64
 DATASET_NAME="IDR0013-FILTERED-2"
-
+PHENOTYPE_MODULE="multi"
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
 
@@ -26,11 +26,12 @@ MODEL_ARGS=(
     --model_type "t2v"
     --training_type "lora"
     --use_phenotype_conditioning true  # Whether to use phenotype conditioning (default: false)
+    --phenotype_module ${PHENOTYPE_MODULE}  # Use "single" or "multi" for different embedding approaches
 )
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/loras/${DATASET_NAME}-lora-t2v-r${LORA_RANK}"
+    --output_dir "../models/loras/${DATASET_NAME}-lora-t2v-special-${PHENOTYPE_MODULE}-r${LORA_RANK}"
     --report_to "wandb"
 )
 

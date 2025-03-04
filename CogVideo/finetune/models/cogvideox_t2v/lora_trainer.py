@@ -15,7 +15,7 @@ from typing_extensions import override
 from finetune.schemas import Components
 from finetune.trainer import Trainer
 from finetune.utils import unwrap_model
-from finetune.models.modules.phenotype_embedder import PhenotypeEmbedder
+from finetune.models.modules.phenotype_embedder import PhenotypeEmbedder, PhenotypeEmbedderMulti
 
 from ..utils import register
 
@@ -45,12 +45,23 @@ class CogVideoXT2VLoraTrainer(Trainer):
             # Get transformer hidden size to ensure compatibility
             text_hidden_size = components.text_encoder.config.hidden_size if hasattr(components.text_encoder, 'config') else 4096
             
-            components.phenotype_embedder = PhenotypeEmbedder(
-                input_dim=4,  # Four phenotype features
-                hidden_dim=256,
-                output_dim=text_hidden_size,  # Match text encoder hidden size
-                dropout=0.1
-            )
+            # Initialize the appropriate phenotype embedder based on configuration
+            if self.args.phenotype_module == "single":
+                components.phenotype_embedder = PhenotypeEmbedder(
+                    input_dim=4,  # Four phenotype features
+                    hidden_dim=256,
+                    output_dim=text_hidden_size,  # Match text encoder hidden size
+                    dropout=0.1
+                )
+            elif self.args.phenotype_module == "multi":
+                components.phenotype_embedder = PhenotypeEmbedderMulti(
+                    input_dim=4,  # Four phenotype features
+                    hidden_dim=256,
+                    output_dim=text_hidden_size,  # Match text encoder hidden size
+                    dropout=0.1
+                )
+            else:
+                raise ValueError(f"Unknown phenotype module type: {self.args.phenotype_module}")
 
         return components
 
@@ -128,12 +139,26 @@ class CogVideoXT2VLoraTrainer(Trainer):
             phenotype_data = batch["phenotypes"]
             phenotype_embedding = self.components.phenotype_embedder(phenotype_data)
             
-            # Prepend phenotype embedding and discard last token
-            # phenotype_embedding shape: [batch_size, 1, hidden_size]
-            # prompt_embedding shape: [batch_size, seq_len, hidden_size]
-            prompt_embedding = torch.cat([phenotype_embedding, prompt_embedding[:, :-1, :]], dim=1)
+            # Handle combining embeddings based on phenotype module type
+            if self.args.phenotype_module == "single":
+                # Single token case: prepend one token and discard last token from text
+                # phenotype_embedding shape: [batch_size, 1, hidden_size]
+                # prompt_embedding shape: [batch_size, seq_len, hidden_size]
+                prompt_embedding = torch.cat([phenotype_embedding, prompt_embedding[:, :-1, :]], dim=1)
+            else:  # "multi"
+                # Multi-token case: prepend 4 tokens and discard last 4 tokens from text
+                # phenotype_embedding shape: [batch_size, 4, hidden_size]
+                # prompt_embedding shape: [batch_size, seq_len, hidden_size]
+                # We need to discard the last 4 tokens to maintain the same sequence length
+                tokens_to_discard = phenotype_embedding.size(1)  # Should be 4
+                prompt_embedding = torch.cat(
+                    [phenotype_embedding, prompt_embedding[:, :-tokens_to_discard, :]], 
+                    dim=1
+                )
 
-        # Shape of prompt_embedding: [B, seq_len+1, hidden_size] when phenotype conditioning is used
+        # Shape of prompt_embedding: [B, seq_len, hidden_size] when phenotype conditioning is not used
+        # Shape of prompt_embedding: [B, seq_len+1, hidden_size] when single token phenotype conditioning is used
+        # Shape of prompt_embedding: [B, seq_len+4, hidden_size] when multi token phenotype conditioning is used
         
         # Shape of latent: [B, C, F, H, W] = [2, 16, 21, 96, 170]
 

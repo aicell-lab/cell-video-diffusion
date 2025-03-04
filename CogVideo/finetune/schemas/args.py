@@ -18,6 +18,7 @@ class Args(BaseModel):
     use_phenotype_conditioning: bool = False
     phenotype_column: Path | None = None
     validation_phenotypes: Path | None = None
+    phenotype_module: Literal["single", "multi"] = "single"
     ########## Output ##########
     output_dir: Path = Path("train_results/{:%Y-%m-%d-%H-%M-%S}".format(datetime.datetime.now()))
     report_to: Literal["tensorboard", "wandb", "all"] | None = None
@@ -274,6 +275,8 @@ class Args(BaseModel):
                           help="Path to file containing phenotype values")
         parser.add_argument("--validation_phenotypes", type=str, default=None,
                           help="Path to file containing validation phenotype values")
+        parser.add_argument("--phenotype_module", type=str, default="single", choices=["single", "multi"],
+                          help="Type of phenotype embedding: 'single' for one token or 'multi' for one token per dimension")
 
         args = parser.parse_args()
 

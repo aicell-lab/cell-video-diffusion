@@ -529,6 +529,11 @@ class Trainer:
 
             self.components.transformer.train()
             models_to_accumulate = [self.components.transformer]
+            
+            # Add phenotype_embedder to models_to_accumulate if it exists and is enabled
+            if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+                self.components.phenotype_embedder.train()
+                models_to_accumulate.append(self.components.phenotype_embedder)
 
             for step, batch in enumerate(self.data_loader):
                 logger.debug(f"Starting step {step + 1}")
@@ -547,11 +552,21 @@ class Trainer:
                             if torch.is_tensor(grad_norm):
                                 grad_norm = grad_norm.item()
                         else:
+                            # Original grad norm calculation for transformer
                             grad_norm = accelerator.clip_grad_norm_(
                                 self.components.transformer.parameters(), self.args.max_grad_norm
                             )
                             if torch.is_tensor(grad_norm):
                                 grad_norm = grad_norm.item()
+                            
+                            # Additional grad norm calculation for phenotype embedder if enabled
+                            if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+                                grad_norm_mlp = accelerator.clip_grad_norm_(
+                                    self.components.phenotype_embedder.parameters(), self.args.max_grad_norm
+                                )
+                                if torch.is_tensor(grad_norm_mlp):
+                                    grad_norm_mlp = grad_norm_mlp.item()
+                                logs["grad_norm_mlp"] = grad_norm_mlp
 
                         logs["grad_norm"] = grad_norm
 
@@ -589,7 +604,6 @@ class Trainer:
 
             memory_statistics = get_memory_statistics()
             logger.info(f"Memory after epoch {epoch + 1}: {json.dumps(memory_statistics, indent=4)}")
-
         accelerator.wait_for_everyone()
         self.__maybe_save_checkpoint(global_step, must_save=True)
         if self.args.do_validation:

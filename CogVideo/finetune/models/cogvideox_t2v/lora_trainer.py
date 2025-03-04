@@ -91,6 +91,10 @@ class CogVideoXT2VLoraTrainer(Trainer):
     @override
     def collate_fn(self, samples: List[Dict[str, Any]]) -> Dict[str, Any]:
         ret = {"encoded_videos": [], "prompt_embedding": []}
+        
+        # Add phenotype collection when enabled
+        if self.args.use_phenotype_conditioning:
+            ret["phenotypes"] = []
 
         for sample in samples:
             encoded_video = sample["encoded_video"]
@@ -98,17 +102,36 @@ class CogVideoXT2VLoraTrainer(Trainer):
 
             ret["encoded_videos"].append(encoded_video)
             ret["prompt_embedding"].append(prompt_embedding)
+            
+            # Collect phenotype data when enabled
+            if self.args.use_phenotype_conditioning:
+                ret["phenotypes"].append(sample["phenotype"])
 
         ret["encoded_videos"] = torch.stack(ret["encoded_videos"])
         ret["prompt_embedding"] = torch.stack(ret["prompt_embedding"])
+        
+        # Stack phenotypes when enabled
+        if self.args.use_phenotype_conditioning:
+            ret["phenotypes"] = torch.stack(ret["phenotypes"])
 
         return ret
 
     @override
     def compute_loss(self, batch) -> torch.Tensor:
-        import pdb; pdb.set_trace()
         prompt_embedding = batch["prompt_embedding"]
         latent = batch["encoded_videos"]
+        
+        # Process phenotype data if enabled
+        if self.args.use_phenotype_conditioning and "phenotypes" in batch:
+            import pdb; pdb.set_trace()
+            # Get phenotype embeddings using our trainable embedder
+            phenotype_data = batch["phenotypes"]
+            phenotype_embedding = self.components.phenotype_embedder(phenotype_data)
+            
+            # Add phenotype embedding to text embedding - broadcasting will happen automatically
+            # phenotype_embedding shape: [batch_size, 1, hidden_size]
+            # prompt_embedding shape: [batch_size, seq_len, hidden_size]
+            prompt_embedding = prompt_embedding + phenotype_embedding
 
         # Shape of prompt_embedding: [B, seq_len, hidden_size] = [2, 226, 4096]
         # Shape of latent: [B, C, F, H, W] = [2, 16, 21, 96, 170]

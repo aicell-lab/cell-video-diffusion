@@ -232,3 +232,28 @@ def preprocess_video_with_buckets(
     frames = torch.stack([resize(f, nearest_res) for f in frames], dim=0)
 
     return frames
+
+
+def load_phenotypes(phenotype_path: Path) -> List[torch.Tensor]:
+    """
+    Load phenotype data from a CSV file.
+    
+    Args:
+        phenotype_path (Path): Path to the CSV file containing phenotype data
+        
+    Returns:
+        List[torch.Tensor]: List of phenotype tensors, each of shape [3]
+    """
+    phenotypes = []
+    with open(phenotype_path, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+        # Skip header row
+        for line in lines[1:]:
+            line = line.strip()
+            if len(line) > 0:
+                # Parse comma-separated values into tensor
+                values = [float(value.strip()) for value in line.split(",")]
+                if len(values) != 3:
+                    raise ValueError(f"Expected 3 phenotype values per line, but got {len(values)}")
+                phenotypes.append(torch.tensor(values, dtype=torch.float32))
+    return phenotypes

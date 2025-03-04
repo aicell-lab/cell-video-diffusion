@@ -26,3 +26,6 @@ class Components(BaseModel):
 
     # Scheduler
     scheduler: Any = None
+    
+    # Phenotype embedder
+    phenotype_embedder: Any = None

@@ -13,7 +13,11 @@ class Args(BaseModel):
     model_name: str
     model_type: Literal["i2v", "t2v"]
     training_type: Literal["lora", "sft"] = "lora"
-
+    
+    # Phenotype conditioning parameters
+    use_phenotype_conditioning: bool = False
+    phenotype_column: Path | None = None
+    validation_phenotypes: Path | None = None
     ########## Output ##########
     output_dir: Path = Path("train_results/{:%Y-%m-%d-%H-%M-%S}".format(datetime.datetime.now()))
     report_to: Literal["tensorboard", "wandb", "all"] | None = None
@@ -176,6 +180,13 @@ class Args(BaseModel):
             )
         return v
 
+    @field_validator("phenotype_column")
+    def validate_phenotype_column(cls, v: str | None, info: ValidationInfo) -> str | None:
+        values = info.data
+        if values.get("use_phenotype_conditioning") and not v:
+            raise ValueError("phenotype_column must be specified when use_phenotype_conditioning is True")
+        return v
+
     @classmethod
     def parse_args(cls):
         """Parse command line arguments and return Args instance"""
@@ -255,6 +266,14 @@ class Args(BaseModel):
         parser.add_argument("--validation_images", type=str, default=None)
         parser.add_argument("--validation_videos", type=str, default=None)
         parser.add_argument("--gen_fps", type=int, default=15)
+
+        # Phenotype conditioning
+        parser.add_argument("--use_phenotype_conditioning", type=lambda x: x.lower() == 'true', default=False,
+                          help="Whether to use phenotype conditioning")
+        parser.add_argument("--phenotype_column", type=str, default=None,
+                          help="Path to file containing phenotype values")
+        parser.add_argument("--validation_phenotypes", type=str, default=None,
+                          help="Path to file containing validation phenotype values")
 
         args = parser.parse_args()
 

@@ -33,6 +33,7 @@ from finetune.datasets.utils import (
     load_images,
     load_prompts,
     load_videos,
+    load_phenotypes,
     preprocess_image_with_resize,
     preprocess_video_with_resize,
 )
@@ -128,7 +129,6 @@ class Trainer:
             train_height=self.args.train_resolution[1],
             train_width=self.args.train_resolution[2],
         )
-
         self.components: Components = self.load_components()
         self.accelerator: Accelerator = None
         self.dataset: Dataset = None
@@ -245,6 +245,13 @@ class Trainer:
             self.accelerator.device, dtype=self.state.weight_dtype
         )
 
+        # Prepare PhenotypeEmbedder if phenotype conditioning is enabled
+        if self.args.use_phenotype_conditioning and self.components.phenotype_embedder is not None:
+            self.components.phenotype_embedder.requires_grad_(False)  # Freeze during data preparation, unfreeze in prepare_trainable_parameters
+            self.components.phenotype_embedder = self.components.phenotype_embedder.to(
+                self.accelerator.device, dtype=self.state.weight_dtype
+            )
+
         # Precompute latent for video and prompt embedding
         logger.info("Precomputing latent for video and prompt embedding ...")
         tmp_data_loader = torch.utils.data.DataLoader(
@@ -288,13 +295,17 @@ class Trainer:
 
         # For LoRA, we freeze all the parameters
         # For SFT, we train all the parameters in transformer model
-        # in the future, maybe start by unfreezing some layers of the transformer model
         for attr_name, component in vars(self.components).items():
             if hasattr(component, "requires_grad_"):
                 if self.args.training_type == "sft" and attr_name == "transformer":
                     component.requires_grad_(True)
                 else:
                     component.requires_grad_(False)
+        
+        # Handle phenotype embedder separately for clarity
+        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+            logger.info("Setting phenotype_embedder to be trainable")
+            self.components.phenotype_embedder.requires_grad_(True)
 
         if self.args.training_type == "lora":
             transformer_lora_config = LoraConfig(
@@ -306,8 +317,12 @@ class Trainer:
             self.components.transformer.add_adapter(transformer_lora_config)
             self.__prepare_saving_loading_hooks(transformer_lora_config)
 
-        # Load components needed for training to GPU (except transformer), and cast them to the specified data type
-        ignore_list = ["transformer"] + self.UNLOAD_LIST
+        # Load components needed for training to GPU (except transformer and phenotype_embedder), 
+        # and cast them to the specified data type
+        ignore_list = ["transformer"]
+        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+            ignore_list.append("phenotype_embedder")
+        ignore_list += self.UNLOAD_LIST
         self.__move_components_to_device(dtype=weight_dtype, ignore_list=ignore_list)
 
         if self.args.gradient_checkpointing:
@@ -318,6 +333,10 @@ class Trainer:
 
         # Make sure the trainable params are in float32
         cast_training_params([self.components.transformer], dtype=torch.float32)
+        
+        # Also cast phenotype_embedder params if it exists and is enabled
+        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+            cast_training_params([self.components.phenotype_embedder], dtype=torch.float32)
 
         # For LoRA, we only want to train the LoRA weights
         # For SFT, we want to train all the parameters
@@ -327,7 +346,21 @@ class Trainer:
             "lr": self.args.learning_rate,
         }
         params_to_optimize = [transformer_parameters_with_lr]
-        self.state.num_trainable_parameters = sum(p.numel() for p in trainable_parameters)
+        
+        # Add phenotype_embedder parameters to optimization if enabled
+        phenotype_embedder_parameters = []
+        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+            phenotype_embedder_parameters = list(filter(lambda p: p.requires_grad, self.components.phenotype_embedder.parameters()))
+            if phenotype_embedder_parameters:
+                phenotype_parameters_with_lr = {
+                    "params": phenotype_embedder_parameters,
+                    "lr": self.args.learning_rate,  # Using the same learning rate
+                }
+                params_to_optimize.append(phenotype_parameters_with_lr)
+                logger.info(f"Added {sum(p.numel() for p in phenotype_embedder_parameters)} phenotype embedder parameters to optimization")
+        
+        # Update total trainable parameter count
+        self.state.num_trainable_parameters = sum(p.numel() for p in trainable_parameters) + sum(p.numel() for p in phenotype_embedder_parameters)
 
         use_deepspeed_opt = (
             self.accelerator.state.deepspeed_plugin is not None
@@ -380,9 +413,15 @@ class Trainer:
         self.lr_scheduler = lr_scheduler
 
     def prepare_for_training(self) -> None:
-        self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
-            self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler
-        )
+        # Prepare phenotype_embedder if it exists and is enabled
+        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
+            self.components.transformer, self.components.phenotype_embedder, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
+                self.components.transformer, self.components.phenotype_embedder, self.optimizer, self.data_loader, self.lr_scheduler
+            )
+        else:
+            self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
+                self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler
+            )
 
         # We need to recalculate our total training steps as the size of the training dataloader may have changed.
         num_update_steps_per_epoch = math.ceil(len(self.data_loader) / self.args.gradient_accumulation_steps)
@@ -404,10 +443,28 @@ class Trainer:
             validation_videos = load_videos(self.args.validation_dir / self.args.validation_videos)
         else:
             validation_videos = [None] * len(validation_prompts)
+        
+        # Load phenotype data for validation if enabled
+        validation_phenotypes = [None] * len(validation_prompts)
+        if self.args.use_phenotype_conditioning and hasattr(self.args, "validation_phenotypes") and self.args.validation_phenotypes is not None:
+            try:
+                phenotype_path = self.args.validation_dir / self.args.validation_phenotypes
+                validation_phenotypes = load_phenotypes(phenotype_path)
+                
+                # If phenotype file has fewer entries than prompts, pad with None
+                if len(validation_phenotypes) < len(validation_prompts):
+                    validation_phenotypes = validation_phenotypes + [None] * (len(validation_prompts) - len(validation_phenotypes))
+                    logger.warning(f"Phenotype file has fewer entries ({len(validation_phenotypes)}) than prompts ({len(validation_prompts)})")
+                
+                logger.info(f"Loaded {len(validation_phenotypes)} phenotype entries for validation")
+            except Exception as e:
+                logger.warning(f"Failed to load validation phenotypes from {self.args.validation_phenotypes}: {e}")
+                validation_phenotypes = [None] * len(validation_prompts)
 
         self.state.validation_prompts = validation_prompts
         self.state.validation_images = validation_images
         self.state.validation_videos = validation_videos
+        self.state.validation_phenotypes = validation_phenotypes
 
     def prepare_trackers(self) -> None:
         logger.info("Initializing trackers")

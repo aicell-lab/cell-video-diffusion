@@ -11,7 +11,7 @@ from typing_extensions import override
 
 from finetune.constants import LOG_LEVEL, LOG_NAME
 
-from .utils import load_prompts, load_videos, preprocess_video_with_buckets, preprocess_video_with_resize
+from .utils import load_prompts, load_videos, preprocess_video_with_buckets, preprocess_video_with_resize, load_phenotypes
 
 
 if TYPE_CHECKING:
@@ -36,6 +36,7 @@ class BaseT2VDataset(Dataset):
         data_root (str): Root directory containing the dataset files
         caption_column (str): Path to file containing text prompts/captions
         video_column (str): Path to file containing video paths
+        phenotype_column (str, optional): Path to file containing phenotype values
         device (torch.device): Device to load the data on
         encode_video_fn (Callable[[torch.Tensor], torch.Tensor], optional): Function to encode videos
     """
@@ -45,6 +46,8 @@ class BaseT2VDataset(Dataset):
         data_root: str,
         caption_column: str,
         video_column: str,
+        phenotype_column: str = None,
+        use_phenotype_conditioning: bool = False,
         device: torch.device = None,
         trainer: "Trainer" = None,
         *args,
@@ -59,6 +62,23 @@ class BaseT2VDataset(Dataset):
         self.encode_video = trainer.encode_video
         self.encode_text = trainer.encode_text
         self.trainer = trainer
+        self.use_phenotype_conditioning = use_phenotype_conditioning
+        
+        # Load phenotypes if enabled
+        self.phenotypes = None
+        if use_phenotype_conditioning and phenotype_column:
+            self.phenotypes = load_phenotypes(data_root / phenotype_column)
+            
+            # Check if all phenotypes are valid
+            for i, phenotype in enumerate(self.phenotypes):
+                if phenotype.shape[0] != 3:
+                    raise ValueError(f"Expected phenotype to have 3 values, but got {phenotype.shape[0]} at index {i}")
+            
+            # Check if number of phenotypes matches number of videos
+            if len(self.phenotypes) != len(self.videos):
+                raise ValueError(
+                    f"Expected length of phenotypes and videos to be the same but found {len(self.phenotypes)=} and {len(self.videos)=}. Please ensure that the number of phenotype values and videos match in your dataset."
+                )
 
         # Check if all video files exist
         if any(not path.is_file() for path in self.videos):
@@ -138,7 +158,7 @@ class BaseT2VDataset(Dataset):
             logger.info(f"Saved encoded video to {encoded_video_path}", main_process_only=False)
 
         # shape of encoded_video: [C, F, H, W]
-        return {
+        result = {
             "prompt_embedding": prompt_embedding,
             "encoded_video": encoded_video,
             "video_metadata": {
@@ -147,6 +167,12 @@ class BaseT2VDataset(Dataset):
                 "width": encoded_video.shape[3],
             },
         }
+        
+        # Add phenotype data if enabled
+        if self.use_phenotype_conditioning and self.phenotypes is not None:
+            result["phenotype"] = self.phenotypes[index]
+            
+        return result
 
     def preprocess(self, video_path: Path) -> torch.Tensor:
         """

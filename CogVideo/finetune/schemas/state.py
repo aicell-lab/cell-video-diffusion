@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import torch
 from pydantic import BaseModel
@@ -25,5 +25,6 @@ class State(BaseModel):
     validation_prompts: List[str] = []
     validation_images: List[Path | None] = []
     validation_videos: List[Path | None] = []
+    validation_phenotypes: List[Dict[str, Any] | None] = []
 
     using_deepspeed: bool = False

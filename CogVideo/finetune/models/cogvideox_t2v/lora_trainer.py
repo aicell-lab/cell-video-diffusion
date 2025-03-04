@@ -15,6 +15,7 @@ from typing_extensions import override
 from finetune.schemas import Components
 from finetune.trainer import Trainer
 from finetune.utils import unwrap_model
+from finetune.models.modules.phenotype_embedder import PhenotypeEmbedder
 
 from ..utils import register
 
@@ -38,6 +39,18 @@ class CogVideoXT2VLoraTrainer(Trainer):
         components.vae = AutoencoderKLCogVideoX.from_pretrained(model_path, subfolder="vae")
 
         components.scheduler = CogVideoXDPMScheduler.from_pretrained(model_path, subfolder="scheduler")
+        
+        # Initialize phenotype embedder if phenotype conditioning is enabled
+        if self.args.use_phenotype_conditioning:
+            # Get transformer hidden size to ensure compatibility
+            text_hidden_size = components.text_encoder.config.hidden_size if hasattr(components.text_encoder, 'config') else 4096
+            
+            components.phenotype_embedder = PhenotypeEmbedder(
+                input_dim=3,  # Three phenotype features
+                hidden_dim=256,
+                output_dim=text_hidden_size,  # Match text encoder hidden size
+                dropout=0.1
+            )
 
         return components
 
@@ -93,18 +106,20 @@ class CogVideoXT2VLoraTrainer(Trainer):
 
     @override
     def compute_loss(self, batch) -> torch.Tensor:
+        import pdb; pdb.set_trace()
         prompt_embedding = batch["prompt_embedding"]
         latent = batch["encoded_videos"]
 
-        # Shape of prompt_embedding: [B, seq_len, hidden_size]
-        # Shape of latent: [B, C, F, H, W]
+        # Shape of prompt_embedding: [B, seq_len, hidden_size] = [2, 226, 4096]
+        # Shape of latent: [B, C, F, H, W] = [2, 16, 21, 96, 170]
 
+        # pad the latent (prepend frames) so that the math works out
         patch_size_t = self.state.transformer_config.patch_size_t
         if patch_size_t is not None:
             ncopy = latent.shape[2] % patch_size_t
             # Copy the first frame ncopy times to match patch_size_t
             first_frame = latent[:, :, :1, :, :]  # Get first frame [B, C, 1, H, W]
-            latent = torch.cat([first_frame.repeat(1, 1, ncopy, 1, 1), latent], dim=2)
+            latent = torch.cat([first_frame.repeat(1, 1, ncopy, 1, 1), latent], dim=2) # [2, 16, 22, 96, 170]
             assert latent.shape[2] % patch_size_t == 0
 
         batch_size, num_channels, num_frames, height, width = latent.shape

@@ -128,12 +128,13 @@ class CogVideoXT2VLoraTrainer(Trainer):
             phenotype_data = batch["phenotypes"]
             phenotype_embedding = self.components.phenotype_embedder(phenotype_data)
             
-            # Add phenotype embedding to text embedding - broadcasting will happen automatically
+            # Prepend phenotype embedding and discard last token
             # phenotype_embedding shape: [batch_size, 1, hidden_size]
             # prompt_embedding shape: [batch_size, seq_len, hidden_size]
-            prompt_embedding = prompt_embedding + phenotype_embedding
+            prompt_embedding = torch.cat([phenotype_embedding, prompt_embedding[:, :-1, :]], dim=1)
 
-        # Shape of prompt_embedding: [B, seq_len, hidden_size] = [2, 226, 4096]
+        # Shape of prompt_embedding: [B, seq_len+1, hidden_size] when phenotype conditioning is used
+        
         # Shape of latent: [B, C, F, H, W] = [2, 16, 21, 96, 170]
 
         # pad the latent (prepend frames) so that the math works out

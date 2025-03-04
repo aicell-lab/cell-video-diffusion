@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-04-prepare-for-training.py
+05-prepare-for-training.py
 
 Takes the CSV with video paths and prompts, then creates the files needed for training:
 - prompts.txt
@@ -10,7 +10,7 @@ Takes the CSV with video paths and prompts, then creates the files needed for tr
 for training, validation, and test subsets.
 
 Usage example:
-  python 04-prepare-for-training.py \
+  python 05-prepare-for-training.py \
     --input_csv ./output/extreme_phenotypes_with_prompts.csv \
     --output_dir ../../data/ready/IDR0013-FILTERED \
     --val_samples 2 \
@@ -19,13 +19,14 @@ Usage example:
     --prompt_prefix "<T2V>"
 
   # For phenotype conditioning:
-  python 04-prepare-for-training.py \
+  python 05-prepare-for-training.py \
     --input_csv ./output/extreme_phenotypes_with_prompts.csv \
     --output_dir ../../data/ready/IDR0013-FILTERED-2 \
     --val_samples 2 \
     --test_percentage 10 \
     --conditioning_type phenotype \
-    --phenotype_columns proliferation_score_normalized,migration_speed_score_normalized,cell_death_score_normalized \
+    --phenotype_columns initial_cell_count_normalized,proliferation_score_normalized,migration_speed_score_normalized,cell_death_score_normalized \
+    --prompt_prefix "<T2V>" \
     --base_prompt "Time-lapse microscopy video of multiple cells."
 """
 
@@ -60,7 +61,7 @@ def main():
     
     # Arguments for phenotype conditioning
     parser.add_argument("--phenotype_columns", type=str, 
-                        default="proliferation_score_normalized,migration_speed_score_normalized,cell_death_score_normalized",
+                        default="initial_cell_count_normalized,proliferation_score_normalized,migration_speed_score_normalized,cell_death_score_normalized",
                         help="Comma-separated list of phenotype columns to use for conditioning")
     parser.add_argument("--base_prompt", type=str, default="Time-lapse microscopy video of multiple cells.",
                         help="Base text prompt to use with phenotype conditioning")
@@ -131,7 +132,9 @@ def main():
         # Create simple column names for the CSV
         phenotype_simple_names = []
         for col in phenotype_cols:
-            if "proliferation" in col:
+            if "initial_cell_count" in col:
+                phenotype_simple_names.append("cell_count")
+            elif "proliferation" in col:
                 phenotype_simple_names.append("proliferation")
             elif "migration" in col:
                 phenotype_simple_names.append("migration_speed")

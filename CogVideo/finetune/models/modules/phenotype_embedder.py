@@ -6,13 +6,13 @@ class PhenotypeEmbedder(nn.Module):
     Module that embeds phenotype vectors into the same dimension as text embeddings.
     
     Args:
-        input_dim (int): Dimension of input phenotype vectors (default: 3)
+        input_dim (int): Dimension of input phenotype vectors (default: 4)
         hidden_dim (int): Dimension of hidden layer (default: 256)
         output_dim (int): Dimension of output embeddings (default: 4096)
         dropout (float): Dropout probability (default: 0.1)
     """
     
-    def __init__(self, input_dim=3, hidden_dim=256, output_dim=4096, dropout=0.1):
+    def __init__(self, input_dim=4, hidden_dim=256, output_dim=4096, dropout=0.1):
         super().__init__()
         
         self.input_dim = input_dim

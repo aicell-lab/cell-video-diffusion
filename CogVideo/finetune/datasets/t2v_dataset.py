@@ -69,11 +69,6 @@ class BaseT2VDataset(Dataset):
         if use_phenotype_conditioning and phenotype_column:
             self.phenotypes = load_phenotypes(data_root / phenotype_column)
             
-            # Check if all phenotypes are valid
-            for i, phenotype in enumerate(self.phenotypes):
-                if phenotype.shape[0] != 3:
-                    raise ValueError(f"Expected phenotype to have 3 values, but got {phenotype.shape[0]} at index {i}")
-            
             # Check if number of phenotypes matches number of videos
             if len(self.phenotypes) != len(self.videos):
                 raise ValueError(

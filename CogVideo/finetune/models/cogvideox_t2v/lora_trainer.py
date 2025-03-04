@@ -46,7 +46,7 @@ class CogVideoXT2VLoraTrainer(Trainer):
             text_hidden_size = components.text_encoder.config.hidden_size if hasattr(components.text_encoder, 'config') else 4096
             
             components.phenotype_embedder = PhenotypeEmbedder(
-                input_dim=3,  # Three phenotype features
+                input_dim=4,  # Four phenotype features
                 hidden_dim=256,
                 output_dim=text_hidden_size,  # Match text encoder hidden size
                 dropout=0.1

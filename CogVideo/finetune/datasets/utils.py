@@ -242,7 +242,7 @@ def load_phenotypes(phenotype_path: Path) -> List[torch.Tensor]:
         phenotype_path (Path): Path to the CSV file containing phenotype data
         
     Returns:
-        List[torch.Tensor]: List of phenotype tensors, each of shape [3]
+        List[torch.Tensor]: List of phenotype tensors, each of shape [num_phenotypes]
     """
     phenotypes = []
     with open(phenotype_path, "r", encoding="utf-8") as file:
@@ -253,7 +253,5 @@ def load_phenotypes(phenotype_path: Path) -> List[torch.Tensor]:
             if len(line) > 0:
                 # Parse comma-separated values into tensor
                 values = [float(value.strip()) for value in line.split(",")]
-                if len(values) != 3:
-                    raise ValueError(f"Expected 3 phenotype values per line, but got {len(values)}")
                 phenotypes.append(torch.tensor(values, dtype=torch.float32))
     return phenotypes

@@ -2,7 +2,7 @@
 #SBATCH -A berzelius-2025-23    # Your project/account
 #SBATCH --gpus=2 -C "fat"        # Number of GPUs needed
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
-#SBATCH -J cogvideo_t2v_train_r128         # Job name
+#SBATCH -J encode_videos         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
 #SBATCH -e logs/%x_%j.err        # Standard error log
 
@@ -12,7 +12,7 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
 LORA_RANK=128
 LORA_ALPHA=64
-DATASET_NAME="IDR0013-10plates"
+DATASET_NAME="IDR0013-FILTERED"
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -61,13 +61,13 @@ SYSTEM_ARGS=(
 CHECKPOINT_ARGS=(
     --checkpointing_steps 50 # save checkpoint every x steps
     --checkpointing_limit 50 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    --resume_from_checkpoint "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/models/loras/IDR0013-10plates-lora-t2v-r128/checkpoint-100"  # if you want to resume from a checkpoint, otherwise, comment this line
+    # --resume_from_checkpoint "/proj/aicell/users/x_aleho/video-diffusion/CogVideo/models/loras/IDR0013-10plates-lora-t2v-r128/checkpoint-100"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
-    --validation_dir "../../data/ready/${DATASET_NAME}-Val2"
+    --validation_dir "../../data/ready/${DATASET_NAME}-Val"
     --validation_steps 50  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --gen_fps 10

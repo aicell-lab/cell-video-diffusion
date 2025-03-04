@@ -36,7 +36,11 @@ DIRS=(
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_375"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_750"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_900"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/checkpoint-900-val-old"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/checkpoint-900-val-old"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-pr-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-pr-MED"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-pr-HIGH"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-pr-EXTREME"
 )
 
 #############################

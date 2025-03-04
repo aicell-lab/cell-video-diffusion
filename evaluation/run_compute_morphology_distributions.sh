@@ -17,7 +17,7 @@ trap "echo 'Received SIGINT. Killing background jobs...'; kill 0" SIGINT
 # USER-DEFINED PATHS/PARAMS #
 ##############################
 
-SCRIPT_PATH="compute_morphology_distributions_delayed.py"
+SCRIPT_PATH="compute_morphology_distributions.py"
 OUTPUT_BASE_DIR="results"
 LOG_DIR="logs/morphology"
 
@@ -49,13 +49,16 @@ DIRS=(
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r128_250"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r128_500"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r128_750"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r128_900"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_150"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_250"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_375"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_750"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_900"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/checkpoint-900-val-old"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r128_900"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_150"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_250"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_375"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_750"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_900"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/checkpoint-900-val-old"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-LOW"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-MED"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-HIGH"
 )
 
 #############################

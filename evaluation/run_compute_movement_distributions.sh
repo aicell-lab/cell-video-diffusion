@@ -37,7 +37,10 @@ DIRS=(
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_750"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_900"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/checkpoint-900-val"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_baseline"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_baseline"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-ms-LOW"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-ms-MED"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-ms-HIGH"
 )
 
 #############################

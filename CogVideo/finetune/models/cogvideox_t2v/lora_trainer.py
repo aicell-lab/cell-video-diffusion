@@ -265,7 +265,7 @@ class CogVideoXT2VLoraTrainer(Trainer):
             "width": self.state.train_width,
             "prompt": prompt,
             "generator": self.state.generator,
-            "num_inference_steps": 2,  # for debugging
+            # "num_inference_steps": 2,  # for debugging
         }
         
         # Add phenotypes if we're using phenotype conditioning
@@ -274,8 +274,12 @@ class CogVideoXT2VLoraTrainer(Trainer):
                 raise ValueError("Phenotype conditioning is enabled but no phenotypes found in validation data")
             
             phenotypes = eval_data["phenotypes"]
+            # Always convert to tensor and move to device, even if it's already a tensor
             if not isinstance(phenotypes, torch.Tensor):
-                phenotypes = torch.tensor(phenotypes, dtype=torch.float32, device=pipe.device)
+                phenotypes = torch.tensor(phenotypes, dtype=torch.float32)
+            
+            # Always ensure it's on the correct device
+            phenotypes = phenotypes.to(pipe.device)
             
             pipe_args["phenotypes"] = phenotypes
         

@@ -16,6 +16,27 @@ class CombinedTransformerWithEmbedder(nn.Module):
         # Forward important attributes from the transformer
         self.config = transformer.config
         
+    @property
+    def dtype(self):
+        """Return the dtype of the wrapped transformer model"""
+        transformer_dtype = self.transformer.dtype
+        
+        # Check for dtype mismatch if phenotype embedder exists
+        if self.phenotype_embedder is not None:
+            # Get a representative parameter from each
+            transformer_param = next(iter(self.transformer.parameters()))
+            phenotype_param = next(iter(self.phenotype_embedder.parameters()))
+            
+            if transformer_param.dtype != phenotype_param.dtype:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    f"Dtype mismatch between transformer ({transformer_param.dtype}) and "
+                    f"phenotype embedder ({phenotype_param.dtype}). Using transformer dtype."
+                )
+        
+        return transformer_dtype
+        
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -58,3 +79,10 @@ class CombinedTransformerWithEmbedder(nn.Module):
             attention_kwargs=attention_kwargs,
             return_dict=return_dict
         ) 
+
+    def to(self, *args, **kwargs):
+        """Handle moving both components to the target device/dtype"""
+        self.transformer = self.transformer.to(*args, **kwargs)
+        if self.phenotype_embedder is not None:
+            self.phenotype_embedder = self.phenotype_embedder.to(*args, **kwargs)
+        return self 

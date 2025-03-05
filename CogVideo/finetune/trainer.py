@@ -55,6 +55,7 @@ import numpy as np
 from skimage.metrics import structural_similarity as ssim
 import torchvision.transforms as T
 from torchvision.transforms.functional import to_tensor
+import os
 
 def count_nuclei_basic_threshold(frame_bgr, threshold=50, min_area=5):
     """
@@ -329,9 +330,9 @@ class Trainer:
         if self.args.gradient_checkpointing:
             # Use transformer.transformer to access the actual transformer inside the combined model
             if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:  
-                self.components.transformer.transformer.enable_gradient_checkpointing() # TODO FIX THIS
+                self.components.transformer.transformer.enable_gradient_checkpointing()
             else:
-                self.components.transformer.enable_gradient_checkpointing() # TODO FIX THIS
+                self.components.transformer.enable_gradient_checkpointing()
 
     def prepare_optimizer(self) -> None:
         logger.info("Initializing optimizer and lr scheduler")
@@ -659,6 +660,14 @@ class Trainer:
             pipe.enable_model_cpu_offload(device=self.accelerator.device)
             pipe = pipe.to(dtype=self.state.weight_dtype)
         
+        # Check if we have validation phenotypes
+        has_validation_phenotypes = (
+            self.args.use_phenotype_conditioning and 
+            hasattr(self, 'state') and 
+            hasattr(self.state, 'validation_phenotypes') and 
+            len(self.state.validation_phenotypes) == num_validation_samples
+        )
+        
         # Process validation samples
         all_processes_artifacts = []
         for i in range(num_validation_samples):
@@ -669,8 +678,16 @@ class Trainer:
             prompt = self.state.validation_prompts[i]
             logger.info(f"Process {accelerator.process_index}, i: {i}, Prompt: {prompt}", main_process_only=False)
             
-            # Run validation step with just the prompt for t2v
-            validation_artifacts = self.validation_step({"prompt": prompt}, pipe)
+            # Prepare validation data with prompt
+            eval_data = {"prompt": prompt}
+            
+            # Add phenotypes if available
+            if has_validation_phenotypes:
+                eval_data["phenotypes"] = self.state.validation_phenotypes[i]
+                logger.info(f"Using phenotype values: {self.state.validation_phenotypes[i]}", main_process_only=False)
+            
+            # Run validation step with the prepared data
+            validation_artifacts = self.validation_step(eval_data, pipe)
             
             # Process generated artifacts
             for k, (artifact_type, artifact_value) in enumerate(validation_artifacts):
@@ -680,15 +697,27 @@ class Trainer:
                 # Generate filename and save video
                 prompt_filename = string_to_filename(prompt)[:25]
                 hash_suffix = hashlib.md5(prompt[::-1].encode()).hexdigest()[:5]
-                gen_filename = f"validation-gen-{step}-{i}-{prompt_filename}-{hash_suffix}.mp4"
+                
+                # Add phenotype values to filename if using phenotype conditioning
+                phenotype_str = ""
+                if has_validation_phenotypes:
+                    phenotype_values = self.state.validation_phenotypes[i]
+                    phenotype_str = f"-pheno[{','.join([f'{p:.2f}' for p in phenotype_values])}]"
+                
+                gen_filename = f"validation-gen-{step}-{i}-{prompt_filename}{phenotype_str}-{hash_suffix}.mp4"
                 validation_path = self.args.output_dir / "validation_res"
                 gen_path = str(validation_path / gen_filename)
                 
                 logger.info(f"Process {accelerator.process_index}, i: {i}, Saving generated video to {gen_path}", main_process_only=False)
                 export_to_video(artifact_value, gen_path, fps=self.args.gen_fps)
                 
+                # Add phenotype values to wandb caption
+                caption = f"Sample {i} - {prompt}"
+                if has_validation_phenotypes:
+                    caption += f" | Phenotypes: {self.state.validation_phenotypes[i]}"
+                
                 # Log to wandb
-                video_wandb = wandb.Video(gen_path, caption=f"Sample {i} - {prompt}")
+                video_wandb = wandb.Video(gen_path, caption=caption)
                 all_processes_artifacts.append(video_wandb)
         
         # Gather artifacts from all processes
@@ -1053,43 +1082,102 @@ class Trainer:
         def save_model_hook(models, weights, output_dir):
             if self.accelerator.is_main_process:
                 transformer_lora_layers_to_save = None
+                phenotype_embedder_to_save = None  # Add this to store phenotype weights
 
                 for model in models:
-                    if isinstance(
-                        unwrap_model(self.accelerator, model),
+                    unwrapped_model = unwrap_model(self.accelerator, model)
+                    # Check if it's our combined model type
+                    from finetune.models.modules.combined_model import CombinedTransformerWithEmbedder
+                    
+                    if isinstance(unwrapped_model, CombinedTransformerWithEmbedder):
+                        # Extract the inner transformer which has the PEFT/LoRA layers
+                        inner_transformer = unwrapped_model.transformer
+                        transformer_lora_layers_to_save = get_peft_model_state_dict(inner_transformer)
+                        
+                        # Save phenotype embedder if it exists
+                        if unwrapped_model.phenotype_embedder is not None:
+                            phenotype_embedder_to_save = unwrapped_model.phenotype_embedder.state_dict()
+                    elif isinstance(
+                        unwrapped_model,
                         type(unwrap_model(self.accelerator, self.components.transformer)),
                     ):
-                        model = unwrap_model(self.accelerator, model)
-                        transformer_lora_layers_to_save = get_peft_model_state_dict(model)
+                        # Original case
+                        transformer_lora_layers_to_save = get_peft_model_state_dict(unwrapped_model)
                     else:
-                        raise ValueError(f"Unexpected save model: {model.__class__}")
+                        raise ValueError(f"Unexpected save model: {unwrapped_model.__class__}")
 
                     # make sure to pop weight so that corresponding model is not saved again
                     if weights:
                         weights.pop()
 
+                # First save LoRA weights using existing pipeline method
                 self.components.pipeline_cls.save_lora_weights(
                     output_dir,
                     transformer_lora_layers=transformer_lora_layers_to_save,
                 )
+                
+                # Then save phenotype embedder weights if they exist
+                if phenotype_embedder_to_save is not None:
+                    output_dir = Path(output_dir)
+                    phenotype_dir = output_dir / "phenotype_embedder"
+                    phenotype_dir.mkdir(exist_ok=True, parents=True)
+                    
+                    # Save the phenotype embedder weights
+                    torch.save(
+                        phenotype_embedder_to_save,
+                        phenotype_dir / "model.safetensors",
+                    )
+                    logger.info(f"Phenotype embedder weights saved to {phenotype_dir}")
 
         def load_model_hook(models, input_dir):
+            transformer_ = None
+            from finetune.models.modules.combined_model import CombinedTransformerWithEmbedder
+            
             if not self.accelerator.distributed_type == DistributedType.DEEPSPEED:
                 while len(models) > 0:
                     model = models.pop()
-                    if isinstance(
-                        unwrap_model(self.accelerator, model),
+                    unwrapped_model = unwrap_model(self.accelerator, model)
+                    
+                    # Handle different model types
+                    if isinstance(unwrapped_model, CombinedTransformerWithEmbedder):
+                        # Combined model with phenotype embedder
+                        transformer_ = unwrapped_model.transformer
+                        
+                        # Load phenotype embedder weights if they exist
+                        phenotype_dir = os.path.join(input_dir, "phenotype_embedder")
+                        if unwrapped_model.phenotype_embedder is not None and os.path.exists(phenotype_dir):
+                            phenotype_path = os.path.join(phenotype_dir, "model.safetensors")
+                            if os.path.exists(phenotype_path):
+                                phenotype_state_dict = torch.load(phenotype_path)
+                                unwrapped_model.phenotype_embedder.load_state_dict(phenotype_state_dict)
+                                logger.info(f"Loaded phenotype embedder weights from {phenotype_dir}")
+                    elif isinstance(
+                        unwrapped_model,
                         type(unwrap_model(self.accelerator, self.components.transformer)),
                     ):
-                        transformer_ = unwrap_model(self.accelerator, model)
+                        # Original case - regular transformer model
+                        transformer_ = unwrapped_model
                     else:
-                        raise ValueError(f"Unexpected save model: {unwrap_model(self.accelerator, model).__class__}")
+                        raise ValueError(f"Unexpected save model: {unwrapped_model.__class__}")
             else:
+                # DeepSpeed loading path
                 transformer_ = unwrap_model(self.accelerator, self.components.transformer).__class__.from_pretrained(
                     self.args.model_path, subfolder="transformer"
                 )
                 transformer_.add_adapter(transformer_lora_config)
+                
+                # For DeepSpeed, check if we have a combined model with phenotype embedder
+                unwrapped_combined = unwrap_model(self.accelerator, self.components.transformer)
+                if isinstance(unwrapped_combined, CombinedTransformerWithEmbedder) and unwrapped_combined.phenotype_embedder is not None:
+                    phenotype_dir = os.path.join(input_dir, "phenotype_embedder")
+                    if os.path.exists(phenotype_dir):
+                        phenotype_path = os.path.join(phenotype_dir, "model.safetensors")
+                        if os.path.exists(phenotype_path):
+                            phenotype_state_dict = torch.load(phenotype_path)
+                            unwrapped_combined.phenotype_embedder.load_state_dict(phenotype_state_dict)
+                            logger.info(f"Loaded phenotype embedder weights for DeepSpeed from {phenotype_dir}")
 
+            # Original LoRA loading code
             lora_state_dict = self.components.pipeline_cls.lora_state_dict(input_dir)
             transformer_state_dict = {
                 f'{k.replace("transformer.", "")}': v

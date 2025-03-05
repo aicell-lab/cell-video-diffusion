@@ -82,13 +82,24 @@ class CogVideoXT2VLoraTrainer(Trainer):
     
     @override
     def initialize_pipeline(self) -> CogVideoXPipeline:
+        # Unwrap the combined model - the transformer is already our combined model
+        transformer = unwrap_model(self.accelerator, self.components.transformer)
+        
+        # Create pipeline with the combined model
         pipe = CogVideoXPipeline(
             tokenizer=self.components.tokenizer,
             text_encoder=self.components.text_encoder,
             vae=self.components.vae,
-            transformer=unwrap_model(self.accelerator, self.components.transformer),
+            transformer=transformer,
             scheduler=self.components.scheduler,
         )
+        
+        # Add a flag to indicate phenotype capability if applicable
+        if hasattr(transformer, 'phenotype_embedder') and transformer.phenotype_embedder is not None:
+            pipe._supports_phenotype = True
+        else:
+            pipe._supports_phenotype = False
+        
         return pipe
 
     @override
@@ -202,7 +213,6 @@ class CogVideoXT2VLoraTrainer(Trainer):
         # import pdb; pdb.set_trace()
         if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder'):
             # Use the combined model with phenotypes parameter
-            import pdb; pdb.set_trace()
             predicted_noise = self.components.transformer(
                 hidden_states=latent_added_noise,
                 encoder_hidden_states=prompt_embedding,
@@ -244,14 +254,33 @@ class CogVideoXT2VLoraTrainer(Trainer):
         """
         # prompt, image, video = eval_data["prompt"], eval_data["image"], eval_data["video"]
         prompt = eval_data["prompt"]
-
-        video_generate = pipe(
-            num_frames=self.state.train_frames,
-            height=self.state.train_height,
-            width=self.state.train_width,
-            prompt=prompt,
-            generator=self.state.generator,
-        ).frames[0]
+        
+        # Use same phenotype conditioning check as elsewhere in the code
+        use_phenotypes = self.args.use_phenotype_conditioning and hasattr(pipe.transformer, 'phenotype_embedder') and pipe.transformer.phenotype_embedder is not None
+        
+        # Pipeline arguments
+        pipe_args = {
+            "num_frames": self.state.train_frames,
+            "height": self.state.train_height,
+            "width": self.state.train_width,
+            "prompt": prompt,
+            "generator": self.state.generator,
+            "num_inference_steps": 2,  # for debugging
+        }
+        
+        # Add phenotypes if we're using phenotype conditioning
+        if use_phenotypes:
+            if "phenotypes" not in eval_data:
+                raise ValueError("Phenotype conditioning is enabled but no phenotypes found in validation data")
+            
+            phenotypes = eval_data["phenotypes"]
+            if not isinstance(phenotypes, torch.Tensor):
+                phenotypes = torch.tensor(phenotypes, dtype=torch.float32, device=pipe.device)
+            
+            pipe_args["phenotypes"] = phenotypes
+        
+        # Call the pipeline with appropriate arguments
+        video_generate = pipe(**pipe_args).frames[0]
         return [("video", video_generate)]
 
     def prepare_rotary_positional_embeddings(

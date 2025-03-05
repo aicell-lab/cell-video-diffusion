@@ -24,7 +24,7 @@ MODEL_ARGS=(
     --model_name "cogvideox1.5-t2v"
     --model_type "t2v"
     --training_type "sft"
-    --use_phenotype_conditioning True  # Whether to use phenotype conditioning (default: false)
+    --use_phenotype_conditioning true  # Whether to use phenotype conditioning (default: false)
     --phenotype_module ${PHENOTYPE_MODULE}  # Use "single" or "multi" for different embedding approaches
 )
 
@@ -73,6 +73,7 @@ VALIDATION_ARGS=(
     --validation_dir "../../data/ready/${DATASET_NAME}-Val"
     --validation_steps 50  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
+    --validation_phenotypes "phenotypes.csv" 
     --gen_fps 10
 )
 

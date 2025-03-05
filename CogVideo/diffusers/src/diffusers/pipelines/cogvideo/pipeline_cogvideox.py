@@ -521,6 +521,7 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
         latents: Optional[torch.FloatTensor] = None,
         prompt_embeds: Optional[torch.FloatTensor] = None,
         negative_prompt_embeds: Optional[torch.FloatTensor] = None,
+        phenotypes: Optional[torch.FloatTensor] = None,
         output_type: str = "pil",
         return_dict: bool = True,
         attention_kwargs: Optional[Dict[str, Any]] = None,
@@ -550,6 +551,9 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
                 contain 1 extra frame because CogVideoX is conditioned with (num_seconds * fps + 1) frames where
                 num_seconds is 6 and fps is 8. However, since videos can be saved at any fps, the only condition that
                 needs to be satisfied is that of divisibility mentioned above.
+            phenotypes (`torch.FloatTensor`, *optional*):
+                Pre-computed phenotype data for conditioning the generation. If provided and the model supports phenotype
+                conditioning, this will be used to modify the prompt embeddings.
             num_inference_steps (`int`, *optional*, defaults to 50):
                 The number of denoising steps. More denoising steps usually lead to a higher quality image at the
                 expense of slower inference.
@@ -609,7 +613,6 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
             [`~pipelines.cogvideo.pipeline_cogvideox.CogVideoXPipelineOutput`] if `return_dict` is True, otherwise a
             `tuple`. When returning a tuple, the first element is a list with the generated images.
         """
-        # import pdb; pdb.set_trace()
         if isinstance(callback_on_step_end, (PipelineCallback, MultiPipelineCallbacks)):
             callback_on_step_end_tensor_inputs = callback_on_step_end.tensor_inputs
 
@@ -662,9 +665,25 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
         )
         # prompt_embeds: [batch_size, 226, 4096]
         # negative_prompt_embeds: [batch_size, 226, 4096]
+
+        # Concatenate prompt_embeds
         if do_classifier_free_guidance:
             prompt_embeds = torch.cat([negative_prompt_embeds, prompt_embeds], dim=0)
-        # prompt_embeds: [batch_size * 2, 226, 4096]
+
+        # Prepare phenotypes in the same way
+        has_phenotype_support = hasattr(self.transformer, 'phenotype_embedder') and self.transformer.phenotype_embedder is not None
+        if has_phenotype_support and phenotypes is not None:
+            # Ensure phenotypes has the right shape [batch_size, phenotype_dim]
+            if len(phenotypes.shape) == 1:
+                # If it's just a 1D vector, add batch dimension
+                phenotypes = phenotypes.unsqueeze(0)
+                
+            # If we have CFG, duplicate along batch dimension exactly like prompt_embeds
+            if do_classifier_free_guidance:
+                # Create unconditional (zero) phenotypes with same shape
+                unconditional_phenotypes = torch.zeros_like(phenotypes)
+                # Concatenate along batch dimension
+                phenotypes = torch.cat([unconditional_phenotypes, phenotypes], dim=0)
 
         # 4. Prepare timesteps
         timesteps, num_inference_steps = retrieve_timesteps(self.scheduler, num_inference_steps, device, timesteps)
@@ -708,7 +727,6 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
 
         # 8. Denoising loop
         num_warmup_steps = max(len(timesteps) - num_inference_steps * self.scheduler.order, 0)
-
         with self.progress_bar(total=num_inference_steps) as progress_bar:
             # for DPM-solver++
             old_pred_original_sample = None
@@ -724,14 +742,27 @@ class CogVideoXPipeline(DiffusionPipeline, CogVideoXLoraLoaderMixin):
                 timestep = t.expand(latent_model_input.shape[0])
 
                 # predict noise model_output
-                noise_pred = self.transformer(
-                    hidden_states=latent_model_input, # [B, T, C, H, W] e.g. [1, 13, 16, 60, 90]
-                    encoder_hidden_states=prompt_embeds, # [B, 226, 4096]
-                    timestep=timestep, # [B]
-                    image_rotary_emb=image_rotary_emb, # [T*H*W/patch_size = 13*60*90/4 = 17550, 64]
-                    attention_kwargs=attention_kwargs,
-                    return_dict=False,
-                )[0]
+                if has_phenotype_support and phenotypes is not None:
+                    noise_pred = self.transformer(
+                        hidden_states=latent_model_input,
+                        encoder_hidden_states=prompt_embeds,
+                        timestep=timestep,
+                        phenotypes=phenotypes,
+                        image_rotary_emb=image_rotary_emb,
+                        attention_kwargs=attention_kwargs,
+                        return_dict=False,
+                    )[0]
+                else:
+                    # Original call without phenotypes
+                    noise_pred = self.transformer(
+                        hidden_states=latent_model_input,
+                        encoder_hidden_states=prompt_embeds,
+                        timestep=timestep,
+                        image_rotary_emb=image_rotary_emb,
+                        attention_kwargs=attention_kwargs,
+                        return_dict=False,
+                    )[0]
+                
                 # noise_pred: [B, T, C, H, W] e.g. [1 (or 2 if CFG), 13, 16, 60, 90]
                 noise_pred = noise_pred.float()
 

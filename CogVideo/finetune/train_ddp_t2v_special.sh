@@ -14,8 +14,8 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
 LORA_RANK=128
 LORA_ALPHA=64
-DATASET_NAME="IDR0013-FILTERED-2"
-PHENOTYPE_MODULE="multi"
+DATASET_NAME="IDR0013-FILTERED-Special"
+PHENOTYPE_MODULE="single"
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
 

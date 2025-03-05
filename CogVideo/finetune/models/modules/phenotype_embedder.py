@@ -47,6 +47,12 @@ class PhenotypeEmbedder(nn.Module):
         Returns:
             torch.Tensor: Embedded phenotypes of shape [batch_size, 1, output_dim]
         """
+        # Cast phenotypes to match the dtype of the first layer's parameters
+        # This ensures consistent dtype throughout the embedder
+        first_layer_dtype = self.layers[0].weight.dtype
+        if phenotypes.dtype != first_layer_dtype:
+            phenotypes = phenotypes.to(dtype=first_layer_dtype)
+        
         # [batch_size, input_dim] -> [batch_size, output_dim]
         embeddings = self.layers(phenotypes)
         

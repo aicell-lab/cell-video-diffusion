@@ -245,12 +245,12 @@ class Trainer:
             self.accelerator.device, dtype=self.state.weight_dtype
         )
 
-        # Prepare PhenotypeEmbedder if phenotype conditioning is enabled
-        if self.args.use_phenotype_conditioning and self.components.phenotype_embedder is not None:
-            self.components.phenotype_embedder.requires_grad_(False)  # Freeze during data preparation, unfreeze in prepare_trainable_parameters
-            self.components.phenotype_embedder = self.components.phenotype_embedder.to(
-                self.accelerator.device, dtype=self.state.weight_dtype
-            )
+        # Prepare phenotype_embedder if part of the combined model
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            # Set requires_grad to False during data preparation (will be unfrozen later)
+            self.components.transformer.phenotype_embedder.requires_grad_(False)
+            
+            # We don't need to move it to the device separately as it will be moved with the transformer
 
         # Precompute latent for video and prompt embedding
         logger.info("Precomputing latent for video and prompt embedding ...")
@@ -302,10 +302,10 @@ class Trainer:
                 else:
                     component.requires_grad_(False)
         
-        # Handle phenotype embedder separately for clarity
-        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-            logger.info("Setting phenotype_embedder to be trainable")
-            self.components.phenotype_embedder.requires_grad_(True)
+        # If we're using phenotype conditioning, make sure the embedder is trainable
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            logger.info("Setting phenotype_embedder in combined model to be trainable")
+            self.components.transformer.phenotype_embedder.requires_grad_(True)
 
         if self.args.training_type == "lora":
             transformer_lora_config = LoraConfig(
@@ -314,19 +314,24 @@ class Trainer:
                 init_lora_weights=True,
                 target_modules=self.args.target_modules,
             )
-            self.components.transformer.add_adapter(transformer_lora_config)
+            # Use transformer.transformer to access the actual transformer inside the combined model
+            if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+                self.components.transformer.transformer.add_adapter(transformer_lora_config)
+            else:
+                self.components.transformer.add_adapter(transformer_lora_config)
             self.__prepare_saving_loading_hooks(transformer_lora_config)
 
-        # Load components needed for training to GPU (except transformer and phenotype_embedder), 
-        # and cast them to the specified data type
-        ignore_list = ["transformer"]
-        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-            ignore_list.append("phenotype_embedder")
-        ignore_list += self.UNLOAD_LIST
+        # Load components needed for training to GPU (except transformer)
+        # Remove phenotype_embedder from ignore_list since it's now part of the transformer
+        ignore_list = ["transformer"] + self.UNLOAD_LIST
         self.__move_components_to_device(dtype=weight_dtype, ignore_list=ignore_list)
 
         if self.args.gradient_checkpointing:
-            self.components.transformer.enable_gradient_checkpointing()
+            # Use transformer.transformer to access the actual transformer inside the combined model
+            if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:  
+                self.components.transformer.transformer.enable_gradient_checkpointing() # TODO FIX THIS
+            else:
+                self.components.transformer.enable_gradient_checkpointing() # TODO FIX THIS
 
     def prepare_optimizer(self) -> None:
         logger.info("Initializing optimizer and lr scheduler")
@@ -334,33 +339,37 @@ class Trainer:
         # Make sure the trainable params are in float32
         cast_training_params([self.components.transformer], dtype=torch.float32)
         
-        # Also cast phenotype_embedder params if it exists and is enabled
-        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-            cast_training_params([self.components.phenotype_embedder], dtype=torch.float32)
-
+        # Explicitly cast phenotype embedder params if it exists and is enabled
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            cast_training_params([self.components.transformer.phenotype_embedder], dtype=torch.float32)
+            # Double-check that the casting worked
+            for param in self.components.transformer.phenotype_embedder.parameters():
+                if param.requires_grad and param.dtype != torch.float32:
+                    logger.warning(f"Phenotype embedder parameter still has dtype {param.dtype} after casting to float32")
+                    param.data = param.data.to(torch.float32)
+        
         # For LoRA, we only want to train the LoRA weights
         # For SFT, we want to train all the parameters
+        # This will automatically include both transformer and phenotype_embedder parameters
         trainable_parameters = list(filter(lambda p: p.requires_grad, self.components.transformer.parameters()))
+        
         transformer_parameters_with_lr = {
             "params": trainable_parameters,
             "lr": self.args.learning_rate,
         }
         params_to_optimize = [transformer_parameters_with_lr]
         
-        # Add phenotype_embedder parameters to optimization if enabled
-        phenotype_embedder_parameters = []
-        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-            phenotype_embedder_parameters = list(filter(lambda p: p.requires_grad, self.components.phenotype_embedder.parameters()))
-            if phenotype_embedder_parameters:
-                phenotype_parameters_with_lr = {
-                    "params": phenotype_embedder_parameters,
-                    "lr": self.args.learning_rate,  # Using the same learning rate
-                }
-                params_to_optimize.append(phenotype_parameters_with_lr)
-                logger.info(f"Added {sum(p.numel() for p in phenotype_embedder_parameters)} phenotype embedder parameters to optimization")
+        # Log phenotype embedder parameters if enabled
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            phenotype_parameters = list(filter(lambda p: p.requires_grad, self.components.transformer.phenotype_embedder.parameters()))
+            if phenotype_parameters:
+                # These are already included in trainable_parameters, but log them for visibility
+                logger.info(f"Phenotype embedder has {sum(p.numel() for p in phenotype_parameters)} trainable parameters")
+                # Log their dtypes to verify
+                logger.info(f"Phenotype embedder parameter dtypes: {[p.dtype for p in phenotype_parameters[:3]]}")
         
         # Update total trainable parameter count
-        self.state.num_trainable_parameters = sum(p.numel() for p in trainable_parameters) + sum(p.numel() for p in phenotype_embedder_parameters)
+        self.state.num_trainable_parameters = sum(p.numel() for p in trainable_parameters)
 
         use_deepspeed_opt = (
             self.accelerator.state.deepspeed_plugin is not None
@@ -411,18 +420,20 @@ class Trainer:
 
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
+        logger.info(f"After optimizer creation - transformer param dtype: {next(self.components.transformer.parameters()).dtype}")
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            logger.info(f"After optimizer creation - phenotype embedder param dtype: {next(self.components.transformer.phenotype_embedder.parameters()).dtype}")
+
 
     def prepare_for_training(self) -> None:
-        # Prepare phenotype_embedder if it exists and is enabled
-        import pdb; pdb.set_trace()
-        if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-            self.components.transformer, self.components.phenotype_embedder, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
-                self.components.transformer, self.components.phenotype_embedder, self.optimizer, self.data_loader, self.lr_scheduler
-            )
-        else:
-            self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
-                self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler
-            )
+        # We have a single combined model now, so we don't need the conditional logic
+        # Just prepare all components together with a single call to accelerator.prepare()
+        self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler = self.accelerator.prepare(
+            self.components.transformer, self.optimizer, self.data_loader, self.lr_scheduler
+        )
+        logger.info(f"After accelerator.prepare() - transformer param dtype: {next(self.components.transformer.parameters()).dtype}")
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            logger.info(f"After accelerator.prepare() - phenotype embedder param dtype: {next(self.components.transformer.phenotype_embedder.parameters()).dtype}")
 
         # We need to recalculate our total training steps as the size of the training dataloader may have changed.
         num_update_steps_per_epoch = math.ceil(len(self.data_loader) / self.args.gradient_accumulation_steps)
@@ -526,15 +537,15 @@ class Trainer:
 
         free_memory()
         for epoch in range(first_epoch, self.args.train_epochs):
+            if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:  
+                logger.info(f"Start of epoch - phenotype embedder param dtype: {next(self.components.transformer.phenotype_embedder.parameters()).dtype}")
             logger.debug(f"Starting epoch ({epoch + 1}/{self.args.train_epochs})")
 
+            # Set combined model to train mode
             self.components.transformer.train()
-            models_to_accumulate = [self.components.transformer]
             
-            # Add phenotype_embedder to models_to_accumulate if it exists and is enabled
-            if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-                self.components.phenotype_embedder.train()
-                models_to_accumulate.append(self.components.phenotype_embedder)
+            # Our models_to_accumulate only needs the combined model now
+            models_to_accumulate = [self.components.transformer]
 
             for step, batch in enumerate(self.data_loader):
                 logger.debug(f"Starting step {step + 1}")
@@ -553,21 +564,13 @@ class Trainer:
                             if torch.is_tensor(grad_norm):
                                 grad_norm = grad_norm.item()
                         else:
-                            # Original grad norm calculation for transformer
+                            # Single grad norm calculation for the combined transformer
+                            # (which includes the phenotype embedder if enabled)
                             grad_norm = accelerator.clip_grad_norm_(
                                 self.components.transformer.parameters(), self.args.max_grad_norm
                             )
                             if torch.is_tensor(grad_norm):
                                 grad_norm = grad_norm.item()
-                            
-                            # Additional grad norm calculation for phenotype embedder if enabled
-                            if self.args.use_phenotype_conditioning and hasattr(self.components, "phenotype_embedder") and self.components.phenotype_embedder is not None:
-                                grad_norm_mlp = accelerator.clip_grad_norm_(
-                                    self.components.phenotype_embedder.parameters(), self.args.max_grad_norm
-                                )
-                                if torch.is_tensor(grad_norm_mlp):
-                                    grad_norm_mlp = grad_norm_mlp.item()
-                                logs["grad_norm_mlp"] = grad_norm_mlp
 
                         logs["grad_norm"] = grad_norm
 

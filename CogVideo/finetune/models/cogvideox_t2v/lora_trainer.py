@@ -16,9 +16,13 @@ from finetune.schemas import Components
 from finetune.trainer import Trainer
 from finetune.utils import unwrap_model
 from finetune.models.modules.phenotype_embedder import PhenotypeEmbedder, PhenotypeEmbedderMulti
+from finetune.constants import LOG_LEVEL, LOG_NAME
+from accelerate.logging import get_logger
 
 from ..utils import register
+from ...models.modules.combined_model import CombinedTransformerWithEmbedder
 
+logger = get_logger(LOG_NAME, LOG_LEVEL)
 
 class CogVideoXT2VLoraTrainer(Trainer):
     UNLOAD_LIST = ["text_encoder", "vae"]
@@ -34,7 +38,8 @@ class CogVideoXT2VLoraTrainer(Trainer):
 
         components.text_encoder = T5EncoderModel.from_pretrained(model_path, subfolder="text_encoder")
 
-        components.transformer = CogVideoXTransformer3DModel.from_pretrained(model_path, subfolder="transformer")
+        # Load transformer model
+        transformer = CogVideoXTransformer3DModel.from_pretrained(model_path, subfolder="transformer")
 
         components.vae = AutoencoderKLCogVideoX.from_pretrained(model_path, subfolder="vae")
 
@@ -47,14 +52,14 @@ class CogVideoXT2VLoraTrainer(Trainer):
             
             # Initialize the appropriate phenotype embedder based on configuration
             if self.args.phenotype_module == "single":
-                components.phenotype_embedder = PhenotypeEmbedder(
+                phenotype_embedder = PhenotypeEmbedder(
                     input_dim=4,  # Four phenotype features
                     hidden_dim=256,
                     output_dim=text_hidden_size,  # Match text encoder hidden size
                     dropout=0.1
                 )
             elif self.args.phenotype_module == "multi":
-                components.phenotype_embedder = PhenotypeEmbedderMulti(
+                phenotype_embedder = PhenotypeEmbedderMulti(
                     input_dim=4,  # Four phenotype features
                     hidden_dim=256,
                     output_dim=text_hidden_size,  # Match text encoder hidden size
@@ -62,9 +67,19 @@ class CogVideoXT2VLoraTrainer(Trainer):
                 )
             else:
                 raise ValueError(f"Unknown phenotype module type: {self.args.phenotype_module}")
+                
+            # Create combined model with transformer and phenotype embedder
+            components.transformer = CombinedTransformerWithEmbedder(
+                transformer=transformer,
+                phenotype_embedder=phenotype_embedder,
+                phenotype_module=self.args.phenotype_module
+            )
+        else:
+            # Just use the transformer directly if not using phenotype conditioning
+            components.transformer = transformer
 
         return components
-
+    
     @override
     def initialize_pipeline(self) -> CogVideoXPipeline:
         pipe = CogVideoXPipeline(
@@ -129,32 +144,10 @@ class CogVideoXT2VLoraTrainer(Trainer):
 
     @override
     def compute_loss(self, batch) -> torch.Tensor:
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder') and self.components.transformer.phenotype_embedder is not None:
+            logger.info(f"Start of epoch - phenotype embedder param dtype: {next(self.components.transformer.phenotype_embedder.parameters()).dtype}")
         prompt_embedding = batch["prompt_embedding"]
         latent = batch["encoded_videos"]
-        
-        # Process phenotype data if enabled
-        if self.args.use_phenotype_conditioning and "phenotypes" in batch:
-            import pdb; pdb.set_trace()
-            # Get phenotype embeddings using our trainable embedder
-            phenotype_data = batch["phenotypes"]
-            phenotype_embedding = self.components.phenotype_embedder(phenotype_data)
-            
-            # Handle combining embeddings based on phenotype module type
-            if self.args.phenotype_module == "single":
-                # Single token case: prepend one token and discard last token from text
-                # phenotype_embedding shape: [batch_size, 1, hidden_size]
-                # prompt_embedding shape: [batch_size, seq_len, hidden_size]
-                prompt_embedding = torch.cat([phenotype_embedding, prompt_embedding[:, :-1, :]], dim=1)
-            else:  # "multi"
-                # Multi-token case: prepend 4 tokens and discard last 4 tokens from text
-                # phenotype_embedding shape: [batch_size, 4, hidden_size]
-                # prompt_embedding shape: [batch_size, seq_len, hidden_size]
-                # We need to discard the last 4 tokens to maintain the same sequence length
-                tokens_to_discard = phenotype_embedding.size(1)  # Should be 4
-                prompt_embedding = torch.cat(
-                    [phenotype_embedding, prompt_embedding[:, :-tokens_to_discard, :]], 
-                    dim=1
-                )
 
         # Shape of prompt_embedding: [B, seq_len, hidden_size] when phenotype conditioning is not used
         # Shape of prompt_embedding: [B, seq_len+1, hidden_size] when single token phenotype conditioning is used
@@ -204,14 +197,29 @@ class CogVideoXT2VLoraTrainer(Trainer):
             else None
         )
 
-        # Predict noise
-        predicted_noise = self.components.transformer(
-            hidden_states=latent_added_noise,
-            encoder_hidden_states=prompt_embedding,
-            timestep=timesteps,
-            image_rotary_emb=rotary_emb,
-            return_dict=False,
-        )[0]
+        # Predict noise using transformer
+        # Check if we're using phenotype conditioning and if our transformer is the combined model
+        # import pdb; pdb.set_trace()
+        if self.args.use_phenotype_conditioning and hasattr(self.components.transformer, 'phenotype_embedder'):
+            # Use the combined model with phenotypes parameter
+            import pdb; pdb.set_trace()
+            predicted_noise = self.components.transformer(
+                hidden_states=latent_added_noise,
+                encoder_hidden_states=prompt_embedding,
+                timestep=timesteps,
+                phenotypes=batch.get("phenotypes", None),
+                image_rotary_emb=rotary_emb,
+                return_dict=False,
+            )[0]
+        else:
+            # Standard transformer call without phenotypes
+            predicted_noise = self.components.transformer(
+                hidden_states=latent_added_noise,
+                encoder_hidden_states=prompt_embedding,
+                timestep=timesteps,
+                image_rotary_emb=rotary_emb,
+                return_dict=False,
+            )[0]
 
         # Denoise
         latent_pred = self.components.scheduler.get_velocity(predicted_noise, latent_added_noise, timesteps)

@@ -111,7 +111,11 @@ class PhenotypeEmbedderMulti(nn.Module):
             torch.Tensor: Embedded phenotypes of shape [batch_size, input_dim, output_dim]
                           where each phenotype dimension gets its own token
         """
-        batch_size = phenotypes.size(0)
+        
+        # Cast phenotypes to match embedder dtype
+        first_embedder_dtype = self.embedders[0][0].weight.dtype
+        if phenotypes.dtype != first_embedder_dtype:
+            phenotypes = phenotypes.to(dtype=first_embedder_dtype)
         
         # Process each phenotype dimension separately
         embeddings = []

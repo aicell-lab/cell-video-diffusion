@@ -28,7 +28,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/sft/${DATASET_NAME}-t2v-special-${PHENOTYPE_MODULE}"
+    --output_dir "../models/sft/${DATASET_NAME}-t2v-special-${PHENOTYPE_MODULE}-final"
     --report_to "wandb"
 )
 
@@ -60,16 +60,16 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 25 # save checkpoint every x steps
+    --checkpointing_steps 100 # save checkpoint every x steps
     --checkpointing_limit 50 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    # --resume_from_checkpoint "/path/to/checkpoint"  # if you want to resume from a checkpoint, otherwise, comment this line
+    # --resume_from_checkpoint "../models/sft/IDR0013-FILTERED-2-t2v-special-single-test/checkpoint-50"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration
 VALIDATION_ARGS=(
     --do_validation true  # ["true", "false"]
     --validation_dir "../../data/ready/${DATASET_NAME}-Val"
-    --validation_steps 50  # should be multiple of checkpointing_steps
+    --validation_steps 100  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
     --validation_phenotypes "phenotypes.csv" 
     --gen_fps 10

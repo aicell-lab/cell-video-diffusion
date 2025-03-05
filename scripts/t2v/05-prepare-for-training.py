@@ -14,8 +14,7 @@ Usage example:
     --input_csv ./output/extreme_phenotypes_with_prompts.csv \
     --output_dir ../../data/ready/IDR0013-FILTERED \
     --val_samples 2 \
-    --test_percentage 10 \
-    --prompt_type visual
+    --test_percentage 10
 
   # For phenotype conditioning:
   python 05-prepare-for-training.py \
@@ -93,10 +92,7 @@ def main():
     if args.conditioning_type == "text":
         # Text-based conditioning (original approach)
         # Determine which prompt column to use
-        prompt_column = f"{args.prompt_type}_prompt"
-        if prompt_column not in df.columns:
-            print(f"Error: Prompt column '{prompt_column}' not found in CSV")
-            return
+        prompt_column = "prompt"
 
         # Create lists of prompts and video paths
         # Add prefix to prompts if specified

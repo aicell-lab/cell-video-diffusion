@@ -10,7 +10,7 @@ module load Mambaforge/23.3.1-1-hpc1-bdist
 
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
-DATASET_NAME="IDR0013-FILTERED-uncond"
+DATASET_NAME="IDR0013-FILTERED"
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -25,7 +25,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/sft/${DATASET_NAME}-t2v-uncond-final"
+    --output_dir "../models/sft/${DATASET_NAME}-t2v-prompt-final"
     --report_to "wandb"
 )
 

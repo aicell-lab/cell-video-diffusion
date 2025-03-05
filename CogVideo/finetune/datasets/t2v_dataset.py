@@ -56,13 +56,18 @@ class BaseT2VDataset(Dataset):
         super().__init__()
 
         data_root = Path(data_root)
-        self.prompts = load_prompts(data_root / caption_column)
         self.videos = load_videos(data_root / video_column)
         self.device = device
         self.encode_video = trainer.encode_video
         self.encode_text = trainer.encode_text
         self.trainer = trainer
         self.use_phenotype_conditioning = use_phenotype_conditioning
+        
+        # Load prompts, or create empty prompts if file is empty
+        self.prompts = load_prompts(data_root / caption_column)
+        if len(self.prompts) == 0:
+            logger.warning(f"Empty prompts file found at {data_root / caption_column}. Using empty strings as prompts.")
+            self.prompts = [""] * len(self.videos)
         
         # Load phenotypes if enabled
         self.phenotypes = None

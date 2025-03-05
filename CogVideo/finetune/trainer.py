@@ -446,16 +446,23 @@ class Trainer:
 
     def prepare_for_validation(self):
         validation_prompts = load_prompts(self.args.validation_dir / self.args.validation_prompts)
-
+        
+        # Load validation videos if specified
+        if self.args.validation_videos is not None:
+            validation_videos = load_videos(self.args.validation_dir / self.args.validation_videos)
+            
+            # If prompts file is empty, create empty prompts for each video
+            if len(validation_prompts) == 0:
+                logger.warning(f"Empty validation prompts file found. Using empty strings as prompts.")
+                validation_prompts = [""] * len(validation_videos)
+        else:
+            validation_videos = [None] * len(validation_prompts)
+        
+        # Load validation images if specified
         if self.args.validation_images is not None:
             validation_images = load_images(self.args.validation_dir / self.args.validation_images)
         else:
             validation_images = [None] * len(validation_prompts)
-
-        if self.args.validation_videos is not None:
-            validation_videos = load_videos(self.args.validation_dir / self.args.validation_videos)
-        else:
-            validation_videos = [None] * len(validation_prompts)
         
         # Load phenotype data for validation if enabled
         validation_phenotypes = [None] * len(validation_prompts)

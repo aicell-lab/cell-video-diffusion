@@ -15,8 +15,7 @@ Usage example:
     --output_dir ../../data/ready/IDR0013-FILTERED \
     --val_samples 2 \
     --test_percentage 10 \
-    --prompt_type visual \
-    --prompt_prefix "<T2V>"
+    --prompt_type visual
 
   # For phenotype conditioning:
   python 05-prepare-for-training.py \
@@ -26,7 +25,6 @@ Usage example:
     --test_percentage 10 \
     --conditioning_type phenotype \
     --phenotype_columns initial_cell_count_normalized,proliferation_score_normalized,migration_speed_score_normalized,cell_death_score_normalized \
-    --prompt_prefix "<T2V>" \
     --base_prompt "Time-lapse microscopy video of multiple cells."
 """
 
@@ -56,7 +54,7 @@ def main():
     # Arguments for text conditioning
     parser.add_argument("--prompt_type", type=str, default="visual", choices=["technical", "visual"],
                         help="Which prompt type to use (for text conditioning): 'technical' or 'visual'")
-    parser.add_argument("--prompt_prefix", type=str, default="<T2V>",
+    parser.add_argument("--prompt_prefix", type=str, default="",
                         help="Prefix to add to the beginning of each prompt (for text conditioning)")
     
     # Arguments for phenotype conditioning

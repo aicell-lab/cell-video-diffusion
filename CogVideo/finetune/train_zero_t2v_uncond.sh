@@ -10,8 +10,7 @@ module load Mambaforge/23.3.1-1-hpc1-bdist
 
 conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 
-DATASET_NAME="IDR0013-FILTERED-2"
-PHENOTYPE_MODULE="single"
+DATASET_NAME="IDR0013-FILTERED-uncond"
 
 # Prevent tokenizer parallelism issues
 export TOKENIZERS_PARALLELISM=false
@@ -22,13 +21,11 @@ MODEL_ARGS=(
     --model_name "cogvideox1.5-t2v"
     --model_type "t2v"
     --training_type "sft"
-    --use_phenotype_conditioning true  # Whether to use phenotype conditioning (default: false)
-    --phenotype_module ${PHENOTYPE_MODULE}  # Use "single" or "multi" for different embedding approaches
 )
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/sft/${DATASET_NAME}-t2v-special-${PHENOTYPE_MODULE}"
+    --output_dir "../models/sft/${DATASET_NAME}-t2v-uncond"
     --report_to "wandb"
 )
 
@@ -37,7 +34,6 @@ DATA_ARGS=(
     --data_root "../../data/ready/${DATASET_NAME}"
     --caption_column "prompts.txt"
     --video_column "videos.txt"
-    --phenotype_column "phenotypes.csv"  # Changed from phenotypes.txt to phenotypes.csv
     --train_resolution "81x768x1360"  # (frames x height x width), frames should be 8N+1
 )
 
@@ -60,7 +56,7 @@ SYSTEM_ARGS=(
 
 # Checkpointing Configuration
 CHECKPOINT_ARGS=(
-    --checkpointing_steps 25 # save checkpoint every x steps
+    --checkpointing_steps 50 # save checkpoint every x steps
     --checkpointing_limit 50 # maximum number of checkpoints to keep, after which the oldest one is deleted
     # --resume_from_checkpoint "/path/to/checkpoint"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
@@ -71,7 +67,6 @@ VALIDATION_ARGS=(
     --validation_dir "../../data/ready/${DATASET_NAME}-Val"
     --validation_steps 50  # should be multiple of checkpointing_steps
     --validation_prompts "prompts.txt"
-    --validation_phenotypes "phenotypes.csv" 
     --gen_fps 10
 )
 

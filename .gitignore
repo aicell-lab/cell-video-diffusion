@@ -85,3 +85,4 @@ visualizations/
 evaluation/preview/*
 evaluation/results/*
 evaluation/masks_output/*
+diffusers_backup/

@@ -28,7 +28,7 @@ MODEL_ARGS=(
 
 # Output Configuration
 OUTPUT_ARGS=(
-    --output_dir "../models/sft/${DATASET_NAME}-t2v-special-${PHENOTYPE_MODULE}-final"
+    --output_dir "../models/sft/${DATASET_NAME}-t2v-special-${PHENOTYPE_MODULE}-final-2"
     --report_to "wandb"
 )
 
@@ -43,7 +43,7 @@ DATA_ARGS=(
 
 # Training Configuration
 TRAIN_ARGS=(
-    --train_epochs 3 # number of training epochs
+    --train_epochs 2 # number of training epochs
     --seed 42 # random seed
     --batch_size 1
     --gradient_accumulation_steps 1

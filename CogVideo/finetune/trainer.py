@@ -446,6 +446,10 @@ class Trainer:
 
     def prepare_for_validation(self):
         validation_prompts = load_prompts(self.args.validation_dir / self.args.validation_prompts)
+
+        if len(validation_prompts) == 0:
+            logger.warning("Empty validation prompts file found. Using empty strings as prompts.")
+            validation_prompts = [""] * len(2)
         
         # Load validation videos if specified
         if self.args.validation_videos is not None:
@@ -485,6 +489,10 @@ class Trainer:
         self.state.validation_images = validation_images
         self.state.validation_videos = validation_videos
         self.state.validation_phenotypes = validation_phenotypes
+        logger.info(f"Validation prompts: {len(validation_prompts)}")
+        logger.info(f"Validation images: {len(validation_images)}")
+        logger.info(f"Validation videos: {len(validation_videos)}")
+        logger.info(f"Validation phenotypes: {len(validation_phenotypes)}")
 
     def prepare_trackers(self) -> None:
         logger.info("Initializing trackers")

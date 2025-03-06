@@ -86,3 +86,4 @@ evaluation/preview/*
 evaluation/results/*
 evaluation/masks_output/*
 diffusers_backup/
+!CogVideo/diffusers/src/diffusers/utils/outputs.py

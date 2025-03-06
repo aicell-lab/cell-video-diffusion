@@ -62,7 +62,7 @@ SYSTEM_ARGS=(
 CHECKPOINT_ARGS=(
     --checkpointing_steps 100 # save checkpoint every x steps
     --checkpointing_limit 50 # maximum number of checkpoints to keep, after which the oldest one is deleted
-    # --resume_from_checkpoint "../models/sft/IDR0013-FILTERED-2-t2v-special-single-test/checkpoint-50"  # if you want to resume from a checkpoint, otherwise, comment this line
+    --resume_from_checkpoint "../models/sft/IDR0013-FILTERED-2-t2v-special-single-final-2/checkpoint-100"  # if you want to resume from a checkpoint, otherwise, comment this line
 )
 
 # Validation Configuration

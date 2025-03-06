@@ -279,7 +279,7 @@ class CogVideoXT2VLoraTrainer(Trainer):
                 phenotypes = torch.tensor(phenotypes, dtype=torch.float32)
             
             # Always ensure it's on the correct device
-            phenotypes = phenotypes.to(pipe.device)
+            phenotypes = phenotypes.to(pipe.transformer.device)
             
             pipe_args["phenotypes"] = phenotypes
         

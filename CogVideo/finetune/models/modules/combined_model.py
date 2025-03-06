@@ -68,6 +68,9 @@ class CombinedTransformerWithEmbedder(nn.Module):
                     dim=1
                 )
         
+        # import pdb; pdb.set_trace()
+        if hidden_states.dtype != encoder_hidden_states.dtype:
+            hidden_states = hidden_states.to(dtype=encoder_hidden_states.dtype)
         # Forward to the transformer with all original arguments
         return self.transformer(
             hidden_states=hidden_states,

@@ -1,0 +1,17 @@
+{
+  "model_path": "../../models/CogVideoX1.5-5B",
+  "sft_path": "../../models/sft/t2v-phenotype/checkpoint-1200-fp32",
+  "dtype": "bfloat16",
+  "tasks": [
+    {
+      "prompt": "Time-lapse microscopy video of cells.",
+      "output_dir": "../../../data/generated/final_evals/phenotype_pr/pr-HIGH",
+      "phenotypes": "0.5,1.0,0.5,0.5",
+      "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      "num_frames": 81,
+      "fps": 10,
+      "guidance_scale": 8.0,
+      "num_inference_steps": 50
+    }
+  ]
+} 

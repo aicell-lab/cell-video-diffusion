@@ -38,3 +38,5 @@ Overall total: 850 generated videos (assuming no additional combos).
 
 ## Comparison with real distribution
 We have 300 test videos. Partition according to the high and low values. 
+
+rsync -avz --progress -e "ssh -p 19742 -i ~/.ssh/id_ed25519" /proj/aicell/users/x_aleho/video-diffusion/CogVideo/models/sft/t2v-uncond/checkpoint-1200-fp32 root@157.157.221.29:/workspace/cell-video-diffusion/CogVideo/models/sft/t2v-uncond

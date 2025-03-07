@@ -50,10 +50,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract 5 frames from a video file")
     parser.add_argument("video_path", help="Path to the MP4 video file")
     parser.add_argument("--output_dir", default="frames", help="Directory to save the extracted frames")
+
+    video_path = "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_i2v/real_videos/00008_01.mp4"
+    output_dir = "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_i2v/real_videos/frames"
     
-    args = parser.parse_args()
-    extract_frames(args.video_path, args.output_dir)
+    extract_frames(video_path, output_dir)
 
-
-"/proj/aicell/users/x_aleho/video-diffusion/CogVideo/models/loras/IDR0013-10plates-i2v-r128-a64/validation_res/validation-gen-500-0-<ALEXANDER>-Time-lapse-mi-23565.mp4"
-"/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_baseline/LT0001_02-00122_01_seed9_S50_G8_F81_FPS10.mp4"

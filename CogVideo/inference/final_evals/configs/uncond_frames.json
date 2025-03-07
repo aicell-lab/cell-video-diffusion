@@ -1,0 +1,16 @@
+{
+  "model_path": "../../models/CogVideoX1.5-5B",
+  "dtype": "bfloat16",
+  "generate_type": "t2v",
+  "tasks": [
+    {
+      "prompt": "",
+      "output_dir": "../../../data/generated/final_evals/uncond/frames129",
+      "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+      "num_frames": 129,
+      "fps": 10,
+      "guidance_scale": 8.0,
+      "num_inference_steps": 50
+    }
+  ]
+} 

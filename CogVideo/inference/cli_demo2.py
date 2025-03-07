@@ -46,6 +46,7 @@ def load_sft_combined_model(
     phenotype_output_dim: int = 4096,
     phenotype_dropout: float = 0.1,
     strict_load: bool = False,
+    dtype: torch.dtype = torch.bfloat16,
 ) -> CombinedTransformerWithEmbedder:
     """
     Loads a CogVideoXTransformer3DModel + PhenotypeEmbedder from FP32 safetensors shards
@@ -115,7 +116,7 @@ def load_sft_combined_model(
 
     # 7. Eval + move to device
     combined_model.eval()
-    combined_model.to(device)
+    combined_model.to(device, dtype=dtype)
     print("Model loaded and moved to", device)
 
     return combined_model
@@ -165,7 +166,6 @@ def generate_video(
                 f"Switching back to default resolution {desired_resolution}.\033[0m"
             )
             height, width = desired_resolution
-
     # Based on generate_type, load the appropriate pipeline
     if generate_type == "i2v":
         pipe = CogVideoXImageToVideoPipeline.from_pretrained(model_path, torch_dtype=dtype)
@@ -191,8 +191,10 @@ def generate_video(
             phenotype_hidden_dim=256,
             phenotype_output_dim=4096,
             phenotype_dropout=0.1,
-            strict_load=False
+            strict_load=False,
+            dtype=dtype
         )
+        # import pdb; pdb.set_trace()
         # Now we can directly do `pipe.transformer = combined_model`
         pipe.transformer = combined_model
         print("Successfully replaced pipeline.transformer with CombinedTransformerWithEmbedder from SFT!")
@@ -207,39 +209,8 @@ def generate_video(
         # Parse the phenotypes from a comma-separated string into a [batch_size=1, input_dim=4] tensor
         phen_list = [float(x) for x in phenotypes_str.split(",")]
         phenotypes_tensor = torch.tensor(phen_list).unsqueeze(0)  # shape (1, 4) if you have 4 dims
+        phenotypes_tensor = phenotypes_tensor.to(dtype=dtype)
         print(f"Will inject phenotypes: {phenotypes_tensor}")
-
-        # 3A. Instantiate your embedder and combined model
-        from finetune.models.modules.phenotype_embedder import PhenotypeEmbedder
-        from finetune.models.modules.combined_model import CombinedTransformerWithEmbedder
-
-        phenotype_embedder = PhenotypeEmbedder(
-            input_dim=4,    # must match what you used in training
-            hidden_dim=256,
-            output_dim=4096,
-            dropout=0.1
-        )
-
-        # Wrap the pipeline's current transformer
-        combined_model = CombinedTransformerWithEmbedder(
-            transformer=pipe.transformer,
-            phenotype_embedder=phenotype_embedder,
-            phenotype_module="single",  # or "multi"
-        )
-
-
-        pipe.transformer = combined_model
-        print("Replaced pipeline.transformer with CombinedTransformerWithEmbedder + injected phenotypes.")
-
-    ###############################################################################
-    # 4. (Optional) Load LoRA, set up scheduler, offload to CPU/GPU, etc.
-    ###############################################################################
-
-    # LoRA
-    if lora_path:
-        print(f"Loading LoRA weights from {lora_path}")
-        pipe.load_lora_weights(lora_path, weight_name="pytorch_lora_weights.safetensors", adapter_name="test_1")
-        pipe.fuse_lora(components=["transformer"], lora_scale=1)
 
     # Replace with DPMScheduler, or DDIM, etc.
     pipe.scheduler = CogVideoXDPMScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing")

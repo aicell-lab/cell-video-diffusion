@@ -117,7 +117,7 @@ def generate_video(
                 f"\033[1;31m{model_name} is not supported for custom resolution. Setting back to default resolution {desired_resolution}.\033[0m"
             )
             height, width = desired_resolution
-
+    
     if generate_type == "i2v":
         pipe = CogVideoXImageToVideoPipeline.from_pretrained(model_path, torch_dtype=dtype)
         image = load_image(image=image_or_video_path)

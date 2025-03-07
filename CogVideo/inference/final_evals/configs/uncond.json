@@ -1,5 +1,6 @@
 {
   "model_path": "../../models/CogVideoX1.5-5B",
+  "sft_path": "../../models/sft/t2v-uncond/checkpoint-1200-fp32",
   "dtype": "bfloat16",
   "generate_type": "t2v",
   "tasks": [

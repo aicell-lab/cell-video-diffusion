@@ -215,6 +215,10 @@ def generate_video(
     # Replace with DPMScheduler, or DDIM, etc.
     pipe.scheduler = CogVideoXDPMScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing")
 
+    # Make sure the device is set before calling enable_sequential_cpu_offload
+    if not hasattr(pipe, 'device'):
+        pipe.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     # CPU offload
     pipe.enable_sequential_cpu_offload()
     pipe.vae.enable_slicing()

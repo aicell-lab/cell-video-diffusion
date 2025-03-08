@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=1 -C "thin"
+#SBATCH --gpus=1
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH -J create_masks_chunks         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
@@ -15,8 +15,8 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 # Then run this script which will process all chunks in parallel
 
 SCRIPT_PATH="create_masks.py"       # Path to create_masks.py
-OUTPUT_BASE_DIR="masks_output"      # Where mask files will be saved
-LOG_DIR="logs"                      # Where to store logs
+OUTPUT_BASE_DIR="masks_output/t2v"      # Where mask files will be saved
+LOG_DIR="logs/masks"                      # Where to store logs
 
 mkdir -p "${LOG_DIR}"
 mkdir -p "${OUTPUT_BASE_DIR}"
@@ -31,6 +31,13 @@ CHUNK_FILES=(
   "chunks/videos_chunk6.txt"
   "chunks/videos_chunk7.txt"
   "chunks/videos_chunk8.txt"
+  "chunks/videos_chunk9.txt"
+  "chunks/videos_chunk10.txt"
+  "chunks/videos_chunk11.txt"
+  "chunks/videos_chunk12.txt"
+  "chunks/videos_chunk13.txt"
+  "chunks/videos_chunk14.txt"
+  "chunks/videos_chunk15.txt"
 )
 
 # OUTPUT DIRECTORY

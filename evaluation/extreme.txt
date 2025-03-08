@@ -1,4 +1,0 @@
-/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations/t2v_sft_850_extreme/t2v_pr-EXTREME_scale8_seed9_S50_F81.mp4
-/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations/t2v_sft_850_extreme/t2v_pr-MAX_scale8_seed9_S50_F81.mp4
-/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations/t2v_sft_850_extreme/t2v_pr-SUPER_scale8_seed9_S50_F81.mp4
-/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations/t2v_sft_850_extreme/t2v_pr-EXPLOS_scale8_seed9_S50_F81.mp4

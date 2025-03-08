@@ -1,0 +1,13 @@
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0067_07-00089_01-cd-HIGH_ms-HIGH_pr-MED.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0027_44-00193_01-cd-LOW_ms-MED_pr-HIGH.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0067_07-00144_01-cd-HIGH_ms-MED_pr-LOW.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0037_41-00283_01-cd-HIGH_ms-MED_pr-LOW.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0048_13-00170_01-cd-HIGH_ms-LOW_pr-LOW.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0007_08-00136_01-cd-HIGH_ms-HIGH_pr-LOW.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0126_31-00081_01-cd-HIGH_ms-LOW_pr-MED.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0007_08-00030_01-cd-LOW_ms-LOW_pr-MED.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0005_06-00113_01-cd-LOW_ms-HIGH_pr-MED.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0044_16-00238_01-cd-HIGH_ms-HIGH_pr-LOW.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0067_07-00215_01-cd-HIGH_ms-HIGH_pr-MED.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0106_02-00177_01-cd-HIGH_ms-HIGH_pr-HIGH.mp4
+/proj/aicell/users/x_aleho/video-diffusion/data/processed/t2v/LT0126_31-00006_01-cd-LOW_ms-MED_pr-HIGH.mp4

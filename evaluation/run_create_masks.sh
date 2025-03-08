@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -A berzelius-2025-23    # Your project/account
-#SBATCH --gpus=1 -C "thin"
+#SBATCH --gpus=1
 #SBATCH -t 2-00:00:00            # Time limit (e.g. 1 day)
 #SBATCH -J create_masks         # Job name
 #SBATCH -o logs/%x_%j.out        # Standard output log
@@ -21,31 +21,28 @@ conda activate /proj/aicell/users/x_aleho/conda_envs/cogvideo
 # 3) Saves logs for each run in a logs/ subdirectory.
 
 SCRIPT_PATH="create_masks.py"    # Path to your create_masks.py
-OUTPUT_BASE_DIR="masks_output"   # Where each directory's .npy files go
+OUTPUT_BASE_DIR="masks_output/t2v"   # Where each directory's .npy files go
 LOG_DIR="logs"                   # Where to store each run's log
 
-# List of directories to process
+# List of directories to process - NO COMMAS between array items
 DIRS=(
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_150"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_250"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_500"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_750"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r64_900"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r128_250"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r128_500"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r128_750"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r128_900"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_150"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_250"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_375"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_750"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_900"
-  # "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_baseline"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_250"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_500"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_750"
-  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/sft_i2v_900"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_alive/alive"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_dead/dead"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_cc/cc-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_cc/cc-LOW"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_ms/ms-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_ms/ms-LOW"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_pr/pr-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/phenotype_pr/pr-LOW"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_cc/cc-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_cc/cc-LOW"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_frames/frames-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_ms/ms-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_ms/ms-LOW"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_pr/pr-HIGH"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/prompt_pr/pr-LOW"
+#  "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/uncond/frames81"
+ "/proj/aicell/users/x_aleho/video-diffusion/data/generated/final_evals/uncond/frames129"
 )
 
 mkdir -p "${LOG_DIR}"
@@ -55,11 +52,20 @@ mkdir -p "${LOG_DIR}"
 #############################
 
 for DIR in "${DIRS[@]}"; do
-  BASENAME=$(basename "$DIR")  # e.g. 'i2v_r64_500'
-  OUTPUT_DIR="${OUTPUT_BASE_DIR}/${BASENAME}"
-  LOG_FILE="${LOG_DIR}/${BASENAME}.log"
+  BASENAME=$(basename "$DIR")  # e.g. 'ms-LOW'
+  
+  # Get the parent directory name
+  PARENT_DIR=$(basename "$(dirname "$DIR")")  # e.g. 'prompt_ms'
+  
+  # Create combined output directory name 
+  COMBINED_NAME="${PARENT_DIR}_${BASENAME}"
+  
+  OUTPUT_DIR="${OUTPUT_BASE_DIR}/${COMBINED_NAME}"
+  LOG_FILE="${LOG_DIR}/${COMBINED_NAME}.log"
 
   echo "Launching mask creation for: ${DIR}"
+  echo "Output to: ${OUTPUT_DIR}"
+  
   python "${SCRIPT_PATH}" \
     --input_dir "${DIR}" \
     --output_dir "${OUTPUT_DIR}" \

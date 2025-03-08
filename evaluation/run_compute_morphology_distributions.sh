@@ -18,7 +18,7 @@ trap "echo 'Received SIGINT. Killing background jobs...'; kill 0" SIGINT
 ##############################
 
 SCRIPT_PATH="compute_morphology_distributions.py"
-OUTPUT_BASE_DIR="results"
+OUTPUT_BASE_DIR="results/t2v"
 LOG_DIR="logs/morphology"
 
 # DIRS=(
@@ -37,7 +37,7 @@ LOG_DIR="logs/morphology"
 #   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_750"
 #   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/i2v_r256_900"
 #   "/proj/aicell/users/x_aleho/video-diffusion/data/generated/test_generations_realval/real_videos_10"
-#   # "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
+  # "/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/val/checkpoint-900-val"
 # )
 
 DIRS=(
@@ -56,9 +56,39 @@ DIRS=(
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_750"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v_r256_900"
   # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/checkpoint-900-val-old"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-LOW"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-MED"
-  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-MED"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/IDR0013-FILTERED-Test-cd-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v/checkpoint-900-val"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v/sft_i2v_250"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v/sft_i2v_500"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v/sft_i2v_750"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/i2v/sft_i2v_900"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-cc-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-cc-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-cc-MED"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-ms-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-ms-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-ms-MED"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-pr-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-pr-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/IDR0013-FILTERED-Test-pr-MED"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_alive_alive"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_dead_dead"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_cc_cc-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_cc_cc-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_ms_ms-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_ms_ms-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_pr_pr-HIGH"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/phenotype_pr_pr-LOW"
+  # "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/uncond_frames81"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/prompt_pr_pr-LOW"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/prompt_cc_cc-HIGH"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/prompt_ms_ms-LOW"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/prompt_ms_ms-HIGH"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/prompt_cc_cc-LOW"
+  "/proj/aicell/users/x_aleho/video-diffusion/evaluation/masks_output/t2v/prompt_pr_pr-HIGH"
 )
 
 #############################

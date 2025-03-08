@@ -11,7 +11,7 @@
       "num_frames": 81,
       "fps": 10,
       "guidance_scale": 8.0,
-      "num_inference_steps": 50
+      "num_inference_steps": 30
     }
   ]
 } 

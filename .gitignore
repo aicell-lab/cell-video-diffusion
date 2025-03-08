@@ -82,6 +82,7 @@ config.json
 /data/
 visualizations/
 /models/    
+evaluation/notebooks
 evaluation/preview/*
 evaluation/results/*
 evaluation/masks_output/*

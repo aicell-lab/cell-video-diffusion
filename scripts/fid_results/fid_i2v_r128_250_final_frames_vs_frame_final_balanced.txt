@@ -1,6 +1,0 @@
-Model ID: i2v_r128_250
-Real images: ../data/processed/idr0013/final_frames/
-Real images sampled: 10
-Generated images: ../data/generated/test_generations_plateval/i2v_r128_250/frame_final/
-Generated images count: 10
-FID score: 271.8710

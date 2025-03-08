@@ -1,2 +1,0 @@
-rsync -av x_aleho@berzelius1.nsc.liu.se:/proj/aicell/users/x_aleho/video-diffusion/CogVideo/test_generations/final_frames/ /Users/lapuerta/aicell/final_frames/fake
-rsync -av x_aleho@berzelius1.nsc.liu.se:/proj/aicell/users/x_aleho/video-diffusion/data/processed/idr0013/final_frames/ /Users/lapuerta/aicell/final_frames/real

@@ -1,3 +1,25 @@
+#!/usr/bin/env python3
+
+"""
+02-process_ch5_to_mp4.py
+
+Processes CellH5 (.ch5) files identified in the filtered extreme phenotypes CSV
+and converts them to MP4 video files. The script locates the image timeseries
+in each file and creates a video showing cell behavior over time.
+
+Usage:
+  python 02-process_ch5_to_mp4.py /path/to/plates_dir output_dir [fps=10]
+  
+Arguments:
+  plates_dir: Directory containing all the plate subdirectories with hdf5 folders
+  output_dir: Directory where all MP4s will be placed (flat structure)
+  fps: Frames per second for output videos (default: 10)
+  
+Notes:
+  - Requires running 01-filter_extreme_phenotypes.py first to generate the input CSV
+  - Creates a new CSV with video metadata at output/extreme_phenotypes_with_videos.csv
+"""
+
 import os
 import sys
 import glob

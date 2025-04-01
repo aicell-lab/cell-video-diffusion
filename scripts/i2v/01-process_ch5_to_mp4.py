@@ -1,3 +1,26 @@
+#!/usr/bin/env python3
+
+"""
+01-process_ch5_to_mp4.py
+
+Converts CellH5 (.ch5) files to MP4 video files for visualization or model training.
+The script locates image timeseries data within each CH5 file and creates
+a video showing cell behavior over time.
+
+Usage:
+  python 01-process_ch5_to_mp4.py /path/to/hdf5_folder [fps=10] [output_dir=auto]
+  
+Arguments:
+  hdf5_folder: Directory containing .ch5 files to process
+  fps: Frames per second for output videos (default: 10)
+  output_dir: Directory where MP4s will be saved (default: auto-generated based on plate name)
+  
+Notes:
+  - The script processes all .ch5 files in the specified folder
+  - Output videos are limited to 81 frames and resized to 768x1360 pixels
+  - If output_dir is not specified, videos are saved in a directory named after the plate
+"""
+
 import os
 import sys
 import glob

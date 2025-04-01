@@ -25,7 +25,6 @@ from tqdm import tqdm
 from skimage.measure import label
 from scipy import ndimage
 
-# Input/output paths
 INPUT_CSV_PATH = "/proj/aicell/users/x_aleho/video-diffusion/scripts/t2v/output/extreme_phenotypes_with_videos.csv"
 OUTPUT_CSV_PATH = "/proj/aicell/users/x_aleho/video-diffusion/scripts/t2v/output/extreme_phenotypes_with_cell_counts.csv"
 

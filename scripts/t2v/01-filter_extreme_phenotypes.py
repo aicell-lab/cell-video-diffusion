@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+"""
+01-filter_extreme_phenotypes.py
+
+Filters cell phenotype data to identify samples with extreme phenotype combinations.
+Creates a filtered CSV file containing samples with at least 2 extreme phenotypes
+(HIGH or LOW) across cell death, migration speed, and proliferation metrics.
+
+Usage:
+  python 01-filter_extreme_phenotypes.py
+"""
+
 import os
 import pandas as pd
 import numpy as np

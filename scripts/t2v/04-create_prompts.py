@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
 
+"""
+04-create_prompts.py
+
+Creates descriptive text prompts for cell videos based on phenotype data and
+cell count information. These prompts can be used for text-to-video model training
+or conditioning. The script converts numerical scores and categorical labels into
+natural language descriptions.
+
+Usage:
+  python 04-create_prompts.py [--input INPUT_CSV] [--output OUTPUT_CSV] [--normalize_scores]
+  
+Arguments:
+  --input: Path to input CSV with video paths and cell counts (default: from 03-count_initial_cells.py)
+  --output: Path to save the CSV with added prompts (default: output/extreme_phenotypes_with_prompts.csv)
+  --normalize_scores: Flag to normalize phenotype scores to [0,1] range for model conditioning
+  
+Notes:
+  - Requires running 03-count_initial_cells.py first to generate the input CSV with cell counts
+  - Creates prompts like "Time-lapse microscopy video of many cells. The cells divide often, 
+    move rapidly, and frequently disappear due to cell death."
+"""
+
 import os
 import pandas as pd
 import argparse

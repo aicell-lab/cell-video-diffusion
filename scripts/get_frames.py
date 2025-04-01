@@ -1,3 +1,27 @@
+#!/usr/bin/env python3
+
+"""
+get_frames.py
+
+A utility script used specifically for extracting frames from cell videos for paper figures.
+Extracts 5 frames (0, 20, 40, 60, 80) from each video and optionally enhances them with
+colormap application to improve visibility of cellular structures.
+
+Usage:
+  python get_frames.py [--apply_color] [--colormap COLORMAP] [--enhance_contrast]
+  
+Arguments:
+  --apply_color: Apply a colormap to enhance visibility (default: False)
+  --colormap: OpenCV colormap to apply (default: COLORMAP_HOT)
+  --enhance_contrast: Enhance contrast before applying colormap (default: False)
+  
+Notes:
+  - Used specifically for extracting images for paper figures and comparisons
+  - Hardcoded to extract 5 evenly-spaced frames from each video
+  - Can process multiple videos with different labels (baseline, sft, real, etc.)
+  - Output files are named using the video label and frame number (e.g., "baseline0.jpg")
+"""
+
 import cv2
 import os
 import argparse

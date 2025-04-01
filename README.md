@@ -67,3 +67,17 @@ These are then used by the following scripts to create csv files with statistics
 - run_compute_{morphology, movement, proliferation}_distributions.sh
 
 To then get to the final evaluation numbers, the notebooks at evaluation/notebooks are used. 
+
+## Results
+
+### Image-to-Video Generation
+![Image-to-Video Results](figures/i2v_results.png)
+
+**Example Video:**  
+<video src="figures/image2video_generated2.mp4" controls width="640"></video>
+
+### Text-to-Video Generation
+![Text-to-Video Results](figures/t2v_results.png)
+
+**Example Video:**  
+<video src="figures/text2video_generated2.mp4" controls width="640"></video>

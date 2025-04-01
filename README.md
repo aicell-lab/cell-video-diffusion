@@ -1,4 +1,9 @@
-# Cell Video Diffusion
+# Adapting Video Diffusion Models for Time-Lapse Microscopy
+
+> [**Adapting Video Diffusion Models for Time-Lapse Microscopy**](https://arxiv.org/abs/2503.18583)  
+> Alexander Holmberg, Nils Mechtel, Wei Ouyang  
+> arXiv:2503.18583, 2025
+
 
 ## Environment Setup
 

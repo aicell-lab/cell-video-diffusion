@@ -88,3 +88,12 @@ evaluation/results/*
 evaluation/masks_output/*
 diffusers_backup/
 !CogVideo/diffusers/src/diffusers/utils/outputs.py
+
+# Exception for figures directory
+!figures/
+!figures/*.png
+!figures/*.jpg
+!figures/*.jpeg
+!figures/*.gif
+!figures/*.mp4
+!figures/*.mov

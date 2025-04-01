@@ -449,7 +449,7 @@ class Trainer:
 
         if len(validation_prompts) == 0:
             logger.warning("Empty validation prompts file found. Using empty strings as prompts.")
-            validation_prompts = [""] * len(2)
+            validation_prompts = [""] * 2
         
         # Load validation videos if specified
         if self.args.validation_videos is not None:

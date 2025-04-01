@@ -74,10 +74,10 @@ To then get to the final evaluation numbers, the notebooks at evaluation/noteboo
 ![Image-to-Video Results](figures/i2v_results.png)
 
 **Example Video:**  
-<video src="figures/image2video_generated2.mp4" controls width="640"></video>
+<video src="https://github.com/user-attachments/assets/65f78ed7-340e-4fa7-9c06-9ac8f03fca26" width="640" controls></video>
 
 ### Text-to-Video Generation
 ![Text-to-Video Results](figures/t2v_results.png)
 
 **Example Video:**  
-<video src="figures/text2video_generated2.mp4" controls width="640"></video>
+<video src="https://github.com/user-attachments/assets/01a98a28-ba0b-4784-a300-28ce3330f5df" width="640" controls></video>
